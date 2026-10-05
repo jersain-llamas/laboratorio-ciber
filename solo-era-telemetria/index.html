@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio 03 · Sólo era telemetría</title>
+<meta name="description" content="Laboratorio de entrenamiento sobre identificabilidad, finalidad y conservación de la telemetría de seguridad. Caso simulado.">
+<style>
+:root{
+  --papel:#f6f5f1;
+  --papel-2:#efede6;
+  --hoja:#ffffff;
+  --tinta:#1b2230;
+  --tinta-2:#3b4556;
+  --tenue:#5b6474;
+  --regla:#d6d2c6;
+  --regla-2:#bdb8aa;
+  --acento:#2c5874;
+  --acento-2:#e3edf3;
+  --acento-3:#c7d9e4;
+  --linea:#4f6d86;
+  --log:#f1efe8;
+  --aviso:#6b4a10;
+  --aviso-fondo:#fbf3e2;
+  --foco:#1f5fbf;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  --radio:6px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.derivado{display:block;font-size:.8rem;color:var(--tenue);margin-top:.2rem}
+.meta-n{font-size:.85rem;color:var(--tenue)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font:16px/1.55 var(--sans);overflow-x:hidden}
+a{color:var(--acento)}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5em}
+h1{font-size:1.6rem;letter-spacing:-.01em}
+h2{font-size:1.25rem}
+h3{font-size:1.05rem}
+p{margin:0 0 .8em}
+code,.mono{font-family:var(--mono);font-size:.9em}
+:focus-visible{outline:3px solid var(--foco);outline-offset:2px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--foco);outline-offset:2px}
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.saltar{position:absolute;left:-999px;top:0;background:var(--hoja);padding:.5rem 1rem;z-index:50}
+.saltar:focus{left:1rem;top:.5rem}
+
+/* Barra superior */
+.barra{position:sticky;top:0;z-index:20;background:var(--hoja);border-bottom:1px solid var(--regla);}
+.barra-in{max-width:1240px;margin:0 auto;padding:.55rem 1rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.marca{font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-2)}
+.etapas{display:flex;gap:.25rem;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.etapas li{font-size:.78rem;padding:.2rem .5rem;border:1px solid var(--regla);border-radius:99px;color:var(--tenue);background:var(--papel)}
+.etapas li[aria-current="step"]{border-color:var(--acento);color:var(--acento);background:var(--acento-2);font-weight:600}
+.etapas li.hecha{color:var(--tinta-2)}
+.barra-der{margin-left:auto;display:flex;gap:.75rem;align-items:center}
+.guardado{font-size:.8rem;color:var(--tenue);font-family:var(--mono)}
+.aviso-alm{max-width:1240px;margin:.5rem auto 0;padding:0 1rem}
+.aviso-alm p{margin:0;font-size:.85rem;background:var(--aviso-fondo);color:var(--aviso);border:1px solid #e6d3a8;border-radius:var(--radio);padding:.4rem .7rem}
+
+/* Botones y controles */
+.btn{font:inherit;font-size:.95rem;border:1px solid var(--acento);background:var(--acento);color:#fff;border-radius:var(--radio);padding:.55rem 1rem;cursor:pointer;min-height:44px}
+.btn:hover{background:#244b63}
+.btn.sec{background:var(--hoja);color:var(--acento)}
+.btn.sec:hover{background:var(--acento-2)}
+.btn.peq{font-size:.85rem;padding:.35rem .7rem;min-height:36px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+select,input[type=text],textarea{font:inherit;font-size:.92rem;color:var(--tinta);background:var(--hoja);border:1px solid var(--regla-2);border-radius:var(--radio);padding:.4rem .5rem;max-width:100%}
+select{min-height:40px;width:100%}
+textarea{width:100%;min-height:9rem;line-height:1.5;resize:vertical}
+fieldset{border:0;margin:0 0 1rem;padding:0;min-width:0}
+legend{font-weight:600;margin-bottom:.4rem;padding:0}
+.opcion{display:flex;gap:.6rem;align-items:flex-start;padding:.5rem .65rem;border:1px solid var(--regla);border-radius:var(--radio);background:var(--hoja);margin-bottom:.4rem;cursor:pointer}
+.opcion input{margin-top:.25rem;flex:none;width:1.05rem;height:1.05rem}
+.opcion:hover{border-color:var(--regla-2)}
+.opcion:has(input:checked){border-color:var(--acento);background:var(--acento-2)}
+.opcion .det{display:block;font-size:.85rem;color:var(--tenue);margin-top:.15rem}
+.chk{display:flex;gap:.45rem;align-items:flex-start;font-size:.84rem;margin:.2rem 0;cursor:pointer}
+.chk input{margin-top:.2rem;flex:none}
+.fila-op{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.4rem}
+
+/* Distribución */
+main{max-width:1240px;margin:0 auto;padding:1.25rem 1rem 4rem}
+.etapa-cab{margin-bottom:1.25rem}
+.etapa-cab .num{font-family:var(--mono);font-size:.8rem;color:var(--tenue);letter-spacing:.05em}
+.etapa-cab h1:focus{outline:none}
+.guia{color:var(--tinta-2);max-width:72ch}
+.seccion{background:var(--hoja);border:1px solid var(--regla);border-radius:var(--radio);padding:1.1rem 1.15rem;margin-bottom:1.1rem}
+.seccion > h2{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}
+.seccion > h2 .paso{font-family:var(--mono);font-size:.8rem;color:var(--tenue);font-weight:500}
+.doc-botones{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0 0}
+.acciones{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;justify-content:space-between;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--regla)}
+.acciones .der{display:flex;gap:.6rem;flex-wrap:wrap;margin-left:auto}
+.mensajes{min-height:0}
+.mensajes:not(:empty){margin-top:.75rem}
+.msg{font-size:.9rem;border-radius:var(--radio);padding:.55rem .75rem;margin:.4rem 0;border:1px solid var(--regla-2);background:var(--papel)}
+.msg.falta{border-color:#e0c79b;background:var(--aviso-fondo);color:var(--aviso)}
+.msg ul{margin:.3rem 0 0;padding-left:1.2rem}
+.coherencia:not(:empty){margin-top:.6rem}
+.nota-coh{font-size:.88rem;border-left:3px solid var(--regla-2);padding:.35rem .7rem;background:var(--papel);margin:.35rem 0}
+
+/* Portada */
+.portada{max-width:820px;margin:1.5rem auto 0}
+.portada .serie{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--tenue);text-transform:uppercase}
+.portada h1{font-size:2rem;margin:.3rem 0 .2rem}
+.portada .sub{font-size:1.2rem;color:var(--tinta-2);margin-bottom:1.2rem}
+.ficha{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1rem;margin:0 0 1rem;font-size:.95rem}
+.ficha dt{color:var(--tenue)}
+.ficha dd{margin:0}
+.lista-nota{margin:.4rem 0 1rem;padding-left:1.15rem;color:var(--tinta-2);font-size:.93rem}
+.continuar{border:1px solid var(--acento-3);background:var(--acento-2);border-radius:var(--radio);padding:1rem;margin-bottom:1rem}
+.campo{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem;max-width:420px}
+.campo label{font-weight:600}
+
+/* Correo / documentos */
+.doc{font-size:.94rem}
+.doc .simulado{font-family:var(--mono);font-size:.75rem;letter-spacing:.03em;color:var(--tenue);border:1px dashed var(--regla-2);display:inline-block;padding:.15rem .45rem;border-radius:4px;margin-bottom:.6rem}
+.doc h3{margin-top:.9rem}
+.doc .meta{display:grid;grid-template-columns:max-content 1fr;gap:.1rem .8rem;font-size:.88rem;margin-bottom:.7rem}
+.doc .meta dt{color:var(--tenue)}
+.doc .meta dd{margin:0}
+.doc blockquote{margin:.6rem 0;padding:.6rem .9rem;border-left:3px solid var(--regla-2);background:var(--papel)}
+.doc table,.tabla{border-collapse:collapse;width:100%;font-size:.86rem;margin:.4rem 0 .8rem}
+.doc th,.doc td,.tabla th,.tabla td{border:1px solid var(--regla);padding:.35rem .5rem;text-align:left;vertical-align:top}
+.doc th,.tabla th{background:var(--papel-2);font-weight:600}
+.doc ol,.doc ul{padding-left:1.3rem}
+.tabla-scroll{overflow-x:auto;max-width:100%}
+
+/* Logs */
+.logs{display:grid;gap:.5rem}
+.log{font-family:var(--mono);font-size:.82rem;background:var(--log);border:1px solid var(--regla);border-radius:var(--radio);padding:.55rem .7rem;overflow-wrap:anywhere;word-break:break-word}
+.log .reg{display:block;font-family:var(--sans);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);margin-bottom:.15rem}
+
+/* Matriz */
+.matriz-wrap{width:100%}
+table.matriz{width:100%;border-collapse:separate;border-spacing:0;font-size:.86rem;background:var(--hoja);border:1px solid var(--regla);border-radius:var(--radio);table-layout:fixed}
+.matriz th,.matriz td{overflow-wrap:break-word;padding:.55rem .55rem;border-bottom:1px solid var(--regla);vertical-align:top;text-align:left}
+.matriz thead th{background:var(--papel-2);font-size:.78rem;letter-spacing:.02em;font-weight:600;color:var(--tinta-2)}
+.matriz th.col1,.matriz td.col1{width:17%}
+.matriz tbody tr:last-child td{border-bottom:0}
+.matriz td.futura{color:#6a7180;background:repeating-linear-gradient(135deg,#f7f6f2,#f7f6f2 6px,#f1efe9 6px,#f1efe9 12px);font-size:.78rem}
+.matriz td.activa{background:#fbfcfd;box-shadow:inset 3px 0 0 var(--acento)}
+.matriz .elem{font-weight:600;display:block}
+.matriz .valor{font-family:var(--mono);font-size:.78rem;color:var(--tinta-2);overflow-wrap:anywhere}
+.matriz .derivado{display:block;font-size:.7rem;color:var(--tenue);margin-top:.15rem}
+.matriz .marca-cambio{display:inline-block;font-size:.7rem;border:1px solid var(--regla-2);border-radius:99px;padding:0 .4rem;margin-top:.25rem;color:var(--tinta-2)}
+.matriz .sub{margin-top:.4rem}
+.matriz select{font-size:.84rem}
+.radios-clasif{margin:0}
+.radios-clasif .chk{margin:.15rem 0 .3rem}
+.matriz .sub-t{font-size:.75rem;color:var(--tenue);display:block;margin-bottom:.15rem}
+.ayuda-btn{font:inherit;font-size:.72rem;border:1px solid var(--regla-2);background:var(--hoja);color:var(--tinta-2);border-radius:99px;width:1.5rem;height:1.5rem;padding:0;cursor:pointer;margin-left:.25rem;vertical-align:middle}
+.ayuda-txt{font-weight:400;font-size:.76rem;color:var(--tinta-2);background:var(--hoja);border:1px solid var(--regla);border-radius:4px;padding:.35rem .45rem;margin-top:.35rem}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem}
+.chip{font-size:.72rem;border:1px solid var(--regla-2);border-radius:4px;padding:.05rem .35rem;background:var(--papel)}
+
+/* Mapa de correlación */
+.mapa{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:2.5rem}
+.mapa svg.lineas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.mapa .col-t{font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;color:var(--tenue);margin:0 0 .4rem}
+.fichas{display:grid;gap:.45rem}
+.ficha-log{display:block;width:100%;text-align:left;font:inherit;background:var(--log);border:1px solid var(--regla);border-radius:var(--radio);padding:.5rem .65rem;cursor:pointer;min-height:44px}
+.ficha-log .reg{display:block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue)}
+.ficha-log .v{font-family:var(--mono);font-size:.86rem;overflow-wrap:anywhere}
+.ficha-log[aria-pressed="true"]{border-color:var(--linea);background:#e8eef3;box-shadow:inset 3px 0 0 var(--linea)}
+.ficha-log .visto{font-size:.7rem;color:var(--tenue)}
+.fuentes{display:grid;gap:.6rem}
+.fuente{border:1px solid var(--regla);border-radius:var(--radio);background:var(--hoja);padding:.55rem .7rem}
+.fuente h3{font-size:.92rem;margin:0}
+.fuente .ref{font-family:var(--mono);font-size:.72rem;color:var(--tenue)}
+.fuente.activa{border-color:var(--linea);box-shadow:0 0 0 2px var(--acento-3)}
+.detalle{margin-top:1rem;border:1px solid var(--regla);border-radius:var(--radio);background:var(--papel);padding:.75rem .85rem}
+.detalle:empty{display:none}
+.detalle h3{font-size:.95rem}
+.detalle .resaltada td{background:#e8eef3;font-weight:600}
+.calc{display:grid;gap:.4rem;margin-top:.6rem;max-width:560px}
+.calc output{display:block;font-family:var(--mono);font-size:.8rem;overflow-wrap:anywhere;background:var(--hoja);border:1px solid var(--regla);border-radius:4px;padding:.4rem .5rem;min-height:2.2rem}
+.coincide{font-size:.85rem;font-weight:600}
+
+/* Finalidad */
+.panel-fin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.panel-fin > div{border:1px solid var(--regla);border-radius:var(--radio);padding:.75rem .9rem;background:var(--papel)}
+.panel-fin h3{font-size:.95rem}
+.panel-fin ol,.panel-fin ul{margin:.2rem 0 .5rem;padding-left:1.2rem;font-size:.9rem}
+.panel-fin table{font-size:.82rem}
+
+/* Retención */
+.ret-fila{display:grid;grid-template-columns:minmax(150px,200px) minmax(190px,250px) 1fr;gap:.9rem;align-items:start;padding:.7rem 0;border-bottom:1px solid var(--regla)}
+.ret-fila:last-child{border-bottom:0}
+.ret-fila.rep{grid-template-columns:minmax(120px,170px) 1fr}
+.ret-fila .nom{font-weight:600;font-size:.9rem}
+.ret-fila .cat{display:block;font-size:.78rem;color:var(--tenue);font-weight:400}
+.ret-ctl{display:grid;gap:.35rem}
+.ret-ctl label{font-size:.78rem;color:var(--tenue)}
+.ret-vis{min-width:0}
+.pista{position:relative;height:30px;background:var(--papel);border:1px solid var(--regla);border-radius:4px;margin-top:.2rem}
+.pista .sin{position:absolute;right:0;top:0;bottom:0;width:10%;background:repeating-linear-gradient(135deg,#ece9e0,#ece9e0 4px,#f6f5f1 4px,#f6f5f1 8px);border-left:1px dashed var(--regla-2)}
+.pista .barra-p{position:absolute;left:0;top:7px;height:14px;background:var(--acento);border-radius:2px}
+.pista .m-base{position:absolute;top:-4px;bottom:-4px;width:0;border-left:3px solid #7b8190}
+.pista .m-soc{position:absolute;top:-4px;bottom:-4px;width:0;border-left:3px dashed #8a5a12}
+.escala{position:relative;height:1.1rem;font-size:.68rem;color:var(--tenue);font-family:var(--mono)}
+.escala span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.escala span.fin{transform:none;right:0}
+.ret-leyenda{font-size:.8rem;color:var(--tinta-2);margin-top:.35rem;display:flex;gap:.9rem;flex-wrap:wrap}
+.ley-base::before{content:"";display:inline-block;width:0;height:.9em;border-left:3px solid #7b8190;margin-right:.35rem;vertical-align:-1px}
+.ley-soc::before{content:"";display:inline-block;width:0;height:.9em;border-left:3px dashed #8a5a12;margin-right:.35rem;vertical-align:-1px}
+.ley-sin::before{content:"";display:inline-block;width:1.2em;height:.8em;background:repeating-linear-gradient(135deg,#d9d5ca,#d9d5ca 3px,#f6f5f1 3px,#f6f5f1 6px);border:1px solid var(--regla-2);margin-right:.35rem;vertical-align:-1px}
+.ley-p::before{content:"";display:inline-block;width:1.2em;height:.6em;background:var(--acento);margin-right:.35rem;vertical-align:0}
+
+/* Contador */
+.contador{font-size:.82rem;color:var(--tenue);font-family:var(--mono);margin-top:.3rem}
+.contador.fuera{color:var(--aviso)}
+.elementos{margin:.3rem 0 .7rem;padding-left:1.2rem;font-size:.9rem;color:var(--tinta-2)}
+
+/* Panel de documentos */
+.velo{position:fixed;inset:0;background:rgba(27,34,48,.25);z-index:30}
+.panel-docs{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--hoja);border-left:1px solid var(--regla);z-index:40;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(0,0,0,.08)}
+.panel-cab{display:flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border-bottom:1px solid var(--regla)}
+.panel-cab h2{margin:0;font-size:1.05rem}
+.panel-cab .btn{margin-left:auto}
+.panel-cuerpo{overflow:auto;padding:0 1rem 1.5rem;flex:1}
+.lista-docs{list-style:none;margin:.75rem 0;padding:0;display:grid;gap:.3rem}
+.lista-docs button{width:100%;text-align:left;font:inherit;font-size:.9rem;background:var(--papel);border:1px solid var(--regla);border-radius:var(--radio);padding:.45rem .6rem;cursor:pointer;min-height:44px}
+.lista-docs button[aria-current="true"]{border-color:var(--acento);background:var(--acento-2)}
+.lista-docs .estado{font-size:.75rem;color:var(--tenue);margin-left:.4rem}
+.lista-docs li.bloq{font-size:.82rem;color:var(--tenue);padding:.3rem .6rem}
+
+/* Diálogo */
+dialog.confirmar{border:1px solid var(--regla);border-radius:8px;padding:1.2rem;max-width:min(460px,92vw);color:var(--tinta)}
+dialog.confirmar::backdrop{background:rgba(27,34,48,.35)}
+dialog.confirmar .botones{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap}
+
+/* Reporte */
+.reporte{background:var(--hoja);border:1px solid var(--regla);border-radius:var(--radio);padding:1.5rem 1.6rem;max-width:980px;margin:0 auto}
+.reporte header.rep-cab{border-bottom:2px solid var(--tinta);padding-bottom:.7rem;margin-bottom:1rem}
+.reporte .rep-t{font-size:1.35rem;margin:0}
+.reporte .rep-s{color:var(--tinta-2);margin:.2rem 0 0;font-size:.95rem}
+.reporte section{padding:.6rem 0 .9rem;border-bottom:1px solid var(--regla)}
+.reporte section:last-of-type{border-bottom:0}
+.reporte h2{font-size:1.05rem;margin-top:.4rem}
+.reporte h2 .n{font-family:var(--mono);color:var(--tenue);font-weight:500;margin-right:.35rem}
+.reporte .texto-libre{white-space:pre-wrap;background:var(--papel);border:1px solid var(--regla);border-radius:4px;padding:.6rem .75rem;font-size:.92rem}
+.reporte .dim{margin:.7rem 0}
+.reporte .dim h3{font-size:.95rem}
+.reporte .dim ul{margin:.2rem 0;padding-left:1.2rem}
+.reporte .dim li{margin:.25rem 0}
+.reporte .apertura{font-size:.98rem;border-left:3px solid var(--acento);padding-left:.75rem}
+.reporte .cierre{font-weight:600;margin-top:1rem;border-top:1px solid var(--regla);padding-top:.7rem}
+.mapa-rep{list-style:none;margin:0;padding:0;display:grid;gap:.3rem;font-size:.88rem}
+.mapa-rep li{display:grid;grid-template-columns:minmax(0,1.1fr) 1.2rem minmax(0,1fr) 1.2rem minmax(0,1.3fr);gap:.4rem;align-items:start;border:1px solid var(--regla);border-radius:4px;padding:.35rem .5rem}
+.mapa-rep .flecha{color:var(--tenue);text-align:center}
+.pie-impresion{display:none}
+.rep-acciones{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:flex-end;max-width:980px;margin:0 auto 1rem}
+
+@media (max-width:900px){
+  .mapa{grid-template-columns:1fr;gap:1rem}
+  .mapa svg.lineas{display:none}
+  .panel-fin{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  body{font-size:15px}
+  h1{font-size:1.35rem}
+  .portada h1{font-size:1.55rem}
+  main{padding:1rem .75rem 3rem}
+  .seccion{padding:.85rem .8rem}
+  .barra-in{gap:.5rem;padding:.45rem .75rem}
+  .etapas li{font-size:.7rem;padding:.15rem .4rem}
+  .barra-der{margin-left:0;width:100%;justify-content:space-between}
+  table.matriz,table.matriz thead,table.matriz tbody,table.matriz tr,table.matriz th,table.matriz td{display:block;width:auto!important}
+  table.matriz{border:0;background:transparent}
+  table.matriz thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table.matriz tr{background:var(--hoja);border:1px solid var(--regla);border-radius:var(--radio);margin-bottom:.75rem;overflow:hidden}
+  table.matriz td{border-bottom:1px solid var(--papel-2);padding:.5rem .7rem}
+  table.matriz td::before{content:attr(data-label);display:block;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--tenue);margin-bottom:.15rem}
+  table.matriz td.col1{background:var(--papel-2)}
+  table.matriz td.col1::before{display:none}
+  table.matriz td.futura.colapsable{padding:.3rem .7rem;font-size:.72rem}
+  .ret-fila{grid-template-columns:1fr;gap:.45rem}
+  .ficha{grid-template-columns:1fr}
+  .ficha dt{margin-top:.3rem}
+  .doc .meta{grid-template-columns:1fr}
+  .panel-docs{width:100%;top:auto;height:88vh;border-left:0;border-top:1px solid var(--regla);border-radius:12px 12px 0 0}
+  .reporte{padding:1rem .9rem}
+  .mapa-rep li{grid-template-columns:1fr;gap:.1rem}
+  .mapa-rep .flecha{text-align:left}
+  .acciones .der{width:100%}
+  .acciones .der .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media (prefers-reduced-motion:no-preference){
+  .mapa svg.lineas path{transition:opacity .2s ease}
+  .ficha-log,.opcion{transition:background-color .15s ease,border-color .15s ease}
+}
+
+@media print{
+  @page{margin:16mm 14mm 18mm;@bottom-center{content:"Documento de entrenamiento · Caso ficticio";font-family:system-ui,sans-serif;font-size:8pt;color:#444}}
+  body{background:#fff;font-size:10.5pt;color:#000}
+  .barra,.aviso-alm,.rep-acciones,.saltar,.panel-docs,.velo,#vivo,#vivo-aviso,dialog{display:none!important}
+  main{padding:0;max-width:none}
+  .reporte{border:0;padding:0;max-width:none}
+  .reporte section{break-inside:auto}
+  .reporte .salto{break-before:page}
+  .reporte h2{break-after:avoid}
+  tr,li,.texto-libre,.ret-fila{break-inside:avoid}
+  .reporte table.matriz{font-size:7.6pt}
+  .reporte table.matriz th,.reporte table.matriz td{padding:.3rem .3rem}
+  .reporte .tabla{font-size:8.5pt}
+  .reporte .ret-fila{padding:.35rem 0}
+  .tabla th,.doc th{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pista .barra-p{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .tabla-scroll{overflow:visible}
+  a{color:#000}
+  .pie-impresion{display:block;text-align:center;font-size:8pt;color:#444;margin-top:1rem}
+}
+
+</style>
+</head>
+<body>
+<a class="saltar" href="#principal">Saltar al contenido</a>
+<header class="barra">
+  <div class="barra-in">
+    <span class="marca">LAB 03 · Sólo era telemetría</span>
+    <nav id="barra-nav" aria-label="Etapas del laboratorio" hidden>
+      <ol class="etapas" id="barra-etapas"></ol>
+    </nav>
+    <div class="barra-der">
+      <span class="guardado" id="guardado" role="status" aria-live="polite"></span>
+      <button type="button" class="btn sec peq" id="btn-docs" data-accion="abrir-docs" aria-haspopup="dialog" aria-controls="panel-docs">Documentos</button>
+    </div>
+  </div>
+</header>
+<div class="aviso-alm" id="aviso-alm" hidden><p role="status">El guardado automático no está disponible en este navegador. Tu avance se conserva mientras esta pestaña siga abierta.</p></div>
+<main id="principal" tabindex="-1"></main>
+<div class="velo" id="velo" hidden></div>
+<aside class="panel-docs" id="panel-docs" role="dialog" aria-modal="true" aria-labelledby="docs-titulo" hidden>
+  <div class="panel-cab"><h2 id="docs-titulo" tabindex="-1">Documentos del expediente</h2><button type="button" class="btn sec peq" data-accion="cerrar-docs">Cerrar <span class="sr">documentos</span></button></div>
+  <div class="panel-cuerpo" id="docs-cuerpo"></div>
+</aside>
+<dialog class="confirmar" id="dlg" aria-labelledby="dlg-texto">
+  <form method="dialog">
+    <p id="dlg-texto"></p>
+    <div class="botones"><button class="btn sec" value="cancel" id="dlg-cancelar">Cancelar</button><button class="btn" value="ok" id="dlg-ok">Continuar</button></div>
+  </form>
+</dialog>
+<div class="sr" id="vivo-aviso" aria-live="polite"></div>
+<script>
+(function () {
+/*MOTOR-INICIO*/
+var DATOS = (function () {
+  'use strict';
+  var TLM = [
+    { n: 1, nombre: 'Identificador de cuenta', valor: 'usr-1842', categoria: 'Autenticación', catCorta: 'autenticación',
+      base: 'R30', max: 'R180', necesidad: '152 días', soc: '365 días',
+      log: '2026-09-14 08:02:11 -06:00 · q760-id · usr_id=usr-1842 · login · resultado=fallido · motivo=contraseña' },
+    { n: 2, nombre: 'IP de VPN', valor: '10.40.17.93', categoria: 'VPN', catCorta: 'VPN',
+      base: 'R30', max: 'R90', necesidad: '41 días', soc: '365 días',
+      log: '2026-09-14 22:41:37 -06:00 · q760-fw · src_ip=10.40.17.93 · dst=203.0.113.44:443 · acción=bloqueada · regla=destinos-no-autorizados' },
+    { n: 3, nombre: 'Hostname del endpoint', valor: 'LAP-0287', categoria: 'EDR crítico', catCorta: 'EDR crítico',
+      base: 'R90', max: 'R180', necesidad: '120 días', soc: '365 días',
+      log: '2026-09-21 10:03:52 -06:00 · q760-edr · host=LAP-0287 · alerta=ejecución bloqueada (macro en documento descargado) · severidad=alta' },
+    { n: 4, nombre: 'Hash del correo corporativo', valor: 'f294246d…27bf80a1', categoria: 'Navegación', catCorta: 'navegación',
+      base: 'R30', max: 'R30', necesidad: '21 días', soc: '365 días',
+      log: '2026-09-22 16:20:05 -06:00 · q760-fw-web · correo_hash=f294246d…27bf80a1 · categoría=almacenamiento en la nube no autorizado · acción=bloqueada' },
+    { n: 5, nombre: 'Métrica agregada', valor: 'Comercial · 2026-S38 · 42', categoria: 'Métricas agregadas', catCorta: 'agregados',
+      base: 'R12M', max: 'R24M', necesidad: 'la comparación interanual (al menos 13 meses)', soc: null,
+      log: 'tablero-riesgo · semana=2026-S38 (14–20 sep) · área=Comercial · métrica=intentos de autenticación fallidos · valor=42 · cuentas activas del área=118' },
+    { n: 6, nombre: 'Evento enriquecido', valor: 'usr-1842 · LAP-0287 · Monterrey', categoria: 'Autenticación (enriquecido)', catCorta: 'evento enriquecido',
+      base: 'R30', max: 'R180', necesidad: '152 días', soc: '365 días',
+      log: '2026-09-14 23:12:08 -06:00 · q760-id · usr_id=usr-1842 · dispositivo=LAP-0287 · ciudad_aprox=Monterrey · mfa=push aceptado · app=Portal de Facturación Clientes · resultado=éxito · categoría=inicio de sesión desde ubicación nueva' }
+  ];
+  var H = [
+    ['H1', 'La telemetría no contiene datos personales'],
+    ['H2', 'Toda la telemetría contiene datos personales'],
+    ['H3', 'Depende de si permite relacionar los eventos con una persona'],
+    ['H4', 'No hay información suficiente']
+  ];
+  var CONF = ['Baja', 'Media', 'Alta'];
+  var C = {
+    C1: { largo: 'Permite identificar en el contexto del caso', corto: 'Identifica' },
+    C2: { largo: 'No permite identificar en el contexto documentado', corto: 'No identifica (contexto)' },
+    C3: { largo: 'Información insuficiente para determinarlo', corto: 'Insuficiente' }
+  };
+  var L = {
+    L1: 'Identificador directo', L2: 'Directorio corporativo', L3: 'Tabla de VPN', L4: 'MDM',
+    L5: 'Combinación de fuentes', L6: 'Reversibilidad/reproducibilidad práctica',
+    L7: 'No se ha demostrado posibilidad de identificación'
+  };
+  var EV = {
+    EV1: 'Relación cuenta–persona (directorio)', EV2: 'Registro de asignaciones VPN',
+    EV3: 'Inventario de dispositivos (MDM)', EV4: 'Método de generación del hash',
+    EV5: 'Reglas de agregación y posibilidad de desglose',
+    EV6: 'Quién puede acceder a esas fuentes y por cuánto tiempo'
+  };
+  var EV_PERT = { 1: ['EV1'], 2: ['EV2'], 3: ['EV3'], 4: ['EV4'], 5: ['EV5'], 6: ['EV1', 'EV3'] };
+  var AV = {
+    AV1: 'Sí: queda cubierta por “seguridad” y “protección de sistemas”',
+    AV2: 'No expresamente: comparte datos con finalidades informadas, pero la evaluación individual dirigida a jefaturas no figura',
+    AV3: 'No guarda relación con ninguna finalidad informada',
+    AV4: 'Información insuficiente para saberlo'
+  };
+  var I = {
+    I1: 'Aprobarlo como se propone (mensual, individual, a jefaturas)',
+    I2: 'No usar telemetría de seguridad para evaluación individual; sustituirlo por indicadores agregados por área, con el umbral de D02 §3',
+    I3: 'Suspenderlo hasta cumplir condiciones',
+    I4: 'Prohibir cualquier uso fuera de la investigación de incidentes, incluidos los agregados'
+  };
+  var I3_CONDICIONES = [
+    'finalidad determinada y documentada',
+    'actualización del aviso y comunicación del cambio',
+    'consentimiento cuando el art. 11 lo exija',
+    'sólo variables necesarias',
+    'intervención humana antes de cualquier efecto',
+    'acceso restringido'
+  ];
+  var I_CORTO = {
+    I1: '«aprobarlo como se propone»',
+    I2: '«sustituirlo por indicadores agregados por área»',
+    I3: '«suspenderlo hasta cumplir condiciones»',
+    I4: '«prohibir cualquier uso fuera de la investigación de incidentes»'
+  };
+  var U = {
+    U1: 'Seguridad: detección, respuesta e investigación',
+    U2: 'Seguridad y alimentar el Índice individual',
+    U3: 'Sólo métricas agregadas',
+    U4: 'No recabarlo / dejar de tratarlo'
+  };
+  var R = ['R30', 'R90', 'R180', 'R12M', 'R24M', 'RIND'];
+  var R_ET = { R30: '30 días', R90: '90 días', R180: '180 días', R12M: '12 meses', R24M: '24 meses', RIND: 'Sin plazo' };
+  var R_DIAS = { R30: 30, R90: 90, R180: 180, R12M: 365, R24M: 730, RIND: null };
+  var MO = {
+    MO1: 'Necesidad documentada en D08 §4',
+    MO2: 'Obligación contractual con clientes (D08 §5)',
+    MO3: 'Podría servir en una investigación futura',
+    MO4: 'Alimentar el Índice o reportes individuales'
+  };
+  var MO_FRASE = {
+    MO1: 'la necesidad documentada en D08 §4',
+    MO2: 'la obligación contractual de D08 §5',
+    MO3: 'la posible utilidad en una investigación futura',
+    MO4: 'la alimentación del Índice'
+  };
+  var G = [
+    ['G1', 'Separar el repositorio de seguridad (eventos individuales) del de analítica (sólo agregados)', [5, 1, 2, 3, 4, 6]],
+    ['G2', 'Limitar el acceso al directorio, a la tabla VPN y al inventario MDM para correlación a funciones del SOC, con registro de consultas', [1, 2, 3, 4, 6]],
+    ['G3', 'Eliminar de los eventos los atributos que ninguna regla de detección usa', [6, 2]],
+    ['G4', 'Documentar el criterio de conservación por categoría (finalidad, necesidad y evidencia)', [1, 2, 3, 4, 5, 6]],
+    ['G5', 'Suprimir automáticamente al vencer cada periodo, incluidos los extractos exportados; conservar con su expediente sólo los eventos de una investigación abierta', [1, 2, 3, 4, 6]],
+    ['G6', 'Sustituir el hash simple por un identificador con clave gestionada por Seguridad, y seguir tratándolo como dato personal', [4]],
+    ['G7', 'Mantener el umbral mínimo de 20 cuentas y no publicar cortes que lo incumplan', [5]],
+    ['G8', 'Conservar toda la telemetría indefinidamente “por si se necesita”', [1, 2, 3, 4, 5, 6]],
+    ['G9', 'Enviar a cada jefatura la telemetría individual de su equipo', [1, 2, 3, 4, 6]]
+  ];
+  var G_CORTO = {
+    G1: 'Repositorios separados', G2: 'Acceso limitado a correlación', G3: 'Menos atributos',
+    G4: 'Criterio documentado', G5: 'Supresión automática', G6: 'Identificador con clave',
+    G7: 'Umbral de 20 cuentas', G8: 'Conservar todo indefinidamente', G9: 'Telemetría individual a jefaturas'
+  };
+  var ELEMENTOS_REC = [
+    'Qué telemetría tratarías como dato personal.',
+    'Qué correlaciones limitarías.',
+    'Qué reutilización permitirías o revisarías.',
+    'Qué retenciones diferenciarías.',
+    'Qué controles incorporarías.'
+  ];
+  var ELEMENTOS_REC_FALTA = [
+    'qué telemetría tratarías como dato personal',
+    'qué correlaciones limitarías',
+    'qué reutilización permitirías o revisarías',
+    'qué retenciones diferenciarías',
+    'qué controles incorporarías'
+  ];
+  var FUENTE_TLM = {
+    1: 'Directorio corporativo Q-760 (D04 §1)',
+    2: 'Tabla de sesiones de Q760-VPN (D05 §1)',
+    3: 'Inventario de Q760-MDM (D04 §2)',
+    4: 'Función de D06 y lista de correos (D06; D04 §1)',
+    5: 'Tablero de riesgo (D02 §3)',
+    6: 'Directorio e inventario (D04 §1 y §2)'
+  };
+  var A11_PLANTILLA = {
+    1: ['D04 §1', 'la relación cuenta–persona'],
+    2: ['D05 §1', 'las asignaciones de la VPN'],
+    3: ['D04 §2', 'el inventario de equipos'],
+    4: ['D06', 'el método de generación del hash'],
+    6: ['D04', 'el directorio y el inventario']
+  };
+  var B5_FUENTE = {
+    1: 'el directorio (D04 §1)',
+    2: 'la tabla de sesiones VPN (D05 §1)',
+    3: 'el inventario MDM (D04 §2)',
+    4: 'la posibilidad de recalcular el hash (D06)',
+    6: 'la combinación de directorio e inventario (D04)'
+  };
+  /* Nota interna: «quelvara.example» se conserva sólo como artefacto técnico del caso (entrada de los SHA-256 del Anexo B).
+     El TLD .example está reservado para documentación (RFC 2606 / RFC 6761); no es el nombre de la organización, que es «Organización Q-760». */
+  var HASHES = [
+    ['dibarra@quelvara.example', '3994af898b31a05f25fcda4423796f586601b186c8badd8f966ff1a7c5395f2f'],
+    ['hzambrano@quelvara.example', 'bf661feb325f7d7020890c1ae42854b04c88077e2b3773267a6517658c338a7f'],
+    ['mtellez@quelvara.example', 'f294246da8dfbb33e2bd8b221471249095e9f548ffe359277c77afc927bf80a1'],
+    ['jesparza@quelvara.example', 'f8e50d0077c8a1d060f4b69de93546fda227129e866b24f7645b603edabdcc65'],
+    ['lbenavides@quelvara.example', '22aa3486ad4e7e18f778e524d0468691ce6df3d79bd1c5002a48deb5790c0a94'],
+    ['tarreola@quelvara.example', 'e6f92d653819f236eb20c8badda7bd0782b1c745596f0735c8e18d5333881f71']
+  ];
+  var HASH_REGISTRO4 = 'f294246da8dfbb33e2bd8b221471249095e9f548ffe359277c77afc927bf80a1';
+  var APERTURA = {
+    'Lectura contextual': 'Tu expediente separa lo que aparece en cada fila de lo que la organización puede relacionar. Esa lectura sostiene tus decisiones sobre finalidad y conservación. Abajo se revisa decisión por decisión qué la respalda y qué queda abierto.',
+    'Nombre como criterio': 'Tu expediente toma la ausencia de nombres como criterio principal. El expediente muestra varias vías por las que la organización llega a la persona sin necesidad del nombre en el log. Abajo se revisan una por una.',
+    'Todo es personal': 'Tu expediente trata toda la telemetría como información que permite identificar, incluido el resultado agregado. Abajo se revisa dónde el expediente sostiene esa lectura y dónde no muestra una vía para llegar a una persona.',
+    'Identificación sólida, gobernanza amplia': 'Tu lectura de identificabilidad se apoya en las fuentes del expediente; la gobernanza que propones es más amplia de lo que esa misma lectura justifica. Abajo se revisan ambas partes.',
+    'Mixto': 'Tu expediente combina lecturas que se sostienen con otras en tensión con los documentos. Abajo se revisan decisión por decisión.'
+  };
+  var CIERRE = 'Para saber si la telemetría es dato personal, no basta mirar la fila del log: hay que mirar qué puede saber la organización al relacionarla con otras fuentes.';
+  var DIMENSIONES = [
+    ['A', 'Análisis de identificabilidad'],
+    ['B', 'Correlación entre fuentes'],
+    ['C', 'Disociación'],
+    ['D', 'Finalidad y reutilización'],
+    ['E', 'Proporcionalidad y conservación']
+  ];
+  return {
+    TLM: TLM, H: H, CONF: CONF, C: C, L: L, EV: EV, EV_PERT: EV_PERT, AV: AV, I: I, I3_CONDICIONES: I3_CONDICIONES,
+    I_CORTO: I_CORTO, U: U, R: R, R_ET: R_ET, R_DIAS: R_DIAS, MO: MO, MO_FRASE: MO_FRASE, G: G, G_CORTO: G_CORTO,
+    ELEMENTOS_REC: ELEMENTOS_REC, ELEMENTOS_REC_FALTA: ELEMENTOS_REC_FALTA, FUENTE_TLM: FUENTE_TLM,
+    A11_PLANTILLA: A11_PLANTILLA, B5_FUENTE: B5_FUENTE, HASHES: HASHES, HASH_REGISTRO4: HASH_REGISTRO4,
+    APERTURA: APERTURA, CIERRE: CIERRE, DIMENSIONES: DIMENSIONES
+  };
+})();
+
+var MOTOR = (function (D) {
+  'use strict';
+  var NS = [1, 2, 3, 4, 5, 6];
+  var INDIV = [1, 2, 3, 4, 6];
+  function rIdx(r) { return D.R.indexOf(r); }
+  function t(est, n) { return est.tlm[n]; }
+  function tl(n) { return D.TLM[n - 1]; }
+  function CI(est, n) { return est.clasificacionInicial ? est.clasificacionInicial[n].clasifI : t(est, n).clasifI; }
+  function EI(est, n) { return est.clasificacionInicial ? est.clasificacionInicial[n].evidenciaI : t(est, n).evidenciaI; }
+  function unir(lista) {
+    if (lista.length <= 1) return lista.join('');
+    return lista.slice(0, -1).join(', ') + ' y ' + lista[lista.length - 1];
+  }
+  function norm(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ');
+  }
+  function contarPalabras(s) {
+    var m = (s || '').trim().split(/\s+/).filter(function (x) { return /[0-9A-Za-zÀ-ÿ]/.test(x); });
+    return m.length;
+  }
+  function contiene(txt, raices) {
+    for (var i = 0; i < raices.length; i++) if (txt.indexOf(raices[i]) !== -1) return true;
+    return false;
+  }
+
+  /* §14.1 */
+  function viaMostrada(est, n) {
+    var x = t(est, n);
+    if (x.clasifF === 'C1') return x.via ? D.L[x.via] : '—';
+    if (x.clasifF === 'C2') return D.L.L7;
+    if (x.clasifF === 'C3') return 'Pendiente: ' + (x.evidenciaF.length ? x.evidenciaF.map(function (e) { return D.EV[e]; }).join('; ') : '—');
+    return '—';
+  }
+
+  /* §7.2 */
+  function evaluarPreliminar(est, n) {
+    var c = CI(est, n), ev = EI(est, n) || [];
+    var especifica = ev.some(function (e) { return D.EV_PERT[n].indexOf(e) !== -1; });
+    if (c === 'C3') return especifica ? 'prudente' : 'pendiente generico';
+    var tabla = {
+      1: { C1: 'sostenida', C2: 'sin sustento' },
+      2: { C1: 'anticipada', C2: 'sin sustento' },
+      3: { C1: 'anticipada', C2: 'sin sustento' },
+      4: { C1: 'anticipada', C2: 'sin sustento' },
+      5: { C1: 'sin sustento', C2: 'sostenida' },
+      6: { C1: 'sostenida', C2: 'sin sustento' }
+    };
+    return tabla[n][c] || null;
+  }
+
+  /* §7.3 */
+  function evaluarIdentificacion(est, n) {
+    var x = t(est, n), c = x.clasifF, v = x.via, ev = x.evidenciaF || [];
+    var reglas = {
+      1: { al: ['L2'], de: ['L1', 'L5'], p: 'P1' },
+      2: { al: ['L3'], de: ['L5'], p: 'P1' },
+      3: { al: ['L4'], de: ['L5'], p: 'P1' },
+      4: { al: ['L6'], de: ['L2', 'L5'], p: 'P2' },
+      6: { al: ['L5', 'L2'], de: ['L1', 'L4'], p: 'P1' }
+    };
+    if (n === 5) {
+      if (c === 'C2') return 'alineada';
+      if (c === 'C3') return ev.indexOf('EV5') !== -1 ? 'defendible' : 'tension-pendiente-no-dirigido';
+      if (c === 'C1') return 'tension-sobreinclusion';
+      return null;
+    }
+    var r = reglas[n];
+    if (c === 'C1') {
+      if (r.al.indexOf(v) !== -1) return 'alineada';
+      if (r.de.indexOf(v) !== -1) return 'defendible';
+      return 'tension-via';
+    }
+    if (c === 'C3') return 'tension-pendiente-cubierto';
+    if (c === 'C2') return 'tension-' + r.p;
+    return null;
+  }
+  function identificacionSolida(est) {
+    var ok = 0;
+    NS.forEach(function (n) {
+      var e = evaluarIdentificacion(est, n);
+      if (e === 'alineada' || e === 'defendible') ok++;
+    });
+    if (ok < 5) return false;
+    if (evaluarIdentificacion(est, 5) === 'tension-sobreinclusion') return false;
+    for (var n = 1; n <= 4; n++) {
+      var e = evaluarIdentificacion(est, n);
+      if (e === 'tension-P1' || e === 'tension-P2') return false;
+    }
+    return true;
+  }
+
+  /* §14.5 */
+  function cambiosDeCriterio(est) {
+    var out = [];
+    NS.forEach(function (n) {
+      var de = CI(est, n), a = t(est, n).clasifF;
+      if (de && a && de !== a) out.push({ n: n, de: de, a: a });
+    });
+    return out;
+  }
+  function nHaciaC1(est) { return cambiosDeCriterio(est).filter(function (c) { return c.a === 'C1'; }).length; }
+
+  /* §7.4 */
+  function evaluarUso(est, n) {
+    var u = t(est, n).uso, ind = est.indice;
+    if (!u) return null;
+    if (n === 5) {
+      if (u === 'U1' || u === 'U3') return 'alineado';
+      if (u === 'U2') return 'tension-incoherente';
+      if (u === 'U4') return 'defendible-restrictivo';
+    }
+    if (u === 'U1') return 'alineado';
+    if (u === 'U2') return ind === 'I3' ? 'condicionado' : 'tension';
+    return 'tension-capacidad';
+  }
+  function prellenarUso(est, indice) {
+    var mapa = {
+      I1: { ind: 'U2', agr: 'U3' }, I2: { ind: 'U1', agr: 'U3' },
+      I3: { ind: 'U1', agr: 'U3' }, I4: { ind: 'U1', agr: 'U4' }
+    }[indice];
+    if (!mapa) return;
+    NS.forEach(function (n) {
+      if (!t(est, n).usoEditado) t(est, n).uso = (n === 5 ? mapa.agr : mapa.ind);
+    });
+  }
+
+  /* §7.5 */
+  function evaluarConservacion(est, n) {
+    var x = t(est, n), p = x.periodo, mo = x.motivo, d = tl(n);
+    if (!p) return null;
+    if (p === 'RIND') return n === 5 ? 'defendible-nota' : 'tension-sin-plazo';
+    if (rIdx(p) > rIdx(d.max)) return 'tension-excede';
+    if (rIdx(p) < rIdx(d.base)) return 'tension-capacidad';
+    if (p === d.base) return n === 4 ? 'sostenida' : 'defendible-nota';
+    if (mo === 'MO1') return 'sostenida';
+    if (mo === 'MO2') return 'defendible-nota';
+    if (mo === 'MO3') return 'defendible-nota';
+    if (mo === 'MO4') return 'tension-finalidad';
+    return null;
+  }
+  function esTension(v) { return typeof v === 'string' && v.indexOf('tension') === 0; }
+  function tensionesConservacion(est) {
+    return NS.filter(function (n) { return esTension(evaluarConservacion(est, n)); }).length;
+  }
+  function diferenciacion(est) {
+    var s = {};
+    NS.forEach(function (n) { if (t(est, n).periodo) s[t(est, n).periodo] = 1; });
+    return Object.keys(s).length;
+  }
+  function requiereMotivo(est, n) {
+    var p = t(est, n).periodo;
+    return !!p && rIdx(p) > rIdx(tl(n).base);
+  }
+
+  /* §7.6 / §14.9 */
+  function medidaGobernanza(est, n) {
+    return D.G.filter(function (g) { return est.controles.indexOf(g[0]) !== -1 && g[2].indexOf(n) !== -1; })
+      .map(function (g) { return g[0]; });
+  }
+  function controlesSolidos(est) {
+    var c = est.controles;
+    function h(x) { return c.indexOf(x) !== -1; }
+    return (h('G2') || h('G6')) && (h('G4') || h('G5')) && (h('G1') || h('G7') || h('G3')) && !h('G8') && !h('G9');
+  }
+
+  /* §14.11 */
+  function coherencia(est, etapa) {
+    var out = [];
+    if (etapa === 'E3' || etapa === 'E4') {
+      if ((est.indice === 'I2' || est.indice === 'I4')) {
+        var u2 = INDIV.concat([5]).filter(function (n) { return t(est, n).uso === 'U2'; });
+        if (u2.length) out.push('Elegiste ' + D.I_CORTO[est.indice] + ' y marcaste ' + unir(u2.map(function (n) { return 'TLM-' + n; })) + ' para alimentar el Índice individual; revisa si ambas decisiones pueden operar a la vez.');
+      }
+    }
+    if (etapa === 'E4') {
+      var c = est.controles;
+      if (c.indexOf('G8') !== -1 && NS.some(function (n) { var p = t(est, n).periodo; return p && p !== 'RIND'; }))
+        out.push('Seleccionaste conservar todo indefinidamente y también periodos con fin; revisa cuál refleja tu política.');
+      if (c.indexOf('G9') !== -1 && (est.indice === 'I2' || est.indice === 'I4'))
+        out.push('Seleccionaste enviar a cada jefatura la telemetría individual de su equipo y también elegiste ' + D.I_CORTO[est.indice] + ' para el Índice; revisa si ambas decisiones pueden operar a la vez.');
+      if (t(est, 5).clasifF === 'C1' && t(est, 5).periodo === 'RIND')
+        out.push('Clasificaste el agregado como información que permite identificar y lo dejaste sin plazo.');
+    }
+    return out;
+  }
+
+  /* §14.12 Heurísticas */
+  function j1Reproducibilidad(est) { return contiene(norm(est.j1), ['reproduc', 'recalcul', 'calcular el mismo', 'mismo valor', 'universo', 'lista de correos', 'revertir', 'diccionario']); }
+  function j1Clave(est) { return contiene(norm(est.j1), ['clave', 'sal ', 'secreto', 'hmac']); }
+  function j1AcuerdoSOC(est) {
+    var raw = (est.j1 || '').trim().toLowerCase();
+    var empieza = /^(sí\b|sí,|si,|estoy de acuerdo|de acuerdo)/.test(raw);
+    var n = norm(est.j1);
+    return empieza && !j1Reproducibilidad(est) && n.indexOf('no estoy de acuerdo') === -1;
+  }
+  function j2Finalidad(est) { return contiene(norm(est.j2), ['finalidad', 'proposito', 'fin distinto', 'uso distinto', 'reutiliz']); }
+  function j2Aviso(est) { return contiene(norm(est.j2), ['aviso', 'consentim', 'informad']); }
+  function j2Destinatario(est) { return contiene(norm(est.j2), ['jefatur', 'responsables de area', 'evaluaci', 'desempen', 'disciplin']); }
+  var REC_GRUPOS = [
+    ['dato personal', 'identific', 'usr', 'hash', 'tlm'],
+    ['correlaci', 'directorio', 'tabla', 'mdm', 'vpn', 'acceso'],
+    ['indice', 'finalidad', 'reutiliz', 'jefatur'],
+    ['dias', 'meses', 'conserv', 'retenc', 'supresi', 'plazo'],
+    ['control', 'separ', 'document', 'umbral', 'clave', 'registro de consultas']
+  ];
+  function recCobertura(est) {
+    var n = norm(est.recomendacion);
+    return REC_GRUPOS.map(function (g) { return contiene(n, g); });
+  }
+  function recEliminarTodo(est) {
+    return contiene(norm(est.recomendacion), ['eliminar toda', 'borrar todos los logs', 'dejar de recabar toda', 'suprimir toda la telemetria']);
+  }
+
+  /* §7.7 */
+  function perfil(est) {
+    var c2 = [1, 2, 3, 4].filter(function (n) { return t(est, n).clasifF === 'C2'; }).length;
+    if (c2 >= 2) return 'Nombre como criterio';
+    var otrosC1 = [1, 2, 3, 4, 6].filter(function (n) { return t(est, n).clasifF === 'C1'; }).length;
+    if (t(est, 5).clasifF === 'C1' && otrosC1 >= 4) return 'Todo es personal';
+    var sol = identificacionSolida(est), ten = tensionesConservacion(est);
+    var g8 = est.controles.indexOf('G8') !== -1, g9 = est.controles.indexOf('G9') !== -1;
+    if (sol && (est.indice === 'I1' || ten >= 3 || g8 || g9)) return 'Identificación sólida, gobernanza amplia';
+    if (sol && ['I2', 'I3', 'I4'].indexOf(est.indice) !== -1 && ten <= 1 && !g8 && !g9) return 'Lectura contextual';
+    return 'Mixto';
+  }
+
+  /* §15.2 Catálogo */
+  function nC1(est) { return NS.filter(function (n) { return t(est, n).clasifF === 'C1'; }).length; }
+  function docsE2Leidos(est) {
+    var l = ['D04', 'D05', 'D06'].filter(function (d) { return est.docsLeidos.indexOf(d) !== -1; });
+    return l.length ? unir(l) : 'los documentos de E2';
+  }
+  function etiquetaPeriodo(p) { return D.R_ET[p] ? D.R_ET[p].toLowerCase() : p; }
+
+  function candidatos(est, dim) {
+    var o = [];
+    function add(id, p, txt) { o.push({ id: id, p: p, texto: txt }); }
+    var x = function (n) { return t(est, n); };
+    if (dim === 'A') {
+      if (x(1).clasifF === 'C2') add('A1', 1, 'Trataste usr-1842 como información que no permite identificar. D04 muestra que el directorio lo relaciona directamente con una persona; la ausencia del nombre en el SIEM no elimina esa posibilidad.');
+      if (x(1).clasifF === 'C1' && x(3).clasifF === 'C1' && x(6).clasifF === 'C1') add('A2', 2, 'Clasificaste usr-1842, LAP-0287 y el evento enriquecido como información que permite identificar. Tu lectura se apoya en lo que la organización puede consultar (D04), no sólo en lo que muestra cada fila.');
+      if (x(5).clasifF === 'C1') add('A3', 1, 'Clasificaste el agregado semanal como información que permite identificar, aunque el expediente no muestra un identificador individual ni una vía razonable para descender desde ese resultado a una persona concreta (D02 §3: umbral de 20 cuentas, sin desglose).');
+      if (x(5).clasifF === 'C2') add('A4', 2, 'Distinguiste el conteo semanal de Comercial de los eventos que lo originan: el tablero conserva sólo área, semana y total, con umbral de 20 cuentas. La distinción depende de esas reglas; si el tablero permitiera desglosar por día o por persona, la lectura cambiaría.');
+      if (x(5).clasifF === 'C3' && x(5).evidenciaF.indexOf('EV5') !== -1) add('A5', 2, 'Dejaste el agregado como pendiente y pediste verificar las reglas de agregación. Es un pendiente dirigido: la conclusión descansa en una descripción del propio SOC (D02 §3) que no se ha contrastado con la configuración del tablero.');
+      if (x(6).clasifF === 'C1' && x(6).via === 'L5') add('A6', 2, 'Leíste el evento enriquecido como un conjunto: cuenta, equipo, ciudad, hora y aplicación describen juntos una actividad atribuible a una persona, aunque varias columnas parezcan técnicas por separado.');
+      if (est.hipotesis === 'H1' && nC1(est) >= 3) add('A7', 1, 'Partiste de que la telemetría no contenía datos personales (confianza ' + (est.confianza || '').toLowerCase() + '). Tu clasificación final reconoce que ' + nC1(est) + ' de los seis elementos permiten identificar a alguien en este contexto.');
+      if (est.hipotesis === 'H2' && (x(5).clasifF === 'C2' || x(5).clasifF === 'C3')) add('A8', 2, 'Partiste de que toda la telemetría era personal; al cierre separaste el agregado semanal, que en el contexto documentado no conduce a una persona.');
+      var nh = nHaciaC1(est);
+      if (nh >= 2) add('A9', 2, 'Entre E1 y E2 cambiaste ' + nh + ' clasificaciones después de revisar ' + docsE2Leidos(est) + '. Ese cambio muestra el punto central del caso: la fila del log no basta; importa qué fuentes puede relacionar la organización.');
+      var prud = NS.filter(function (n) { return evaluarPreliminar(est, n) === 'prudente'; });
+      if (prud.length >= 3) add('A10', 3, 'En la clasificación preliminar dejaste como pendientes ' + unir(prud.map(function (n) { return 'TLM-' + n; })) + ' y nombraste la evidencia que faltaba; los documentos de E2 respondieron precisamente esas preguntas.');
+      var a11 = INDIV.filter(function (n) { return x(n).clasifF === 'C3'; }).slice(0, 2);
+      a11.forEach(function (n) {
+        var pl = D.A11_PLANTILLA[n];
+        add('A11', 1, 'Mantuviste TLM-' + n + ' como información insuficiente al cierre, aunque ' + pl[0] + ' ya aporta ' + pl[1] + '. Un pendiente es útil cuando nombra lo que falta; aquí el expediente ya lo contiene.');
+      });
+    }
+    if (dim === 'B') {
+      if (x(2).clasifF === 'C1' && (x(2).via === 'L3' || x(2).via === 'L5')) add('B1', 2, 'Vinculaste la IP 10.40.17.93 con la tabla de sesiones de Q760-VPN. La identificación no depende de la IP sola: D05 muestra que esa dirección tuvo dos cuentas distintas el mismo día; lo que permite llegar a una persona es IP + hora + tabla.');
+      if (x(2).clasifF === 'C2') add('B2', 1, 'Trataste la IP de VPN como información que no permite identificar. D05 muestra una tabla con cuenta, inicio y fin de cada sesión, conservada 30 días y consultable por el SOC; con la hora del evento, la correlación es directa.');
+      if (x(2).clasifF === 'C1') add('B3', 3, 'El mismo expediente muestra un caso distinto: las direcciones de la red de invitados (10.90.0.0/16) no se registran por persona (D05 §3). Tu conclusión sobre 10.40.17.93 depende del pool VPN y de su tabla, no de que toda IP identifique.');
+      if (x(3).clasifF === 'C1' && (x(3).via === 'L4' || x(3).via === 'L5')) add('B4', 2, 'Relacionaste LAP-0287 con el inventario de Q760-MDM, que lo asigna a usr-1842 desde febrero de 2025. D04 también muestra equipos de sala y de préstamo sin persona asignada: para esos códigos la conclusión podría ser otra.');
+      INDIV.filter(function (n) { return evaluarIdentificacion(est, n) === 'tension-via'; }).slice(0, 2).forEach(function (n) {
+        add('B5', 1, 'Para TLM-' + n + ' indicaste que la vinculación proviene de «' + D.L[x(n).via].toLowerCase() + '»; el expediente la ubica en ' + D.B5_FUENTE[n] + '. Distinguir la fuente importa para decidir qué acceso controlar.');
+      });
+      var g2 = est.controles.indexOf('G2') !== -1;
+      if (g2) add('B6', 2, 'Incluiste limitar quién puede consultar el directorio, la tabla VPN y el inventario MDM para correlación. Es una medida que actúa sobre la vía de identificación sin quitarle al SOC la capacidad de investigar.');
+      if (!g2 && nC1(est) >= 3) add('B7', 1, 'Identificaste que varias fuentes permiten relacionar los eventos con personas, pero tus controles no incluyen limitar quién puede hacer esas correlaciones.');
+      if (x(1).clasifF === 'C1' && x(3).clasifF === 'C1' && x(4).clasifF === 'C1' && x(6).clasifF === 'C1') add('B8', 3, 'Cuatro de los seis registros conducen a la misma cuenta (usr-1842). Reunidos, describen la actividad de una persona durante una semana; ése es el material que el Índice de E3 propone usar.');
+    }
+    if (dim === 'C') {
+      if (x(4).clasifF === 'C1' && x(4).via === 'L6') add('C1', 2, 'Detectaste que el hash oculta el correo a simple vista, pero también que la empresa puede calcular el mismo valor para su universo conocido de correos (D06, PR-SOC-07). Transformar el dato no equivale a disociarlo.');
+      if (x(4).clasifF === 'C2') add('C2', 1, 'Aceptaste que correo_hash no permite identificar. D06 describe una función sin clave aplicada a correos que la organización conoce, y un procedimiento interno que la usa para encontrar a la persona investigada; el valor puede reproducirse en la práctica.');
+      if (x(4).clasifF === 'C1' && (x(4).via === 'L2' || x(4).via === 'L5')) add('C3', 2, 'Reconociste que el hash permite identificar. La vía central en D06 es la posibilidad de recalcularlo con la lista de correos, más que el directorio por sí solo.');
+      if (j1Reproducibilidad(est)) add('C4', 2, 'En J1 explicaste que el valor puede recalcularse con los correos conocidos. Ésa es la diferencia entre sustituir un identificador y aplicar un procedimiento que impida asociar el dato a la persona (art. 2, fr. IX).');
+      if (j1AcuerdoSOC(est)) add('C5', 1, 'Tu J1 parece aceptar que sustituir correo y nombre vuelve anónimos los registros, sin abordar si la organización puede repetir o revertir la sustitución. (Lectura automática aproximada.)');
+      if (est.controles.indexOf('G6') !== -1) add('C6', 2, 'Propusiste un identificador con clave gestionada por Seguridad y seguir tratándolo como dato personal. La clave limita quién puede reidentificar; no convierte el campo en disociado mientras la organización la conserve.');
+      if (x(4).clasifF === 'C1') add('C7', 3, 'Además de poder revelar el correo, el mismo valor se repite en todos los eventos de la cuenta: permite reunir su navegación a lo largo del tiempo aun sin conocer el nombre.');
+      if (x(4).clasifF === 'C1' && est.hashesProbados.indexOf('mtellez@quelvara.example') !== -1) add('C8', 3, 'Usaste la función de D06 sobre el extracto del directorio y encontraste el valor del registro 4 en un paso.');
+    }
+    if (dim === 'D') {
+      if (est.av === 'AV2') add('D1', 2, 'Señalaste que el Índice comparte datos con finalidades informadas en D07, pero que la evaluación individual dirigida a jefaturas no figura entre ellas. Es la distinción que el art. 11 obliga a revisar.');
+      if (est.av === 'AV1') add('D2', 1, 'Consideraste que el Índice queda cubierto por la finalidad de seguridad de D07. D09 describe otro propósito: puntuar a cada persona, informar a su jefatura y usarlo como insumo de desempeño o disciplina.');
+      if (est.indice === 'I1') add('D3', 1, 'Aprobaste el Índice como se propone. D09 lo plantea como un uso nuevo de datos recabados para seguridad, con envío mensual a jefaturas. Antes de operarlo faltan pasos que el expediente no muestra: una finalidad informada en el aviso, el consentimiento cuando el art. 11 lo exija y la revisión de qué variables son necesarias.');
+      if (est.indice === 'I2') add('D4', 2, 'Sustituiste el Índice individual por indicadores agregados por área. Conservas un uso de gestión del riesgo sin trasladar a las jefaturas información que permite identificar a cada persona.');
+      if (est.indice === 'I3') add('D5', 2, 'Condicionaste el Índice a definir la finalidad, actualizar el aviso, recabar el consentimiento cuando se requiera, reducir variables y asegurar intervención humana. Es una ruta distinta a la sustitución por agregados y también se sostiene en el expediente; su viabilidad depende de que esas condiciones se cumplan antes de operar.');
+      if (est.indice === 'I4') add('D6', 2, 'Restringiste todo uso fuera de la investigación de incidentes, incluidos los agregados. El conteo semanal no permite identificar en el contexto documentado; excluirlo es una decisión de política, no una exigencia que se derive del expediente, y deja sin indicadores de riesgo.');
+      if (est.indice === 'I1' || est.indice === 'I3') add('D7', 2, 'D09 describe un cálculo automático con semáforo por persona, cuyo resultado podría usarse como insumo en evaluaciones. El expediente no muestra si alguna decisión con efectos significativos se tomaría sin intervención humana; si el Índice siguiera adelante, conviene revisar ese punto a la luz del art. 26, fr. II.');
+      if (est.indice === 'I2' || est.indice === 'I4') {
+        var u2 = NS.filter(function (n) { return x(n).uso === 'U2'; });
+        if (u2.length) add('D8', 1, 'Elegiste ' + D.I_CORTO[est.indice] + ' para el Índice, pero en la matriz marcaste ' + unir(u2.map(function (n) { return 'TLM-' + n; })) + ' para alimentar el Índice individual. Las dos decisiones no pueden operar a la vez.');
+      }
+      INDIV.filter(function (n) { return x(n).uso === 'U3' || x(n).uso === 'U4'; }).slice(0, 2).forEach(function (n) {
+        add('D9', 1, 'Para TLM-' + n + ' limitaste el uso a «' + D.U[x(n).uso] + '». D08 §4 documenta investigaciones que necesitaron esos eventos; que un dato sea personal no obliga a renunciar a la finalidad de seguridad.');
+      });
+      if (j2Finalidad(est) && (j2Aviso(est) || j2Destinatario(est))) add('D10', 2, 'En J2 relacionaste el cambio de destinatario y de propósito con lo que se informó en el aviso; ése es el núcleo de la reutilización.');
+      if (!j2Finalidad(est) && !j2Aviso(est)) add('D11', 1, 'Tu J2 no menciona la finalidad informada ni el aviso de privacidad; la pregunta apuntaba a qué cambia cuando el mismo dato se usa para otro propósito. (Lectura automática aproximada.)');
+      if (est.av === 'AV3') add('D12', 3, 'Consideraste que el Índice no guarda relación con las finalidades informadas. Los datos y su origen son los mismos; lo que cambia es el propósito y quién recibe el resultado.');
+    }
+    if (dim === 'E') {
+      var ten = tensionesConservacion(est), dif = diferenciacion(est);
+      if (ten === 0 && dif >= 3) {
+        var resumen = NS.map(function (n) { return tl(n).catCorta + ': ' + etiquetaPeriodo(x(n).periodo); }).join('; ');
+        var mos = [];
+        NS.forEach(function (n) { var m = x(n).motivo; if (m && requiereMotivo(est, n) && mos.indexOf(m) === -1) mos.push(m); });
+        var motivosTxt = mos.length ? unir(mos.map(function (m) { return D.MO_FRASE[m]; })) : 'las líneas base de D08 §1';
+        add('E1', 2, 'Propusiste periodos distintos por categoría (' + resumen + ') y los apoyaste en ' + motivosTxt + '. La diferenciación por categoría es lo que la propuesta del SOC no planteó.');
+      }
+      var largos = INDIV.filter(function (n) { var p = x(n).periodo; return p && rIdx(p) >= rIdx('R12M'); });
+      var e2 = largos.length >= 4;
+      if (e2) add('E2', 1, 'Conservaste ' + largos.length + ' categorías individuales durante 12 meses o más. El expediente documenta necesidad hasta 152 días en autenticación, 120 en EDR crítico, 41 en VPN y 21 en navegación (D08 §4); el plazo que elegiste excede la necesidad documentada en este caso.');
+      var mo3 = NS.filter(function (n) { return x(n).motivo === 'MO3' && requiereMotivo(est, n); });
+      if (mo3.length) add('E3', 1, 'Para ' + unir(mo3.map(function (n) { return 'TLM-' + n; })) + ' justificaste la ampliación con «podría servir en una investigación futura». Es el argumento de D08 §2; el art. 37 del Reglamento pide que el plazo responda a las finalidades que justificaron el tratamiento.');
+      var mo4 = NS.filter(function (n) { return x(n).motivo === 'MO4' && requiereMotivo(est, n); });
+      if (mo4.length) add('E4', 1, 'Ampliaste ' + unir(mo4.map(function (n) { return 'TLM-' + n; })) + ' para alimentar el Índice. El plazo queda atado a una finalidad que ' + ((est.indice === 'I2' || est.indice === 'I4') ? 'tú mismo descartaste en E3' : 'no está informada en D07') + '.');
+      if (x(1).periodo === 'R30' || x(6).periodo === 'R30') add('E5', 2, 'Mantuviste 30 días para autenticación. Es una opción de minimización defendible; D08 §4 registra dos investigaciones que necesitaron eventos de 74 y 152 días y no pudieron completarse.');
+      NS.filter(function (n) { return evaluarConservacion(est, n) === 'tension-capacidad'; }).slice(0, 2).forEach(function (n) {
+        add('E6', 1, 'Redujiste TLM-' + n + ' a ' + etiquetaPeriodo(x(n).periodo) + ', por debajo del plazo vigente y de lo que D08 §4 muestra como necesario. Limitar la conservación no debería inutilizar una capacidad documentada en D08 §4.');
+      });
+      if (x(5).periodo === 'RIND') add('E7', 3, 'Dejaste el agregado sin plazo. En el contexto documentado no permite identificar, por lo que las reglas de conservación de datos personales no lo alcanzan como tal; aun así, documentar un plazo evita que el tablero crezca sin control.');
+      var c = est.controles;
+      if (c.indexOf('G8') !== -1) {
+        var finitos = NS.some(function (n) { var p = x(n).periodo; return p && p !== 'RIND'; });
+        add('E8', 1, 'Seleccionaste conservar toda la telemetría indefinidamente. Esa medida ' + (finitos ? 'contradice los periodos que propusiste' : 'sustituye la diferenciación por categoría') + ' y no se apoya en ninguna necesidad documentada.');
+      }
+      if (c.indexOf('G9') !== -1) add('E9', 1, 'Seleccionaste enviar a las jefaturas la telemetría individual de su equipo: traslada información que permite identificar a destinatarios y propósitos que D07 no contempla.');
+      if (c.indexOf('G4') !== -1 && c.indexOf('G5') !== -1) add('E10', 2, 'Incluiste documentar el criterio de conservación y suprimir al vencer el plazo. D08 §6 muestra que hoy los extractos que exportan los analistas no tienen supresión automática.');
+      if (c.indexOf('G1') !== -1 || c.indexOf('G7') !== -1) add('E11', 2, 'Separaste la analítica (sólo agregados, con umbral de 20 cuentas) de los eventos de seguridad. Así el agregado puede conservarse más tiempo sin arrastrar eventos individuales.');
+      if (c.indexOf('G3') !== -1) add('E12', 3, 'Propusiste retirar los atributos que ninguna regla de detección usa; reduce lo que cada evento revela sin quitar lo que el SOC necesita para detectar.');
+      NS.filter(function (n) {
+        if (evaluarConservacion(est, n) !== 'tension-excede') return false;
+        var cubierto = e2 && INDIV.indexOf(n) !== -1 && rIdx(x(n).periodo) >= rIdx('R12M');
+        return !cubierto;
+      }).slice(0, 2).forEach(function (n) {
+        add('E13', 1, 'Para TLM-' + n + ' propusiste ' + etiquetaPeriodo(x(n).periodo) + '. El expediente documenta necesidad hasta ' + tl(n).necesidad + ' (D08 §4); el plazo que elegiste excede la necesidad documentada en este caso.');
+      });
+      if ((x(1).motivo === 'MO2' && requiereMotivo(est, 1)) || (x(6).motivo === 'MO2' && requiereMotivo(est, 6))) add('E14', 3, 'Usaste la obligación contractual de D08 §5 para ampliar autenticación. Esa cláusula cubre los accesos administrativos al entorno productivo, no todos los inicios de sesión; podría justificar un plazo distinto sólo para ese subconjunto.');
+    }
+    return o;
+  }
+  var RESPALDOS = {
+    A: [['AF1', 'Tu clasificación final de los seis elementos está en la sección 4 del reporte; compárala con la preliminar (sección 3) para ver qué fuentes marcaron la diferencia.'],
+        ['AF2', 'En este caso la identificabilidad se decide con la información que la organización puede consultar en la práctica; por eso el mismo tipo de dato puede leerse distinto en otro contexto.']],
+    B: [['BF1', 'Las vías que identificaste para cada elemento están en la sección 6 del reporte.'],
+        ['BF2', 'Las fuentes de correlación (directorio, tabla VPN, inventario MDM) son en sí mismas medidas de seguridad; su acceso también requiere control.']],
+    C: [['CF1', 'La sección 7 del reporte reúne tu lectura del hash y los hechos de D06 en que se apoya.'],
+        ['CF2', 'Que un hash permita o no identificar depende de cómo se generó y de lo que la organización sabe; en este caso la función no usa clave y el universo de correos es conocido.']],
+    D: [['DF1', 'La finalidad que autorizaste para cada elemento está en la sección 8 del reporte; la decisión sobre el Índice, en la sección 9.'],
+        ['DF2', 'En este caso, que la telemetría sea dato personal no impide usarla para seguridad; lo que exige revisión es usarla para otro propósito.']],
+    E: [['EF1', 'Tu política de conservación está en la sección 10 del reporte, junto a la línea base y la propuesta del SOC.'],
+        ['EF2', 'En este caso no hay una cifra legal de días; lo que sostiene un plazo es la finalidad y la necesidad documentada.']]
+  };
+  /* §14.14 */
+  function observaciones(est, dim) {
+    var c = candidatos(est, dim);
+    c.forEach(function (o, i) { o.orden = i; });
+    c.sort(function (a, b) { return a.p - b.p || a.orden - b.orden; });
+    var sel = c.slice(0, 4).map(function (o) { return { id: o.id, texto: o.texto }; });
+    var r = RESPALDOS[dim], k = 0;
+    while (sel.length < 2 && k < r.length) { sel.push({ id: r[k][0], texto: r[k][1] }); k++; }
+    return sel;
+  }
+  /* §15.3 */
+  function observacionRecomendacion(est) {
+    var cob = recCobertura(est), k = cob.filter(Boolean).length, out = [];
+    if (k < 5) {
+      var falt = D.ELEMENTOS_REC_FALTA.filter(function (_, i) { return !cob[i]; });
+      out.push({ id: 'REC1', texto: 'Tu recomendación aborda ' + k + ' de los cinco elementos solicitados; no se detectó referencia a ' + unir(falt) + '. (Lectura automática aproximada.)' });
+    }
+    if (recEliminarTodo(est)) out.push({ id: 'REC2', texto: 'Tu recomendación parece proponer eliminar toda la telemetría; el encargo pedía gobernarla sin inutilizar las capacidades de seguridad. (Lectura automática aproximada.)' });
+    if (!out.length) out.push({ id: 'REC3', texto: 'Tu recomendación aborda los cinco elementos solicitados.' });
+    return out;
+  }
+  function retroalimentacion(est) {
+    var p = perfil(est);
+    var dims = D.DIMENSIONES.map(function (d) { return { clave: d[0], titulo: d[1], obs: observaciones(est, d[0]) }; });
+    return { perfil: p, apertura: D.APERTURA[p], dims: dims, recomendacion: observacionRecomendacion(est), cierre: D.CIERRE };
+  }
+
+  /* §14.15 */
+  function guardiaLenguaje(texto) {
+    var hallazgos = [];
+    var s = (texto || '').replace(/No hay puntuación\./g, ' ');
+    var low = s.toLowerCase();
+    var prohibidas = ['correcto', 'incorrecta', 'incorrecto', 'aprobado', 'reprobado', 'puntuación', 'calificación', 'respuesta modelo', 'acierto',
+      'plazo legal', 'la ley permite', 'la ley exige', 'la lfpdppp permite', 'plazo correcto', 'plazo adecuado', 'plazo recomendado'];
+    prohibidas.forEach(function (w) {
+      var re = new RegExp('(^|[^a-záéíóúñü])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![a-záéíóúñü])', 'i');
+      if (re.test(low)) hallazgos.push(w);
+    });
+    var sinFrase = low.split('reglamento de 2011 en lo que resulte compatible').join(' ');
+    if (/(^|[^a-záéíóúñü])(compatibles?|an[aá]log[ao]s?)(?![a-záéíóúñü])/.test(sinFrase)) hallazgos.push('compatible/análoga');
+    if (/art(\.|ículo)\s*26[^.]*\b(activa|actualiza|queda sujeto)/.test(low) || /(activa|actualiza|queda sujeto a)[^.]*art(\.|ículo)\s*26/.test(low)) hallazgos.push('art. 26 activado');
+    var sinComillas = s.replace(/“[^”]*”/g, ' ').replace(/"[^"]*"/g, ' ').toLowerCase();
+    if (sinComillas.indexOf('anonimizad') !== -1) hallazgos.push('anonimizado fuera de comillas');
+    var oraciones = low.split(/(?<=[.;:])\s+/);
+    oraciones.forEach(function (o) {
+      if (/\b\d+\s*(d[ií]as|meses|mes)\b/.test(o) && /(\bley\b|\blegal\b|\bexige\b)/.test(o)) hallazgos.push('cifra con ley/legal/exige: ' + o.slice(0, 60));
+    });
+    return hallazgos;
+  }
+
+  return {
+    contarPalabras: contarPalabras, viaMostrada: viaMostrada, evaluarPreliminar: evaluarPreliminar,
+    evaluarIdentificacion: evaluarIdentificacion, identificacionSolida: identificacionSolida,
+    cambiosDeCriterio: cambiosDeCriterio, nHaciaC1: nHaciaC1, evaluarUso: evaluarUso, prellenarUso: prellenarUso,
+    evaluarConservacion: evaluarConservacion, tensionesConservacion: tensionesConservacion, diferenciacion: diferenciacion,
+    requiereMotivo: requiereMotivo, medidaGobernanza: medidaGobernanza, controlesSolidos: controlesSolidos,
+    coherencia: coherencia, j1Reproducibilidad: j1Reproducibilidad, j1Clave: j1Clave, j1AcuerdoSOC: j1AcuerdoSOC,
+    j2Finalidad: j2Finalidad, j2Aviso: j2Aviso, j2Destinatario: j2Destinatario, recCobertura: recCobertura,
+    recEliminarTodo: recEliminarTodo, perfil: perfil, observaciones: observaciones, observacionRecomendacion: observacionRecomendacion,
+    retroalimentacion: retroalimentacion, guardiaLenguaje: guardiaLenguaje, unir: unir
+  };
+})(DATOS);
+/*MOTOR-FIN*/
+
+var DOCS = (function (D) {
+  'use strict';
+  var SIM = '<p class="simulado">Documento simulado para fines de entrenamiento.</p>';
+  function logsHtml() {
+    return '<div class="logs">' + D.TLM.map(function (x) {
+      return '<div class="log"><span class="reg">Registro ' + x.n + '</span>' + x.log + '</div>';
+    }).join('') + '</div>';
+  }
+  return {
+    D01: { etapa: 'E0', titulo: 'D01 · Correo del SOC y nota de asignación', html: SIM +
+      '<dl class="meta"><dt>De</dt><dd>Rodrigo Anaya Lizárraga, Líder del SOC</dd><dt>Para</dt><dd>Privacidad y Gobierno de Datos</dd>' +
+      '<dt>CC</dt><dd>Paula Quezada Ríos, Dirección de Personas</dd><dt>Fecha</dt><dd>jueves 1 de octubre de 2026, 18:47</dd>' +
+      '<dt>Asunto</dt><dd>Renovación de política de telemetría — ¿algo que revisar?</dd></dl>' +
+      '<blockquote><p>Hola, equipo:</p><p>Estamos renovando la política de telemetría. Los logs son información técnica: no contienen nombres completos. Las IP son dinámicas, los equipos tienen códigos y el correo de navegación ya lo guardamos hasheado.</p>' +
+      '<p>Queremos dos cambios:</p><ol><li>Llevar los eventos individuales de seguridad a una retención uniforme de 365 días. Hoy cada categoría tiene su plazo (30 días casi todo, 90 días EDR crítico); las métricas agregadas se quedan como están.</li>' +
+      '<li>Reutilizar parte de la telemetría para generar, junto con Personas, un indicador mensual de comportamiento digital por persona.</li></ol>' +
+      '<p>¿Privacidad necesita revisar algo? Nos gustaría presentarlo al comité el 15 de octubre.</p><p>Saludos, Rodrigo</p></blockquote>' +
+      '<h3>Nota de asignación</h3><p class="meta-n">Inés Carrasco Villalobos, Responsable de Privacidad y Gobierno de Datos · 2 de octubre</p>' +
+      '<blockquote><p>No respondas todavía. Revisa qué contiene la telemetría, qué puede relacionar la organización, para qué se quiere usar y cuánto tiempo tiene sentido conservarla. Necesito una recomendación concreta para el comité; no se trata de frenar al SOC ni de firmarle todo.</p></blockquote>' },
+
+    D02: { etapa: 'E1', titulo: 'D02 · Diccionario de campos de Q760-SIEM', html: SIM +
+      '<h3>§1 Campos</h3><div class="tabla-scroll"><table><thead><tr><th scope="col">Campo</th><th scope="col">Origen</th><th scope="col">Descripción</th></tr></thead><tbody>' +
+      '<tr><td><code>ts</code></td><td>Todos</td><td>Fecha y hora del evento (UTC−6)</td></tr>' +
+      '<tr><td><code>usr_id</code></td><td>Q760-ID</td><td>Identificador único de cuenta que Q760-ID asigna a cada persona usuaria; no se reutiliza</td></tr>' +
+      '<tr><td><code>src_ip</code></td><td>Q760-FW</td><td>Dirección de origen. Pool 10.40.0.0/16: asignación dinámica de Q760-VPN. 10.90.0.0/16: red de invitados</td></tr>' +
+      '<tr><td><code>dst</code></td><td>Q760-FW</td><td>Destino y puerto</td></tr>' +
+      '<tr><td><code>host</code></td><td>Q760-EDR</td><td>Nombre del equipo corporativo administrado por Q760-MDM</td></tr>' +
+      '<tr><td><code>correo_hash</code></td><td>Q760-FW (módulo web)</td><td>Valor derivado del correo corporativo; el módulo de navegación no registra el correo en claro</td></tr>' +
+      '<tr><td><code>categoría</code></td><td>Varios</td><td>Clasificación del evento o del destino web</td></tr>' +
+      '<tr><td><code>dispositivo</code></td><td>Q760-ID</td><td>Equipo desde el que se autenticó la cuenta</td></tr>' +
+      '<tr><td><code>ciudad_aprox</code></td><td>Q760-ID</td><td>Ciudad estimada a partir de la IP pública de conexión</td></tr>' +
+      '<tr><td><code>mfa</code></td><td>Q760-ID</td><td>Método y resultado del segundo factor</td></tr>' +
+      '<tr><td><code>app</code></td><td>Q760-ID</td><td>Aplicación a la que se accedió</td></tr>' +
+      '<tr><td><code>resultado</code></td><td>Varios</td><td>Éxito, fallido o bloqueado</td></tr></tbody></table></div>' +
+      '<h3>§2 Ingesta</h3><p>Los eventos de Q760-ID llegan con <code>usr_id</code>, <code>dispositivo</code> y <code>ciudad_aprox</code> incorporados por el propio proveedor de identidad. Los de Q760-FW y Q760-EDR llegan sin cuenta.</p>' +
+      '<h3>§3 Tablero semanal de riesgo (repositorio de analítica)</h3><p>Conteos por área, semana y métrica. Sólo se publican celdas de áreas con al menos 20 cuentas activas. El tablero no conserva la lista de cuentas que originaron cada conteo ni ofrece desglose por día o por persona. Se alimenta cada lunes desde el SIEM.</p>' },
+
+    D03: { etapa: 'E1', titulo: 'D03 · Extracto de seis registros', html: function () { return SIM + logsHtml() + '<p class="meta-n" style="margin-top:.6rem">Extracto preparado por el SOC para la revisión de Privacidad.</p>'; } },
+
+    D04: { etapa: 'E2', titulo: 'D04 · Directorio e inventario de dispositivos', html: SIM +
+      '<h3>§1 Extracto del Directorio corporativo Q-760 (6 de 760 filas)</h3><div class="tabla-scroll"><table><thead><tr><th scope="col"><code>usr_id</code></th><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Área</th><th scope="col">Sede</th></tr></thead><tbody>' +
+      '<tr><td>usr-0716</td><td>Daniela Ibarra Solís</td><td>dibarra@quelvara.example</td><td>Operación y Soporte</td><td>CDMX</td></tr>' +
+      '<tr><td>usr-0931</td><td>Héctor Zambrano Ruelas</td><td>hzambrano@quelvara.example</td><td>Finanzas y Administración</td><td>Querétaro</td></tr>' +
+      '<tr><td>usr-1842</td><td>Mariana Téllez Ocampo</td><td>mtellez@quelvara.example</td><td>Comercial</td><td>Monterrey</td></tr>' +
+      '<tr><td>usr-2215</td><td>Jorge Esparza Villa</td><td>jesparza@quelvara.example</td><td>Ingeniería</td><td>Remoto (Puebla)</td></tr>' +
+      '<tr><td>usr-2307</td><td>Lucía Benavides Orta</td><td>lbenavides@quelvara.example</td><td>Comercial</td><td>Querétaro</td></tr>' +
+      '<tr><td>usr-3054</td><td>Tomás Arreola Ceniceros</td><td>tarreola@quelvara.example</td><td>Producto</td><td>Remoto (Mérida)</td></tr></tbody></table></div>' +
+      '<p>Nota de acceso: nombre, correo, área y sede son consultables por cualquier persona empleada en la intranet. La columna <code>usr_id</code> es visible para Identidad, Mesa de Servicio y SOC. La búsqueda por <code>usr_id</code> devuelve la fila en menos de un segundo.</p>' +
+      '<h3>§2 Extracto del inventario de Q760-MDM</h3><div class="tabla-scroll"><table><thead><tr><th scope="col">Equipo</th><th scope="col">Tipo</th><th scope="col">Asignado a</th><th scope="col">Desde</th></tr></thead><tbody>' +
+      '<tr><td>LAP-0287</td><td>Portátil</td><td>usr-1842</td><td>2025-02-10</td></tr>' +
+      '<tr><td>LAP-0311</td><td>Portátil</td><td>usr-2215</td><td>2024-11-04</td></tr>' +
+      '<tr><td>LAP-0412</td><td>Portátil</td><td>usr-0716</td><td>2025-06-23</td></tr>' +
+      '<tr><td>LAP-0455</td><td>Portátil</td><td>usr-2307</td><td>2026-01-15</td></tr>' +
+      '<tr><td>SAL-004</td><td>Equipo de sala (Monterrey)</td><td>— (sin persona asignada)</td><td>—</td></tr>' +
+      '<tr><td>PRE-012</td><td>Préstamo</td><td>Registro manual en hoja de préstamos (no integrada al MDM)</td><td>—</td></tr></tbody></table></div>' },
+
+    D05: { etapa: 'E2', titulo: 'D05 · Sesiones VPN y correlación en el SIEM', html: SIM +
+      '<h3>§1 Extracto de la tabla de sesiones de Q760-VPN, 14 de septiembre de 2026</h3><div class="tabla-scroll"><table><thead><tr><th scope="col">IP asignada</th><th scope="col">Cuenta</th><th scope="col">Inicio</th><th scope="col">Fin</th></tr></thead><tbody>' +
+      '<tr><td>10.40.17.93</td><td>usr-0716</td><td>09:12:40</td><td>13:40:02</td></tr>' +
+      '<tr><td>10.40.17.93</td><td>usr-2215</td><td>22:05:18</td><td>23:58:51</td></tr>' +
+      '<tr><td>10.40.22.08</td><td>usr-1842</td><td>22:58:30</td><td>23:47:15</td></tr></tbody></table></div>' +
+      '<p>Conservación de la tabla: 30 días. Acceso: SOC (14 personas) e Infraestructura (9 personas).</p>' +
+      '<h3>§2 Reglas de correlación de Q760-SIEM</h3><ul><li><code>VPN-ENR-01</code>: al consultar un evento de Q760-FW con <code>src_ip</code> del pool 10.40.0.0/16, busca la sesión VPN activa en ese momento y muestra la cuenta en pantalla.</li>' +
+      '<li><code>MDM-ENR-02</code>: al consultar un evento de Q760-EDR, muestra la cuenta asignada al <code>host</code> en el MDM.</li>' +
+      '<li>Las reglas se ejecutan al consultar y no modifican el evento almacenado. Se usan en investigaciones y en el triage diario.</li></ul>' +
+      '<h3>§3 Nota</h3><p>Las direcciones de la red de invitados (10.90.0.0/16) no se registran por persona.</p>' },
+
+    D06: { etapa: 'E2', titulo: 'D06 · Nota técnica sobre correo_hash', html: SIM +
+      '<dl class="meta"><dt>Autor</dt><dd>SOC (R. Anaya)</dd><dt>Fecha</dt><dd>2 de octubre de 2026</dd></dl><ol>' +
+      '<li><strong>Método:</strong> SHA-256 sobre el correo corporativo en minúsculas, sin clave secreta ni valor aleatorio. Lo aplica el conector del módulo web de Q760-FW antes de enviar el evento al SIEM.</li>' +
+      '<li><strong>Propiedades:</strong> el mismo correo produce siempre el mismo valor. El campo se repite en todos los eventos de navegación de la cuenta.</li>' +
+      '<li><strong>Universo:</strong> los correos siguen el formato inicial + apellido @quelvara.example. Identidad y SOC pueden exportar desde Q760-ID la lista de correos activos (≈ 760).</li>' +
+      '<li><strong>Posición del SOC:</strong> “No guardamos ninguna tabla hash → correo. Por eso consideramos que el campo está anonimizado.”</li>' +
+      '<li><strong>Procedimiento PR-SOC-07 (investigaciones de navegación):</strong> “Para revisar la navegación de una persona investigada, calcular el hash de su correo con la misma función y buscarlo en Q760-SIEM.”</li>' +
+      '<li><strong>Motivo del diseño:</strong> evitar que el primer nivel de analistas vea correos en claro durante el triage.</li></ol>' },
+
+    D07: { etapa: 'E3', titulo: 'D07 · Aviso de privacidad integral para el personal (extracto)', html: SIM +
+      '<dl class="meta"><dt>Responsable</dt><dd>Organización Q-760, S.A. de C.V., Querétaro, Qro.</dd><dt>Versión</dt><dd>3.1, marzo de 2026</dd></dl>' +
+      '<h3>§2 Datos que tratamos</h3><p>Identificación y contacto; datos laborales; datos de uso de sistemas, dispositivos y red corporativos (registros de acceso, de dispositivos y de navegación).</p>' +
+      '<h3>§3 Finalidades respecto de los datos de uso de sistemas, dispositivos y red</h3><ol type="a"><li>proteger la seguridad de la información y de los sistemas;</li><li>administrar cuentas, credenciales y accesos;</li><li>proteger los equipos y la red corporativa;</li><li>detectar, investigar y responder a incidentes de seguridad.</li></ol>' +
+      '<h3>§4 Otras finalidades</h3><p>Administración de la relación laboral (nómina, prestaciones, expediente). [El extracto no incluye otras finalidades sobre datos de uso de sistemas.]</p>' +
+      '<h3>§6 Conservación</h3><p>“Los datos se conservarán durante los plazos establecidos en la política interna de retención.”</p>' +
+      '<h3>§8 Cambios al aviso</h3><p>Se comunicarán en la intranet y por correo corporativo.</p>' },
+
+    D08: { etapa: 'E4', titulo: 'D08 · Política de retención y propuesta del SOC', html: SIM +
+      '<h3>§1 Política vigente (POL-SEG-04, v2)</h3><div class="tabla-scroll"><table><thead><tr><th scope="col">Categoría</th><th scope="col">Plazo</th></tr></thead><tbody>' +
+      '<tr><td>Autenticación (Q760-ID)</td><td>30 días</td></tr><tr><td>VPN (Q760-VPN) y tabla de sesiones</td><td>30 días</td></tr>' +
+      '<tr><td>Navegación (Q760-FW, módulo web)</td><td>30 días</td></tr><tr><td>EDR crítico (Q760-EDR, severidad alta o crítica)</td><td>90 días</td></tr>' +
+      '<tr><td>Métricas agregadas (tablero de riesgo)</td><td>12 meses</td></tr></tbody></table></div>' +
+      '<h3>§2 Propuesta del SOC</h3><p>Llevar los eventos individuales de seguridad (autenticación, VPN, navegación y EDR crítico) a una retención uniforme de 365 días en un único repositorio (“lago de seguridad”). Las métricas agregadas mantienen su régimen actual de 12 meses. Motivos declarados: “algún día podrían servir en una investigación” y “el Índice necesita 12 meses de historia”.</p>' +
+      '<h3>§3 Costo estimado</h3><p>Incremento de almacenamiento autorizado en presupuesto (dato informativo; no condiciona la decisión).</p>' +
+      '<h3>§4 Necesidades observadas (investigaciones de los últimos 12 meses)</h3><ul>' +
+      '<li>Autenticación: 11 investigaciones; 9 se resolvieron con eventos de hasta 30 días; 2 casos de uso indebido de credenciales detectados tarde necesitaron eventos de 74 y 152 días que ya no existían.</li>' +
+      '<li>VPN: 3 investigaciones requirieron correlación; antigüedad máxima necesaria: 41 días.</li>' +
+      '<li>EDR crítico: 4 casos de reinfección; antigüedad máxima necesaria: 120 días.</li>' +
+      '<li>Navegación: ninguna investigación necesitó eventos de más de 21 días.</li>' +
+      '<li>Métricas agregadas: el comité de riesgos compara tendencias interanuales (requiere al menos 13 meses).</li></ul>' +
+      '<h3>§5 Obligación contractual</h3><p>Los contratos con clientes de la Plataforma Q-760 exigen conservar 180 días la bitácora de accesos <strong>administrativos al entorno productivo</strong> de la plataforma.</p>' +
+      '<h3>§6 Supresión actual</h3><p>Automática en Q760-SIEM al vencer el plazo. Los extractos que los analistas exportan a hojas de cálculo durante investigaciones no tienen supresión automática.</p>' },
+
+    D09: { etapa: 'E3', titulo: 'D09 · Propuesta “Índice de comportamiento digital”', html: SIM +
+      '<dl class="meta"><dt>Autores</dt><dd>SOC (R. Anaya) y Dirección de Personas (P. Quezada)</dd><dt>Estado</dt><dd>Borrador para comité</dd></dl>' +
+      '<h3>§1 Propósito</h3><p>“Dar a cada jefatura visibilidad mensual del comportamiento digital de su equipo y reforzar la cultura de seguridad.”</p>' +
+      '<h3>§2 Variables y pesos</h3><div class="tabla-scroll"><table><thead><tr><th scope="col">Variable</th><th scope="col">Fuente</th><th scope="col">Peso</th></tr></thead><tbody>' +
+      '<tr><td>V1 Frecuencia de bloqueos de cuenta</td><td>Q760-ID</td><td>15 %</td></tr>' +
+      '<tr><td>V2 Uso de aplicaciones o destinos no autorizados</td><td>Q760-FW (navegación)</td><td>25 %</td></tr>' +
+      '<tr><td>V3 Accesos fuera del horario habitual</td><td>Q760-ID</td><td>15 %</td></tr>' +
+      '<tr><td>V4 Intentos de autenticación fallidos</td><td>Q760-ID</td><td>10 %</td></tr>' +
+      '<tr><td>V5 Eventos de Q760-EDR</td><td>Q760-EDR</td><td>20 %</td></tr>' +
+      '<tr><td>V6 Conexiones desde ubicaciones inusuales</td><td>Q760-ID (<code>ciudad_aprox</code>)</td><td>15 %</td></tr></tbody></table></div>' +
+      '<h3>§3 Cálculo</h3><p>Automático, mensual, con 12 meses de historia. Para V2, el equipo de datos del SOC resolverá los valores de <code>correo_hash</code> contra la lista de correos del directorio.</p>' +
+      '<h3>§4 Resultado</h3><p>Puntuación de 0 a 100 y semáforo por persona. Lista de las 10 personas con puntuación más alta en cada área.</p>' +
+      '<h3>§5 Destinatarios</h3><p>Jefaturas de área, cada mes. Dirección de Personas recibe el consolidado.</p>' +
+      '<h3>§6 Uso previsto</h3><p>“Podrá considerarse como insumo en la evaluación de desempeño y, en su caso, en procesos disciplinarios.”</p>' },
+
+    D10: { etapa: 'E1', opcional: true, titulo: 'D10 · Nota de referencia normativa (opcional)', html: SIM +
+      '<p>Transcripción de disposiciones para consulta. No contiene análisis del caso. Marco: LFPDPPP vigente (DOF 20-03-2025, última reforma 14-11-2025) y Reglamento (DOF 21-12-2011) en lo que resulte compatible.</p>' +
+      '<h3>Ley Federal de Protección de Datos Personales en Posesión de los Particulares</h3>' +
+      '<p><strong>Artículo 2.</strong> Para los efectos de esta Ley, se entenderá por:</p>' +
+      '<p>V. Datos personales: Cualquier información concerniente a una persona identificada o identificable. Se considera que una persona es identificable cuando su identidad pueda determinarse directa o indirectamente a través de cualquier información;</p>' +
+      '<p>IX. Disociación: Procedimiento mediante el cual los datos personales no pueden asociarse a la persona titular ni permitir, por su estructura, contenido o grado de desagregación, la identificación de la misma;</p>' +
+      '<p><strong>Artículo 11.</strong> El tratamiento de datos personales deberá limitarse al cumplimiento de las finalidades previstas en el aviso de privacidad, sin embargo, si el responsable pretende tratar los datos para una finalidad distinta a las establecidas en el aviso de privacidad, se requerirá obtener nuevamente el consentimiento de la persona titular.</p>' +
+      '<p><strong>Artículo 12.</strong> El tratamiento de datos personales será el que resulte necesario, adecuado y relevante en relación con las finalidades previstas en el aviso de privacidad, para los datos personales sensibles, el responsable deberá realizar esfuerzos razonables para limitar el periodo de tratamiento de los mismos a efecto de que sea el mínimo indispensable.</p>' +
+      '<h3>Reglamento de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares</h3>' +
+      '<p><strong>Artículo 2.</strong> […] VIII. Persona física identificable: Toda persona física cuya identidad pueda determinarse, directa o indirectamente, mediante cualquier información. No se considera persona física identificable cuando para lograr la identidad de ésta se requieran plazos o actividades desproporcionadas;</p>' +
+      '<p><strong>Artículo 37.</strong> Los plazos de conservación de los datos personales no deberán exceder aquéllos que sean necesarios para el cumplimiento de las finalidades que justificaron el tratamiento, y deberán atender las disposiciones aplicables a la materia de que se trate, y tomar en cuenta los aspectos administrativos, contables, fiscales, jurídicos e históricos de la información. Una vez cumplida la o las finalidades del tratamiento, y cuando no exista disposición legal o reglamentaria que establezca lo contrario, el responsable deberá proceder a la cancelación de los datos en su posesión previo bloqueo de los mismos, para su posterior supresión.</p>' +
+      '<p><strong>Artículo 45.</strong> Sólo podrán ser objeto de tratamiento los datos personales que resulten necesarios, adecuados y relevantes en relación con las finalidades para las que se hayan obtenido.</p>' +
+      '<p><strong>Artículo 46.</strong> El responsable deberá realizar esfuerzos razonables para que los datos personales tratados sean los mínimos necesarios de acuerdo con la finalidad del tratamiento que tenga lugar.</p>' +
+      '<p class="meta-n">Fuente: textos vigentes publicados por la Cámara de Diputados (LFPDPPP, última reforma DOF 14-11-2025; Reglamento, DOF 21-12-2011).</p>' }
+  };
+})(DATOS);
+
+(function () {
+  'use strict';
+  var D = DATOS, M = MOTOR;
+  var CLAVE = 'lab03_solo_era_telemetria_v1';
+  var ESQUEMA = 'lab03-v1';
+  var ORDEN = ['INICIO', 'E0', 'E1', 'E2', 'E3', 'E4', 'REPORTE'];
+  var NOMBRE_ETAPA = {
+    E0: 'Sólo son logs', E1: 'Lo que contiene el log', E2: 'Lo que la organización puede relacionar',
+    E3: 'Una finalidad diferente', E4: '¿Qué conservarías?', REPORTE: 'Reporte', INICIO: 'Portada'
+  };
+  var DURACION = { E0: '≈ 3 min', E1: '≈ 6 min', E2: '≈ 8 min', E3: '≈ 7 min', E4: '≈ 9 min, incluye cierre' };
+  var DOCS_ETAPA = {
+    INICIO: [], E0: ['D01'], E1: ['D01', 'D02', 'D03', 'D10'], E2: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D10'],
+    E3: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D09', 'D10'],
+    E4: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09', 'D10'],
+    REPORTE: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09', 'D10']
+  };
+  var NS = [1, 2, 3, 4, 5, 6];
+  var COLS = ['Elemento', 'Clasificación inicial', 'Clasificación final', 'Qué permite vincularlo', 'Finalidad', 'Conservación propuesta', 'Medida de gobernanza'];
+  var COL_ETAPA = [null, 'E1', 'E2', 'E2', 'E3', 'E4', 'E4'];
+  var AYUDA = {
+    clasif: ['Clasificación', 'Considera lo que la organización puede relacionar con la información de la que dispone, no sólo lo que aparece en la fila.'],
+    via: ['Qué permite vincularlo', '¿Qué fuente o procedimiento permite pasar del dato técnico a una cuenta o persona?'],
+    fin: ['Finalidad', '¿Para qué se autoriza usar este elemento? Puedes ajustar lo prellenado.'],
+    cons: ['Conservación', 'No existe una cifra legal general. Elige un periodo y, si amplías el actual, indica en qué te apoyas.']
+  };
+
+  var est = null;
+  var almacenamiento = true;
+  var avisoRecuperacion = false;
+  var guardadoPrevio = null;
+  var temporizador = null;
+  var ui = { ficha: null, ayuda: {}, docAbierto: null, opener: null, mensajes: '', nombre: '' };
+
+  /* ---------- Estado y persistencia ---------- */
+  function nuevoEstado() {
+    var tl = {};
+    NS.forEach(function (n) {
+      tl[n] = { clasifI: null, evidenciaI: [], clasifF: null, via: null, evidenciaF: [], uso: null, usoEditado: false, periodo: null, motivo: null };
+    });
+    return {
+      esquema: ESQUEMA, participante: '', etapa: 'INICIO', etapaMax: 'INICIO', tInicio: null, tFin: null, guardadoEn: null,
+      almacenamientoDisponible: true, docsLeidos: [], correlacionesExploradas: [], hashesProbados: [],
+      hipotesis: null, confianza: null, tlm: tl, clasificacionInicial: null, j1: '', av: null, indice: null,
+      j2: '', controles: [], recomendacion: '', cerrado: false
+    };
+  }
+  function probarAlmacenamiento() {
+    try { localStorage.setItem('__lab03_prueba', '1'); localStorage.removeItem('__lab03_prueba'); return true; } catch (e) { return false; }
+  }
+  function valido(o) {
+    if (!o || typeof o !== 'object' || o.esquema !== ESQUEMA || !o.tlm) return false;
+    if (ORDEN.indexOf(o.etapa) === -1) return false;
+    for (var i = 0; i < NS.length; i++) if (!o.tlm[NS[i]]) return false;
+    if (!Array.isArray(o.controles) || !Array.isArray(o.docsLeidos)) return false;
+    return true;
+  }
+  function cargar() {
+    var raw = null;
+    try { raw = localStorage.getItem(CLAVE); } catch (e) { return null; }
+    if (!raw) return null;
+    try {
+      var o = JSON.parse(raw);
+      if (!valido(o)) { avisoRecuperacion = true; return null; }
+      if (!o.etapaMax || ORDEN.indexOf(o.etapaMax) < ORDEN.indexOf(o.etapa)) o.etapaMax = o.etapa;
+      if (!Array.isArray(o.correlacionesExploradas)) o.correlacionesExploradas = [];
+      if (!Array.isArray(o.hashesProbados)) o.hashesProbados = [];
+      return o;
+    } catch (e) { avisoRecuperacion = true; return null; }
+  }
+  function hhmm(ts) {
+    var d = new Date(ts);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  function guardar() {
+    clearTimeout(temporizador); temporizador = null;
+    if (!est || est.etapa === 'INICIO' && !est.participante) return;
+    est.guardadoEn = Date.now();
+    est.almacenamientoDisponible = almacenamiento;
+    if (almacenamiento) {
+      try { localStorage.setItem(CLAVE, JSON.stringify(est)); }
+      catch (e) { almacenamiento = false; est.almacenamientoDisponible = false; }
+    }
+    pintarGuardado();
+  }
+  function guardarPronto() { clearTimeout(temporizador); temporizador = setTimeout(guardar, 500); }
+  function pintarGuardado() {
+    var g = document.getElementById('guardado');
+    if (g) g.textContent = almacenamiento ? (est && est.guardadoEn ? 'Guardado · ' + hhmm(est.guardadoEn) : '') : 'Sólo en esta pestaña';
+    var a = document.getElementById('aviso-alm');
+    if (a) a.hidden = almacenamiento;
+  }
+  function borrarGuardado() { try { localStorage.removeItem(CLAVE); } catch (e) { /* sin almacenamiento */ } }
+
+  /* ---------- Utilidades ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function idx(e) { return ORDEN.indexOf(e); }
+  function alcanzada(e) { return idx(est.etapaMax) >= idx(e); }
+  function tl(n) { return D.TLM[n - 1]; }
+  function T(n) { return est.tlm[n]; }
+  function anunciar(txt) {
+    var v = document.getElementById('vivo-aviso');
+    if (!v) return;
+    v.textContent = '';
+    setTimeout(function () { v.textContent = txt; }, 30);
+  }
+  function opciones(mapa, sel, vacia) {
+    var h = '<option value="">' + (vacia || 'Elige…') + '</option>';
+    Object.keys(mapa).forEach(function (k) {
+      var txt = typeof mapa[k] === 'string' ? mapa[k] : mapa[k].largo;
+      h += '<option value="' + k + '"' + (sel === k ? ' selected' : '') + '>' + esc(txt) + '</option>';
+    });
+    return h;
+  }
+  function docHtml(id) { var d = DOCS[id]; return typeof d.html === 'function' ? d.html() : d.html; }
+  function marcarLeido(id) { if (est.docsLeidos.indexOf(id) === -1) { est.docsLeidos.push(id); guardarPronto(); } }
+  function fechaLarga(ts) {
+    try { return new Date(ts).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' }); } catch (e) { return new Date(ts).toString(); }
+  }
+
+  /* ---------- Diálogo de confirmación ---------- */
+  function confirmar(texto, ok) {
+    var dlg = document.getElementById('dlg');
+    if (!dlg || typeof dlg.showModal !== 'function') return Promise.resolve(window.confirm(texto));
+    return new Promise(function (resolver) {
+      document.getElementById('dlg-texto').textContent = texto;
+      document.getElementById('dlg-ok').textContent = ok || 'Continuar';
+      var previo = document.activeElement;
+      function fin(v) {
+        dlg.removeEventListener('close', alCerrar);
+        if (dlg.open) dlg.close();
+        if (previo && previo.focus && document.body.contains(previo)) previo.focus();
+        resolver(v);
+      }
+      function alCerrar() { fin(dlg.returnValue === 'ok'); }
+      dlg.returnValue = '';
+      dlg.addEventListener('close', alCerrar);
+      dlg.showModal();
+      document.getElementById('dlg-cancelar').focus();
+    });
+  }
+
+  /* ---------- Matriz ---------- */
+  function etiquetaClasif(c) { return c ? D.C[c].largo : '—'; }
+  function evidenciasTxt(lista) { return lista && lista.length ? lista.map(function (e) { return D.EV[e]; }).join('; ') : ''; }
+  function checksEvidencia(n, campo, lista) {
+    var pref = campo === 'evidenciaI' ? 'evI' : 'evF';
+    var h = '<div class="sub"><span class="sub-t" id="' + pref + '-' + n + '-t">Evidencia que falta (elige 1 o 2)</span><div role="group" aria-labelledby="' + pref + '-' + n + '-t">';
+    Object.keys(D.EV).forEach(function (k) {
+      var id = pref + '-' + n + '-' + k;
+      h += '<label class="chk" for="' + id + '"><input type="checkbox" id="' + id + '" data-campo="' + campo + '" data-n="' + n + '" value="' + k + '"' + (lista.indexOf(k) !== -1 ? ' checked' : '') + '> ' + esc(D.EV[k]) + '</label>';
+    });
+    return h + '</div></div>';
+  }
+  function radiosClasif(n, campo, valor, etiqueta) {
+    var pref = campo === 'clasifI' ? 'cI' : 'cF';
+    var h = '<fieldset class="radios-clasif"><legend class="sr">' + etiqueta + ' de TLM-' + n + '</legend>';
+    Object.keys(D.C).forEach(function (k) {
+      var id = pref + '-' + n + '-' + k;
+      h += '<label class="chk" for="' + id + '"><input type="radio" name="' + pref + '-' + n + '" id="' + id + '" value="' + k + '" data-campo="' + campo + '" data-n="' + n + '"' + (valor === k ? ' checked' : '') + '> ' + esc(D.C[k].largo) + '</label>';
+    });
+    return h + '</fieldset>';
+  }
+  function futura(col) { return '<span>Se habilita en ' + COL_ETAPA[col] + '</span>'; }
+  function cuerpoCelda(col, n, etapa, editable) {
+    var x = T(n), inicial = est.clasificacionInicial ? est.clasificacionInicial[n] : null;
+    switch (col) {
+      case 0:
+        return '<span class="elem">TLM-' + n + ' · ' + esc(tl(n).nombre) + '</span><span class="valor">' + esc(tl(n).valor) + '</span>';
+      case 1:
+        if (editable && etapa === 'E1' && !est.clasificacionInicial) {
+          return radiosClasif(n, 'clasifI', x.clasifI, 'Clasificación inicial') +
+            (x.clasifI === 'C3' ? checksEvidencia(n, 'evidenciaI', x.evidenciaI) : '');
+        }
+        if (inicial) return esc(etiquetaClasif(inicial.clasifI)) + (inicial.clasifI === 'C3' && inicial.evidenciaI.length ? '<span class="derivado">Pendiente: ' + esc(evidenciasTxt(inicial.evidenciaI)) + '</span>' : '') + '<span class="derivado">Fotografía de E1</span>';
+        return null;
+      case 2:
+        if (editable && etapa === 'E2') {
+          return radiosClasif(n, 'clasifF', x.clasifF, 'Clasificación final') + marcaCambio(n);
+        }
+        if (alcanzada('E2') && x.clasifF) return esc(etiquetaClasif(x.clasifF)) + marcaCambio(n);
+        return null;
+      case 3:
+        if (editable && etapa === 'E2') {
+          if (x.clasifF === 'C1') return '<label class="sr" for="via-' + n + '">Qué permite vincular TLM-' + n + '</label><select id="via-' + n + '" data-campo="via" data-n="' + n + '">' + opciones({ L1: D.L.L1, L2: D.L.L2, L3: D.L.L3, L4: D.L.L4, L5: D.L.L5, L6: D.L.L6 }, x.via) + '</select>';
+          if (x.clasifF === 'C2') return esc(D.L.L7) + '<span class="derivado">derivado</span>';
+          if (x.clasifF === 'C3') return checksEvidencia(n, 'evidenciaF', x.evidenciaF);
+          return '<span class="derivado">Elige primero la clasificación final.</span>';
+        }
+        if (alcanzada('E2') && x.clasifF) return esc(M.viaMostrada(est, n)) + (x.clasifF === 'C2' ? '<span class="derivado">derivado</span>' : '');
+        return null;
+      case 4:
+        if (editable && etapa === 'E3') {
+          return '<label class="sr" for="uso-' + n + '">Finalidad autorizada para TLM-' + n + '</label><select id="uso-' + n + '" data-campo="uso" data-n="' + n + '">' + opciones(D.U, x.uso) + '</select>' +
+            (x.uso && !x.usoEditado ? '<span class="derivado">prellenado según tu decisión sobre el Índice</span>' : '');
+        }
+        if (alcanzada('E3') && x.uso) return esc(D.U[x.uso]);
+        return null;
+      case 5:
+        if (alcanzada('E4')) {
+          if (!x.periodo) return '<span class="derivado">Elige el periodo en la línea de retención.</span>';
+          return esc(D.R_ET[x.periodo]) + (x.motivo && M.requiereMotivo(est, n) ? '<span class="derivado">Motivo: ' + esc(D.MO[x.motivo]) + '</span>' : '');
+        }
+        return null;
+      case 6:
+        if (alcanzada('E4')) {
+          var m = M.medidaGobernanza(est, n);
+          return (m.length ? '<span class="chips">' + m.map(function (g) { return '<span class="chip" title="' + esc(textoControl(g)) + '">' + g + ' · ' + esc(D.G_CORTO[g]) + '</span>'; }).join('') + '</span>' : 'Sin medida específica') + '<span class="derivado">derivado</span>';
+        }
+        return null;
+    }
+    return null;
+  }
+  function textoControl(g) { for (var i = 0; i < D.G.length; i++) if (D.G[i][0] === g) return D.G[i][1]; return g; }
+  function marcaCambio(n) {
+    var ini = est.clasificacionInicial ? est.clasificacionInicial[n].clasifI : null;
+    return ini && T(n).clasifF && T(n).clasifF !== ini ? '<span class="marca-cambio">cambió en E2</span>' : '';
+  }
+  function matrizHtml(etapa, opts) {
+    opts = opts || {};
+    var editable = !opts.soloLectura;
+    var activa = { E1: [1], E2: [2, 3], E3: [4], E4: [] }[etapa] || [];
+    var anchos = [16, 14, 14, 14, 14, 14, 14];
+    if (editable && activa.length === 1) { anchos = [15, 12, 12, 12, 12, 12, 12]; anchos[activa[0]] = 27; }
+    if (editable && activa.length === 2) anchos = [13, 10, 21, 26, 10, 10, 10];
+    var h = '<div class="matriz-wrap"><table class="matriz' + (opts.clase ? ' ' + opts.clase : '') + '"><caption class="sr">Matriz de identificabilidad y gobernanza</caption><colgroup>';
+    anchos.forEach(function (a) { h += '<col style="width:' + a + '%">'; });
+    h += '</colgroup><thead><tr>';
+    COLS.forEach(function (c, i) { h += '<th scope="col"' + (i === 0 ? ' class="col1"' : '') + '>' + c + '</th>'; });
+    h += '</tr></thead><tbody>';
+    NS.forEach(function (n) {
+      h += '<tr>';
+      COLS.forEach(function (c, col) {
+        var cont = cuerpoCelda(col, n, etapa, editable);
+        var clase = col === 0 ? 'col1' : '';
+        if (cont === null) { cont = futura(col); clase += ' futura colapsable'; }
+        else if (editable && activa.indexOf(col) !== -1) clase += ' activa';
+        h += col === 0 ? '<th scope="row" class="col1">' + cont + '</th>' : '<td class="' + clase + '" data-label="' + c + '">' + cont + '</td>';
+      });
+      h += '</tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+  function ayudaHtml(claves) {
+    var h = '<div class="ayudas">';
+    claves.forEach(function (k) {
+      var abierta = !!ui.ayuda[k];
+      h += '<button type="button" class="btn sec peq" data-accion="ayuda" data-clave="' + k + '" aria-expanded="' + abierta + '" aria-controls="ayuda-' + k + '" id="btn-ayuda-' + k + '">? ' + AYUDA[k][0] + '</button> ';
+    });
+    claves.forEach(function (k) {
+      h += '<p class="ayuda-txt" id="ayuda-' + k + '"' + (ui.ayuda[k] ? '' : ' hidden') + '>' + esc(AYUDA[k][1]) + '</p>';
+    });
+    return h + '</div>';
+  }
+
+  /* ---------- Vistas ---------- */
+  function cab(etapa, guia) {
+    return '<header class="etapa-cab"><p class="num">' + etapa + ' · ' + DURACION[etapa] + '</p><h1 id="titulo" tabindex="-1">' + NOMBRE_ETAPA[etapa] + '</h1>' +
+      (guia ? '<p class="guia">' + guia + '</p>' : '') + '</header>';
+  }
+  function botonesDocs(ids) {
+    return '<div class="doc-botones">' + ids.map(function (id) {
+      return '<button type="button" class="btn sec peq" data-accion="doc" data-doc="' + id + '">Abrir ' + esc(DOCS[id].titulo) + '</button>';
+    }).join('') + '</div>';
+  }
+  function accionesHtml(atras, adelante, txtAdelante) {
+    return '<div class="mensajes" id="mensajes" aria-live="polite">' + ui.mensajes + '</div>' +
+      '<div class="acciones">' + (atras ? '<button type="button" class="btn sec" data-accion="ir" data-destino="' + atras + '">Volver a ' + atras + '</button>' : '<span></span>') +
+      '<div class="der"><button type="button" class="btn" data-accion="avanzar" id="btn-avanzar">' + txtAdelante + '</button></div></div>';
+  }
+
+  function vistaPortada() {
+    var h = '<div class="portada"><p class="serie">Serie · Protección de datos personales y ciberseguridad en México</p>' +
+      '<h1 id="titulo" tabindex="-1">LABORATORIO 03 · SÓLO ERA TELEMETRÍA</h1><p class="sub">¿Cuándo un log se convierte en dato personal?</p>' +
+      '<dl class="ficha"><dt>Rol</dt><dd>Analista de Privacidad y Gobierno de Datos, trabajando con el SOC</dd><dt>Duración estimada</dt><dd>30–35 minutos</dd>' +
+      '<dt>Estructura</dt><dd>Cinco etapas lineales, seis elementos de telemetría y diez documentos</dd></dl>' +
+      '<ul class="lista-nota"><li>Tus decisiones se guardan automáticamente en este navegador.</li>' +
+      '<li>No hay puntuación visible: al cerrar el expediente recibirás un reporte con retroalimentación narrativa.</li>' +
+      '<li>El caso, la organización, sus productos y las personas que aparecen son simulados.</li>' +
+      '<li>El laboratorio no envía datos a ningún servidor ni usa analítica o cookies de terceros.</li></ul>';
+    if (avisoRecuperacion) h += '<p class="msg falta" role="status">No se pudo recuperar un expediente anterior.</p>';
+    if (guardadoPrevio) {
+      var g = guardadoPrevio;
+      h += '<section class="continuar" aria-labelledby="cont-t"><h2 id="cont-t">Expediente guardado en este navegador</h2>' +
+        '<p>Participante: <strong>' + esc(g.participante) + '</strong> · Etapa: ' + esc(g.etapa === 'REPORTE' ? 'reporte final' : g.etapa + ' · ' + NOMBRE_ETAPA[g.etapa]) +
+        (g.guardadoEn ? ' · Último guardado: ' + esc(fechaLarga(g.guardadoEn)) : '') + '</p>' +
+        '<div class="doc-botones"><button type="button" class="btn" data-accion="continuar" id="btn-continuar">Continuar expediente</button>' +
+        '<button type="button" class="btn sec" data-accion="nuevo">Iniciar un nuevo expediente</button></div></section>';
+    } else {
+      h += '<form class="seccion" data-form="inicio" novalidate><div class="campo"><label for="nombre">Nombre del participante</label>' +
+        '<input type="text" id="nombre" maxlength="60" autocomplete="name" value="' + esc(ui.nombre) + '" aria-describedby="nombre-ayuda"><span id="nombre-ayuda" class="derivado">Entre 1 y 60 caracteres. Aparecerá en tu reporte.</span></div>' +
+        '<div class="mensajes" id="mensajes" aria-live="polite">' + ui.mensajes + '</div>' +
+        '<button type="submit" class="btn" id="btn-iniciar">Iniciar expediente</button></form>';
+    }
+    return h + '</div>';
+  }
+
+  function vistaE0() {
+    var bloqueado = alcanzada('E1');
+    var h = cab('E0', 'Antes de responder al SOC, registra tu hipótesis inicial. No hay retroalimentación hasta el cierre.');
+    h += '<section class="seccion doc" aria-labelledby="d01-t"><h2 id="d01-t">' + DOCS.D01.titulo + '</h2>' + docHtml('D01') + '</section>';
+    h += '<section class="seccion" aria-labelledby="hip-t"><h2 id="hip-t"><span class="paso">1</span> Hipótesis inicial</h2>';
+    h += '<fieldset><legend>¿Qué piensas de la afirmación del SOC antes de revisar el expediente?</legend>';
+    D.H.forEach(function (o) {
+      h += '<label class="opcion" for="h-' + o[0] + '"><input type="radio" name="hipotesis" id="h-' + o[0] + '" value="' + o[0] + '" data-campo="hipotesis"' + (est.hipotesis === o[0] ? ' checked' : '') + (bloqueado ? ' disabled' : '') + '><span>' + esc(o[1]) + '</span></label>';
+    });
+    h += '</fieldset><fieldset><legend>Confianza en tu hipótesis</legend><div class="fila-op">';
+    D.CONF.forEach(function (c) {
+      h += '<label class="opcion" for="conf-' + c + '"><input type="radio" name="confianza" id="conf-' + c + '" value="' + c + '" data-campo="confianza"' + (est.confianza === c ? ' checked' : '') + (bloqueado ? ' disabled' : '') + '><span>' + c + '</span></label>';
+    });
+    h += '</div></fieldset><p class="derivado">Al continuar, tu hipótesis y tu confianza quedarán registradas y no podrán editarse.</p></section>';
+    return h + accionesHtml(null, 'E1', 'Continuar a E1');
+  }
+
+  function vistaE1() {
+    var h = cab('E1', 'Clasifica con lo que tienes hoy: el log y su diccionario de campos. Podrás revisar tu clasificación cuando lleguen nuevos documentos; esta primera lectura quedará guardada como fotografía inicial.');
+    h += botonesDocs(['D02', 'D10']);
+    h += '<section class="seccion doc" aria-labelledby="logs-t" style="margin-top:1rem"><h2 id="logs-t"><span class="paso">D03</span> Registros tal como aparecen en el SIEM</h2>' + docHtml('D03') + '</section>';
+    h += '<section class="seccion" aria-labelledby="mat-t"><h2 id="mat-t"><span class="paso">Matriz</span> Clasificación preliminar</h2>';
+    if (est.clasificacionInicial) h += '<p class="derivado">Tu clasificación preliminar ya está guardada como fotografía inicial y no puede editarse.</p>';
+    h += ayudaHtml(['clasif']) + matrizHtml('E1') + '</section>';
+    return h + accionesHtml(null, 'E2', 'Continuar a E2');
+  }
+
+  var FICHAS = [
+    { id: 'usr', valor: 'usr-1842', reg: 1, fuentes: ['dir'] },
+    { id: 'ip', valor: '10.40.17.93', reg: 2, fuentes: ['vpn'] },
+    { id: 'host', valor: 'LAP-0287', reg: 3, fuentes: ['mdm'] },
+    { id: 'hash', valor: 'f294246d…27bf80a1', reg: 4, fuentes: ['hash'] },
+    { id: 'agregado', valor: 'Comercial · 42', reg: 5, fuentes: [] },
+    { id: 'evento6', valor: 'Evento 6 (usr-1842 · LAP-0287 · Monterrey)', reg: 6, fuentes: ['dir', 'mdm'] }
+  ];
+  var FUENTES = [
+    { id: 'dir', titulo: 'Directorio corporativo Q-760', ref: 'D04 §1' },
+    { id: 'vpn', titulo: 'Tabla de sesiones · Q760-VPN', ref: 'D05 §1' },
+    { id: 'mdm', titulo: 'Inventario · Q760-MDM', ref: 'D04 §2' },
+    { id: 'hash', titulo: 'Función de D06 y lista de correos', ref: 'D06 · D04 §1' }
+  ];
+  function fichaPorId(id) { for (var i = 0; i < FICHAS.length; i++) if (FICHAS[i].id === id) return FICHAS[i]; return null; }
+  function filaDir() { return '<tr><td>usr-1842</td><td>Mariana Téllez Ocampo</td><td>mtellez@quelvara.example</td><td>Comercial</td><td>Monterrey</td></tr>'; }
+  var CAB_DIR = '<thead><tr><th scope="col">usr_id</th><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Área</th><th scope="col">Sede</th></tr></thead>';
+  var CAB_MDM = '<thead><tr><th scope="col">Equipo</th><th scope="col">Tipo</th><th scope="col">Asignado a</th><th scope="col">Desde</th></tr></thead>';
+  function detalleFicha(id) {
+    var f = fichaPorId(id); if (!f) return '';
+    var h = '';
+    if (id === 'usr') {
+      h = '<h3>usr-1842 → Directorio corporativo Q-760 (D04 §1)</h3><div class="tabla-scroll"><table class="tabla">' + CAB_DIR + '<tbody>' + filaDir() + '</tbody></table></div>';
+    } else if (id === 'ip') {
+      h = '<h3>10.40.17.93 → Tabla de sesiones de Q760-VPN (D05 §1)</h3><p>Hora del registro 2: 22:41:37 del 14 de septiembre de 2026.</p><div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">IP asignada</th><th scope="col">Cuenta</th><th scope="col">Inicio</th><th scope="col">Fin</th></tr></thead><tbody>' +
+        '<tr><td>10.40.17.93</td><td>usr-0716</td><td>09:12:40</td><td>13:40:02</td></tr>' +
+        '<tr class="resaltada"><td>10.40.17.93</td><td>usr-2215</td><td>22:05:18</td><td>23:58:51</td></tr></tbody></table></div>' +
+        '<p class="derivado">Fila resaltada: sesión activa a la hora del registro 2.</p>';
+    } else if (id === 'host') {
+      h = '<h3>LAP-0287 → Inventario de Q760-MDM (D04 §2)</h3><div class="tabla-scroll"><table class="tabla">' + CAB_MDM + '<tbody><tr><td>LAP-0287</td><td>Portátil</td><td>usr-1842</td><td>2025-02-10</td></tr></tbody></table></div>';
+    } else if (id === 'hash') {
+      var sel = ui.correoCalc || '';
+      var res = '';
+      if (sel) { for (var i = 0; i < D.HASHES.length; i++) if (D.HASHES[i][0] === sel) res = D.HASHES[i][1]; }
+      h = '<h3>f294246d…27bf80a1 → Función de D06 y lista de correos (D06 · D04 §1)</h3>' +
+        '<p>D06 §1: SHA-256 sobre el correo corporativo en minúsculas, sin clave secreta ni valor aleatorio.</p>' +
+        '<div class="calc"><label for="calc-correo">Aplica la función de D06 a un correo del extracto de D04</label><select id="calc-correo" data-campo="calc"><option value="">Elige un correo…</option>' +
+        D.HASHES.map(function (x) { return '<option value="' + x[0] + '"' + (sel === x[0] ? ' selected' : '') + '>' + x[0] + '</option>'; }).join('') + '</select>' +
+        '<span class="sub-t">Resultado SHA-256</span><output id="calc-salida" for="calc-correo">' + (res || '—') + '</output>' +
+        '<p class="coincide" id="calc-coincide">' + (res && res === D.HASH_REGISTRO4 ? 'Coincide con el registro 4.' : '') + '</p></div>';
+    } else if (id === 'agregado') {
+      h = '<h3>Comercial · 42 → registro del tablero y reglas de D02 §3</h3><div class="log">' + esc(tl(5).log) + '</div>' +
+        '<p style="margin-top:.5rem">D02 §3: Conteos por área, semana y métrica. Sólo se publican celdas de áreas con al menos 20 cuentas activas. El tablero no conserva la lista de cuentas que originaron cada conteo ni ofrece desglose por día o por persona.</p>';
+    } else if (id === 'evento6') {
+      h = '<h3>Evento 6 → Directorio corporativo Q-760 (D04 §1) e inventario de Q760-MDM (D04 §2)</h3><div class="tabla-scroll"><table class="tabla">' + CAB_DIR + '<tbody>' + filaDir() + '</tbody></table></div>' +
+        '<div class="tabla-scroll"><table class="tabla">' + CAB_MDM + '<tbody><tr><td>LAP-0287</td><td>Portátil</td><td>usr-1842</td><td>2025-02-10</td></tr></tbody></table></div>';
+    }
+    return h;
+  }
+  function mapaHtml() {
+    var h = '<div class="mapa" id="mapa"><svg class="lineas" id="lineas" aria-hidden="true" focusable="false"></svg>' +
+      '<div><p class="col-t" id="fichas-t">Valores técnicos en el log</p><div class="fichas" role="group" aria-labelledby="fichas-t">';
+    FICHAS.forEach(function (f) {
+      var activa = ui.ficha === f.id, vista = est.correlacionesExploradas.indexOf(f.id) !== -1;
+      h += '<button type="button" class="ficha-log" id="ficha-' + f.id + '" data-accion="ficha" data-ficha="' + f.id + '" aria-pressed="' + activa + '" aria-controls="detalle-mapa">' +
+        '<span class="reg">Registro ' + f.reg + (vista ? '<span class="visto"> · consultado</span>' : '') + '</span><span class="sr">, valor técnico </span><span class="v">' + esc(f.valor) + '</span></button>';
+    });
+    h += '</div></div><div><p class="col-t">Fuentes de la organización</p><div class="fuentes">';
+    var act = ui.ficha ? fichaPorId(ui.ficha).fuentes : [];
+    FUENTES.forEach(function (s) {
+      h += '<div class="fuente' + (act.indexOf(s.id) !== -1 ? ' activa' : '') + '" id="fuente-' + s.id + '"><h3>' + s.titulo + '</h3><span class="ref">' + s.ref + '</span></div>';
+    });
+    h += '</div></div></div><div class="detalle" id="detalle-mapa" aria-live="polite">' + (ui.ficha ? detalleFicha(ui.ficha) : '') + '</div>';
+    return h;
+  }
+  function dibujarLineas() {
+    var svg = document.getElementById('lineas'), mapa = document.getElementById('mapa');
+    if (!svg || !mapa) return;
+    svg.innerHTML = '';
+    if (!ui.ficha || getComputedStyle(svg).display === 'none') return;
+    var f = fichaPorId(ui.ficha), btn = document.getElementById('ficha-' + f.id);
+    if (!btn) return;
+    var rm = mapa.getBoundingClientRect(), rb = btn.getBoundingClientRect();
+    var x1 = rb.right - rm.left, y1 = rb.top + rb.height / 2 - rm.top, out = '';
+    f.fuentes.forEach(function (s) {
+      var el = document.getElementById('fuente-' + s); if (!el) return;
+      var r = el.getBoundingClientRect(), x2 = r.left - rm.left, y2 = r.top + r.height / 2 - rm.top, cx = (x1 + x2) / 2;
+      out += '<path d="M' + x1 + ' ' + y1 + ' C ' + cx + ' ' + y1 + ', ' + cx + ' ' + y2 + ', ' + x2 + ' ' + y2 + '" fill="none" stroke="#4f6d86" stroke-width="2"/>' +
+        '<circle cx="' + x1 + '" cy="' + y1 + '" r="4" fill="#4f6d86"/><circle cx="' + x2 + '" cy="' + y2 + '" r="4" fill="#4f6d86"/>';
+    });
+    svg.innerHTML = out;
+  }
+
+  function contadorTxt(campo, n) {
+    if (campo === 'recomendacion') {
+      var fuera = n < 180 || n > 250;
+      var av = avisoPalabrasRec();
+      return '<span id="cont-' + campo + '" class="contador' + (fuera ? ' fuera' : '') + '">' + n + ' palabras · guía 180–250; se aceptan 150–300' + (av ? ' · ' + av : '') + '</span>';
+    }
+    return '<span id="cont-' + campo + '" class="contador' + (n < 50 || n > 100 ? ' fuera' : '') + '">' + n + ' palabras · entre 50 y 100</span>';
+  }
+  function areaTexto(campo, etiqueta, pregunta, valor) {
+    var n = M.contarPalabras(valor);
+    return '<label for="txt-' + campo + '" class="sr">' + etiqueta + '</label><p id="preg-' + campo + '"><strong>' + esc(pregunta) + '</strong></p>' +
+      '<textarea id="txt-' + campo + '" data-texto="' + campo + '" aria-describedby="preg-' + campo + ' cont-' + campo + '">' + esc(valor) + '</textarea><div aria-live="polite">' + contadorTxt(campo, n) + '</div>';
+  }
+
+  function vistaE2() {
+    var h = cab('E2', 'Llegan tres documentos nuevos (D04, D05 y D06). Pulsa cada valor técnico para ver qué fuente del expediente permite relacionarlo con una cuenta o una persona. Después revisa tu clasificación.');
+    h += botonesDocs(['D04', 'D05', 'D06']);
+    h += '<section class="seccion" aria-labelledby="mapa-t" style="margin-top:1rem"><h2 id="mapa-t"><span class="paso">1</span> Mapa de correlación</h2>' +
+      '<p class="guia">El mapa muestra hechos del expediente. La conclusión sobre cada elemento es tuya.</p>' + mapaHtml() + '</section>';
+    h += '<section class="seccion" aria-labelledby="mat-t"><h2 id="mat-t"><span class="paso">2</span> Clasificación final</h2>' +
+      '<p class="guia">La clasificación final empieza con tu lectura preliminar. Puedes mantenerla o cambiarla.</p>' + ayudaHtml(['clasif', 'via']) + matrizHtml('E2') + '</section>';
+    h += '<section class="seccion" aria-labelledby="j1-t"><h2 id="j1-t"><span class="paso">3</span> Justificación J1</h2>' +
+      areaTexto('j1', 'Justificación J1', 'El SOC afirma que sustituir correo y nombre por identificadores o hashes vuelve anónimos los logs. ¿Estás de acuerdo en este caso? Explica por qué.', est.j1) + '</section>';
+    return h + accionesHtml('E1', 'E3', 'Continuar a E3');
+  }
+
+  function vistaE3() {
+    var h = cab('E3', 'Llega una propuesta del SOC y de la Dirección de Personas. Compara lo que informa el aviso de privacidad (D07) con lo que propone el Índice (D09).');
+    h += botonesDocs(['D07', 'D09']);
+    h += '<section class="seccion" aria-labelledby="fin-t" style="margin-top:1rem"><h2 id="fin-t"><span class="paso">1</span> Panel de finalidad</h2><div class="panel-fin">' +
+      '<div><h3>Informado en D07 §3</h3><p class="derivado">Finalidades respecto de los datos de uso de sistemas, dispositivos y red</p><ol type="a"><li>proteger la seguridad de la información y de los sistemas;</li><li>administrar cuentas, credenciales y accesos;</li><li>proteger los equipos y la red corporativa;</li><li>detectar, investigar y responder a incidentes de seguridad.</li></ol></div>' +
+      '<div><h3>Propuesto en D09</h3><p><strong>Propósito (§1):</strong> “Dar a cada jefatura visibilidad mensual del comportamiento digital de su equipo y reforzar la cultura de seguridad.”</p>' +
+      '<p><strong>Destinatarios (§5):</strong> jefaturas de área, cada mes; Dirección de Personas recibe el consolidado.</p>' +
+      '<p><strong>Variables (§2):</strong></p><ul><li>V1 Frecuencia de bloqueos de cuenta (15 %)</li><li>V2 Uso de aplicaciones o destinos no autorizados (25 %)</li><li>V3 Accesos fuera del horario habitual (15 %)</li><li>V4 Intentos de autenticación fallidos (10 %)</li><li>V5 Eventos de Q760-EDR (20 %)</li><li>V6 Conexiones desde ubicaciones inusuales (15 %)</li></ul>' +
+      '<p><strong>Uso previsto (§6):</strong> “Podrá considerarse como insumo en la evaluación de desempeño y, en su caso, en procesos disciplinarios.”</p></div></div></section>';
+    h += '<section class="seccion" aria-labelledby="av-t"><h2 id="av-t"><span class="paso">2</span> ¿La finalidad del Índice está informada en D07?</h2><fieldset><legend class="sr">¿La finalidad del Índice está informada en D07?</legend>';
+    Object.keys(D.AV).forEach(function (k) {
+      h += '<label class="opcion" for="av-' + k + '"><input type="radio" name="av" id="av-' + k + '" value="' + k + '" data-campo="av"' + (est.av === k ? ' checked' : '') + '><span>' + esc(D.AV[k]) + '</span></label>';
+    });
+    h += '</fieldset></section>';
+    h += '<section class="seccion" aria-labelledby="ind-t"><h2 id="ind-t"><span class="paso">3</span> Índice de comportamiento digital</h2><fieldset><legend class="sr">Decisión sobre el Índice de comportamiento digital</legend>';
+    Object.keys(D.I).forEach(function (k) {
+      var det = k === 'I3' ? '<span class="det">Condiciones: ' + esc(D.I3_CONDICIONES.join('; ')) + '.</span>' : '';
+      h += '<label class="opcion" for="ind-' + k + '"><input type="radio" name="indice" id="ind-' + k + '" value="' + k + '" data-campo="indice"' + (est.indice === k ? ' checked' : '') + '><span>' + esc(D.I[k]) + det + '</span></label>';
+    });
+    h += '</fieldset></section>';
+    h += '<section class="seccion" aria-labelledby="mat-t"><h2 id="mat-t"><span class="paso">4</span> Finalidad por elemento</h2>' +
+      '<p class="guia">Al elegir una opción sobre el Índice, la columna se prellena para los elementos que no hayas editado. Puedes ajustarla.</p>' +
+      ayudaHtml(['fin']) + matrizHtml('E3') + coherenciaHtml('E3') + '</section>';
+    h += '<section class="seccion" aria-labelledby="j2-t"><h2 id="j2-t"><span class="paso">5</span> Justificación J2</h2>' +
+      areaTexto('j2', 'Justificación J2', '¿Qué cambia jurídicamente cuando la telemetría deja de utilizarse sólo para seguridad y empieza a alimentar reportes individuales para responsables de área?', est.j2) + '</section>';
+    return h + accionesHtml('E2', 'E4', 'Continuar a E4');
+  }
+  function coherenciaHtml(etapa) {
+    var c = M.coherencia(est, etapa);
+    return '<div class="coherencia" id="coherencia" role="status">' + c.map(function (m) { return '<p class="nota-coh">' + esc(m) + '</p>'; }).join('') + '</div>';
+  }
+
+  var ESCALA_MAX = 730;
+  function pos(p) {
+    if (p === 'RIND') return 100;
+    return D.R_DIAS[p] / ESCALA_MAX * 90;
+  }
+  function pistaHtml(n, soloLectura) {
+    var x = T(n), d = tl(n);
+    var h = '<div class="pista" aria-hidden="true"><div class="sin"></div>';
+    if (x.periodo) h += '<div class="barra-p" style="width:' + pos(x.periodo).toFixed(2) + '%"></div>';
+    h += '<div class="m-base" style="left:' + pos(d.base).toFixed(2) + '%"></div>';
+    if (d.soc) h += '<div class="m-soc" style="left:' + (365 / ESCALA_MAX * 90).toFixed(2) + '%"></div>';
+    h += '</div><div class="escala" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:' + (180 / ESCALA_MAX * 90).toFixed(2) + '%">6 m</span><span style="left:' + (365 / ESCALA_MAX * 90).toFixed(2) + '%">12 m</span><span style="left:90%;transform:translateX(-100%)">24 m</span></div>';
+    h += '<p class="ret-leyenda"><span class="ley-base">Línea base: ' + esc(D.R_ET[d.base].toLowerCase()) + '</span>' + (d.soc ? '<span class="ley-soc">Propuesta del SOC: 365 días</span>' : '<span>Propuesta del SOC: sin cambio</span>') + '<span class="ley-p">' + (soloLectura ? 'Periodo propuesto: ' : 'Tu elección: ') + (x.periodo ? esc(D.R_ET[x.periodo].toLowerCase()) : '—') + '</span><span class="ley-sin">Zona rayada: sin plazo</span></p>';
+    return h;
+  }
+  function retencionHtml() {
+    var h = '<div class="retencion">';
+    NS.forEach(function (n) {
+      var x = T(n), d = tl(n);
+      h += '<div class="ret-fila"><div class="nom">TLM-' + n + ' · ' + esc(d.nombre) + '<span class="cat">' + esc(d.categoria) + ' · <span class="mono">' + esc(d.valor) + '</span></span></div>' +
+        '<div class="ret-ctl"><label for="periodo-' + n + '">Periodo propuesto</label><select id="periodo-' + n + '" data-campo="periodo" data-n="' + n + '">' + opciones(D.R_ET, x.periodo) + '</select>';
+      if (M.requiereMotivo(est, n)) {
+        h += '<label for="motivo-' + n + '">Motivo de la ampliación (obligatorio)</label><select id="motivo-' + n + '" data-campo="motivo" data-n="' + n + '">' + opciones(D.MO, x.motivo) + '</select>';
+      }
+      h += '</div><div class="ret-vis">' + pistaHtml(n) + '</div></div>';
+    });
+    return h + '</div>';
+  }
+  function vistaE4() {
+    var h = cab('E4', 'Propón un periodo de conservación por elemento. Las cifras son opciones del caso: compáralas con lo que documenta D08. Si amplías el plazo vigente, indica en qué te apoyas.');
+    h += botonesDocs(['D08']);
+    h += '<section class="seccion" aria-labelledby="ret-t" style="margin-top:1rem"><h2 id="ret-t"><span class="paso">1</span> Línea de retención</h2>' + ayudaHtml(['cons']) + retencionHtml() + '</section>';
+    h += '<section class="seccion" aria-labelledby="ctl-t"><h2 id="ctl-t"><span class="paso">2</span> Controles</h2><fieldset><legend>Elige de 3 a 6 controles</legend>';
+    D.G.forEach(function (g) {
+      h += '<label class="opcion" for="g-' + g[0] + '"><input type="checkbox" id="g-' + g[0] + '" value="' + g[0] + '" data-campo="control"' + (est.controles.indexOf(g[0]) !== -1 ? ' checked' : '') + '><span>' + g[0] + ' · ' + esc(g[1]) + '</span></label>';
+    });
+    h += '</fieldset><p class="contador" id="cont-controles" aria-live="polite">Seleccionados: ' + est.controles.length + ' de 6</p>' + coherenciaHtml('E4') + '</section>';
+    h += '<section class="seccion" aria-labelledby="mat-t"><h2 id="mat-t"><span class="paso">3</span> Matriz de identificabilidad y gobernanza</h2>' + matrizHtml('E4') + '</section>';
+    h += '<section class="seccion" aria-labelledby="rec-t"><h2 id="rec-t"><span class="paso">4</span> RECOMENDACIÓN DE GOBIERNO DE TELEMETRÍA</h2>' +
+      '<p>Aborda estos cinco elementos (guía de 180–250 palabras):</p><ol class="elementos">' + D.ELEMENTOS_REC.map(function (e) { return '<li>' + e + '</li>'; }).join('') + '</ol>' +
+      '<p class="derivado">Tu recomendación no debe pedir eliminar toda la telemetría ni asumir que la ciberseguridad justifica cualquier recopilación.</p>' +
+      areaTexto('recomendacion', 'Recomendación de gobierno de telemetría', 'Recomendación para el comité', est.recomendacion) + '</section>';
+    return h + accionesHtml('E3', 'REPORTE', 'Cerrar expediente y generar reporte');
+  }
+
+  /* ---------- Reporte ---------- */
+  function filaTabla(celdas) { return '<tr>' + celdas.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }
+  function seccionRep(num, titulo, cuerpo, salto) {
+    return '<section aria-labelledby="rep-s' + num + '"' + (salto ? ' class="salto"' : '') + '><h2 id="rep-s' + num + '"><span class="n">' + num + '</span>' + titulo + '</h2>' + cuerpo + '</section>';
+  }
+  function vistaReporte() {
+    var r = M.retroalimentacion(est);
+    var dur = est.tInicio && est.tFin ? Math.max(1, Math.round((est.tFin - est.tInicio) / 60000)) : null;
+    var s = [];
+    s.push(seccionRep(1, 'Datos generales', '<dl class="ficha"><dt>Participante</dt><dd>' + esc(est.participante) + '</dd><dt>Organización ficticia</dt><dd>Organización Q-760, S.A. de C.V.</dd>' +
+      '<dt>Rol</dt><dd>Analista de Privacidad y Gobierno de Datos, trabajando con el SOC</dd><dt>Cierre</dt><dd>' + esc(est.tFin ? fechaLarga(est.tFin) : '—') + '</dd>' +
+      '<dt>Duración</dt><dd>' + (dur ? dur + (dur === 1 ? ' minuto' : ' minutos') : '—') + '</dd><dt>D10 consultado</dt><dd>' + (est.docsLeidos.indexOf('D10') !== -1 ? 'Sí' : 'No') + '</dd></dl>'));
+    var hip = ''; D.H.forEach(function (o) { if (o[0] === est.hipotesis) hip = o[1]; });
+    s.push(seccionRep(2, 'Hipótesis inicial', '<p>' + esc(hip) + ' · Confianza: ' + esc(est.confianza || '—') + '</p>'));
+    var t3 = '<div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Elemento</th><th scope="col">Clasificación preliminar</th><th scope="col">Evidencia faltante</th></tr></thead><tbody>';
+    NS.forEach(function (n) { var ci = est.clasificacionInicial ? est.clasificacionInicial[n] : { clasifI: null, evidenciaI: [] }; t3 += filaTabla(['TLM-' + n + ' · ' + esc(tl(n).nombre), esc(etiquetaClasif(ci.clasifI)), esc(evidenciasTxt(ci.evidenciaI) || '—')]); });
+    s.push(seccionRep(3, 'Clasificación preliminar (fotografía de E1)', t3 + '</tbody></table></div>'));
+    var t4 = '<div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Elemento</th><th scope="col">Clasificación final</th><th scope="col">Qué permite vincularlo</th></tr></thead><tbody>';
+    NS.forEach(function (n) { t4 += filaTabla(['TLM-' + n + ' · ' + esc(tl(n).nombre), esc(etiquetaClasif(T(n).clasifF)), esc(M.viaMostrada(est, n))]); });
+    s.push(seccionRep(4, 'Clasificación final', t4 + '</tbody></table></div>'));
+    var cam = M.cambiosDeCriterio(est);
+    s.push(seccionRep(5, 'Cambios de criterio', cam.length ? '<ul>' + cam.map(function (c) { return '<li>TLM-' + c.n + ': de «' + esc(D.C[c.de].largo) + '» a «' + esc(D.C[c.a].largo) + '»</li>'; }).join('') + '</ul>' : '<p>Sin cambios entre E1 y E2</p>'));
+    var m6 = '<ul class="mapa-rep">';
+    NS.forEach(function (n) {
+      var c = T(n).clasifF, fuente = c === 'C1' ? D.FUENTE_TLM[n] : (c === 'C2' ? 'Sin línea' : 'Pendiente');
+      m6 += '<li><span><strong>TLM-' + n + '</strong> · <span class="mono">' + esc(tl(n).valor) + '</span></span><span class="flecha" aria-hidden="true">→</span><span>' + esc(M.viaMostrada(est, n)) + '</span><span class="flecha" aria-hidden="true">→</span><span>' + esc(fuente) + '</span></li>';
+    });
+    s.push(seccionRep(6, 'Fuentes de correlación', '<p class="derivado">Cada elemento, la vía que indicaste y el documento del expediente donde consta la fuente.</p>' + m6 + '</ul>', true));
+    s.push(seccionRep(7, 'Análisis del hash', '<p>TLM-4 · <span class="mono">f294246d…27bf80a1</span>: ' + esc(etiquetaClasif(T(4).clasifF)) + ' · ' + esc(M.viaMostrada(est, 4)) + '</p>' +
+      '<ul><li>D06 §1 · Método: SHA-256 sobre el correo en minúsculas, sin clave secreta ni valor aleatorio.</li><li>D06 §2 · Propiedades: el mismo correo produce siempre el mismo valor.</li>' +
+      '<li>D06 §3 · Universo: ≈ 760 correos exportables desde Q760-ID.</li><li>D06 §4 · Posición del SOC: considera el campo “anonimizado” porque no guarda una tabla hash → correo.</li>' +
+      '<li>D06 §5 · PR-SOC-07: calcula el hash del correo de la persona investigada para buscar su navegación.</li></ul><p>Control G6 seleccionado: ' + (est.controles.indexOf('G6') !== -1 ? 'Sí' : 'No') + '</p>'));
+    var t8 = '<p>Finalidades informadas en D07 §3: a) proteger la seguridad de la información y de los sistemas; b) administrar cuentas, credenciales y accesos; c) proteger los equipos y la red corporativa; d) detectar, investigar y responder a incidentes de seguridad.</p>' +
+      '<div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Elemento</th><th scope="col">Finalidad autorizada</th></tr></thead><tbody>';
+    NS.forEach(function (n) { t8 += filaTabla(['TLM-' + n + ' · ' + esc(tl(n).nombre), esc(T(n).uso ? D.U[T(n).uso] : '—')]); });
+    s.push(seccionRep(8, 'Finalidad de seguridad', t8 + '</tbody></table></div>'));
+    s.push(seccionRep(9, 'Nueva finalidad propuesta', '<p><strong>Propósito (D09 §1):</strong> dar a cada jefatura visibilidad mensual del comportamiento digital de su equipo y reforzar la cultura de seguridad. <strong>Destinatarios (§5):</strong> jefaturas de área, cada mes; Dirección de Personas recibe el consolidado. <strong>Uso previsto (§6):</strong> insumo en la evaluación de desempeño y, en su caso, en procesos disciplinarios.</p>' +
+      '<p><strong>¿Está informada en D07?</strong> ' + esc(est.av ? D.AV[est.av] : '—') + '</p><p><strong>Decisión sobre el Índice:</strong> ' + esc(est.indice ? D.I[est.indice] : '—') +
+      (est.indice === 'I3' ? '. Condiciones: ' + esc(D.I3_CONDICIONES.join('; ')) + '.' : '') + '</p>'));
+    var t10 = '<div class="tabla-scroll"><table class="tabla"><thead><tr><th scope="col">Elemento</th><th scope="col">Línea base</th><th scope="col">Propuesta del SOC</th><th scope="col">Periodo propuesto</th><th scope="col">Motivo</th></tr></thead><tbody>';
+    NS.forEach(function (n) {
+      var x = T(n), d = tl(n);
+      t10 += filaTabla(['TLM-' + n + ' · ' + esc(d.categoria), esc(D.R_ET[d.base].toLowerCase()), d.soc ? '365 días' : 'sin cambio', esc(x.periodo ? D.R_ET[x.periodo].toLowerCase() : '—'), esc(x.motivo && M.requiereMotivo(est, n) ? D.MO[x.motivo] : '—')]);
+    });
+    t10 += '</tbody></table></div><div class="retencion">';
+    NS.forEach(function (n) { t10 += '<div class="ret-fila rep"><div class="nom">TLM-' + n + '<span class="cat">' + esc(tl(n).categoria) + '</span></div><div class="ret-vis">' + pistaHtml(n, true) + '</div></div>'; });
+    t10 += '</div><p class="derivado">Los periodos son opciones del caso y se comparan con las necesidades documentadas en D08; no son plazos legales.</p>';
+    s.push(seccionRep(10, 'Política de conservación propuesta', t10, true));
+    s.push(seccionRep(11, 'Controles seleccionados', '<ul>' + D.G.filter(function (g) { return est.controles.indexOf(g[0]) !== -1; }).map(function (g) { return '<li>' + g[0] + ' · ' + esc(g[1]) + '</li>'; }).join('') + '</ul>'));
+    s.push(seccionRep(12, 'Matriz consolidada', matrizHtml('REPORTE', { soloLectura: true })));
+    s.push(seccionRep(13, 'Justificaciones', '<h3>J1 · ' + M.contarPalabras(est.j1) + ' palabras</h3><div class="texto-libre">' + esc(est.j1) + '</div><h3 style="margin-top:.8rem">J2 · ' + M.contarPalabras(est.j2) + ' palabras</h3><div class="texto-libre">' + esc(est.j2) + '</div>'));
+    s.push(seccionRep(14, 'Recomendación de gobierno de telemetría', '<p class="derivado">' + M.contarPalabras(est.recomendacion) + ' palabras</p><div class="texto-libre">' + esc(est.recomendacion) + '</div>'));
+    var rt = '<p class="apertura">' + esc(r.apertura) + '</p>';
+    r.dims.forEach(function (d, i) {
+      rt += '<div class="dim"><h3>' + esc(d.titulo) + '</h3><ul>' + d.obs.map(function (o) { return '<li data-obs="' + o.id + '">' + esc(o.texto) + '</li>'; }).join('') + '</ul>';
+      if (d.clave === 'E') rt += '<p><strong>Sobre la recomendación:</strong></p><ul>' + r.recomendacion.map(function (o) { return '<li data-obs="' + o.id + '">' + esc(o.texto) + '</li>'; }).join('') + '</ul>';
+      rt += '</div>';
+    });
+    rt += '<p class="cierre">' + esc(r.cierre) + '</p>';
+    s.push(seccionRep(15, 'Retroalimentación', rt, true));
+    s.push(seccionRep(16, 'Nota metodológica y marco', '<p>No hay puntuación. La retroalimentación compara tus decisiones con el expediente y reconoce lecturas alternativas. La detección en textos libres es una lectura automática aproximada. Marco de referencia: LFPDPPP vigente (DOF 20-03-2025, última reforma 14-11-2025) y Reglamento de 2011 en lo que resulte compatible. Las conclusiones marcadas como interpretativas requieren revisión jurídica.</p>'));
+    var h = '<div class="rep-acciones"><button type="button" class="btn" data-accion="imprimir">Imprimir / Guardar como PDF</button><button type="button" class="btn sec" data-accion="portada">Ir a la portada</button></div>' +
+      '<article class="reporte" id="reporte" aria-labelledby="titulo"><header class="rep-cab"><h1 class="rep-t" id="titulo" tabindex="-1">REPORTE DE IDENTIFICABILIDAD Y GOBIERNO DE TELEMETRÍA</h1>' +
+      '<p class="rep-s">LABORATORIO 03 · SÓLO ERA TELEMETRÍA — Caso ficticio con fines de entrenamiento.</p></header>' + s.join('') + '</article>' +
+      '<p class="pie-impresion">Documento de entrenamiento · Caso ficticio</p>';
+    return h;
+  }
+  function revisarLenguaje() {
+    var cont = document.getElementById('reporte');
+    if (!cont) return;
+    var copia = cont.cloneNode(true);
+    Array.prototype.forEach.call(copia.querySelectorAll('.texto-libre'), function (el) { el.remove(); });
+    var textos = [copia.textContent];
+    Object.keys(AYUDA).forEach(function (k) { textos.push(AYUDA[k][1]); });
+    var hall = M.guardiaLenguaje(textos.join('\n'));
+    if (hall.length && window.console) console.warn('guardiaLenguaje', hall);
+  }
+
+  /* ---------- Render ---------- */
+  function pintarBarra() {
+    var barra = document.getElementById('barra-etapas');
+    var visible = est.etapa !== 'INICIO';
+    document.getElementById('barra-nav').hidden = !visible;
+    document.getElementById('btn-docs').hidden = !visible;
+    if (!visible) return;
+    var h = '';
+    ['E0', 'E1', 'E2', 'E3', 'E4'].forEach(function (e) {
+      var actual = est.etapa === e, hecha = idx(est.etapaMax) > idx(e) && !actual;
+      h += '<li' + (actual ? ' aria-current="step"' : '') + (hecha ? ' class="hecha"' : '') + '>' + e + '<span class="sr"> · ' + NOMBRE_ETAPA[e] + (hecha ? ' (completada)' : '') + '</span></li>';
+    });
+    barra.innerHTML = h;
+  }
+  var etapaPintada = null;
+  function render(opts) {
+    opts = opts || {};
+    var main = document.getElementById('principal');
+    var activo = document.activeElement && document.activeElement.id;
+    var cambio = etapaPintada !== est.etapa;
+    var vista = { INICIO: vistaPortada, E0: vistaE0, E1: vistaE1, E2: vistaE2, E3: vistaE3, E4: vistaE4, REPORTE: vistaReporte }[est.etapa];
+    main.innerHTML = vista();
+    etapaPintada = est.etapa;
+    pintarBarra();
+    pintarGuardado();
+    if (est.etapa === 'E0') marcarLeido('D01');
+    if (est.etapa === 'E1') marcarLeido('D03');
+    if (cambio) {
+      window.scrollTo(0, 0);
+      var t = document.getElementById('titulo');
+      if (t && !opts.sinFoco) t.focus({ preventScroll: true });
+    } else if (activo) {
+      var el = document.getElementById(activo);
+      if (el) el.focus({ preventScroll: true });
+    }
+    if (est.etapa === 'E2') requestAnimationFrame(dibujarLineas);
+    ajustarDesplazables(main);
+    if (est.etapa === 'REPORTE') revisarLenguaje();
+  }
+
+  function ajustarDesplazables(raiz) {
+    Array.prototype.forEach.call((raiz || document).querySelectorAll('.tabla-scroll'), function (el) {
+      if (el.scrollWidth > el.clientWidth + 1) {
+        el.setAttribute('tabindex', '0'); el.setAttribute('role', 'region');
+        var t = el.querySelector('table'), cab = t && t.querySelector('th');
+        el.setAttribute('aria-label', 'Tabla desplazable' + (cab ? ': ' + cab.textContent.trim() : ''));
+      } else { el.removeAttribute('tabindex'); el.removeAttribute('role'); el.removeAttribute('aria-label'); }
+    });
+  }
+  /* ---------- Panel de documentos ---------- */
+  function abrirDocs(id, opener) {
+    var disp = DOCS_ETAPA[est.etapaMax] || [];
+    if (id && disp.indexOf(id) === -1) id = null;
+    ui.docAbierto = id || ui.docAbierto || disp[disp.length - 1];
+    if (disp.indexOf(ui.docAbierto) === -1) ui.docAbierto = disp[0];
+    ui.opener = opener || document.activeElement;
+    var panel = document.getElementById('panel-docs'), velo = document.getElementById('velo');
+    pintarDocs();
+    panel.hidden = false; velo.hidden = false;
+    document.getElementById('docs-titulo').focus();
+  }
+  function pintarDocs() {
+    var disp = DOCS_ETAPA[est.etapaMax] || [];
+    var lista = '<ul class="lista-docs">' + disp.map(function (id) {
+      var leido = est.docsLeidos.indexOf(id) !== -1;
+      return '<li><button type="button" data-accion="ver-doc" data-doc="' + id + '"' + (ui.docAbierto === id ? ' aria-current="true"' : '') + '>' + esc(DOCS[id].titulo) + (leido ? '<span class="estado">· leído</span>' : '') + '</button></li>';
+    }).join('') + '</ul>';
+    var cuerpo = ui.docAbierto ? '<article class="doc" aria-labelledby="doc-t"><h2 id="doc-t" tabindex="-1">' + esc(DOCS[ui.docAbierto].titulo) + '</h2>' + docHtml(ui.docAbierto) + '</article>' : '';
+    document.getElementById('docs-cuerpo').innerHTML = lista + cuerpo;
+    ajustarDesplazables(document.getElementById('docs-cuerpo'));
+    if (ui.docAbierto) marcarLeido(ui.docAbierto);
+  }
+  function cerrarDocs() {
+    var panel = document.getElementById('panel-docs');
+    if (panel.hidden) return;
+    panel.hidden = true; document.getElementById('velo').hidden = true;
+    if (ui.opener && document.body.contains(ui.opener)) ui.opener.focus(); else { var t = document.getElementById('titulo'); if (t) t.focus(); }
+    if (est.etapa === 'E2') requestAnimationFrame(dibujarLineas);
+  }
+
+  /* ---------- Validación y transiciones ---------- */
+  function faltantes(etapa) {
+    var f = [];
+    if (etapa === 'E0') {
+      if (!est.hipotesis) f.push('Elige una hipótesis inicial.');
+      if (!est.confianza) f.push('Indica tu nivel de confianza.');
+    }
+    if (etapa === 'E1' && !est.clasificacionInicial) {
+      NS.forEach(function (n) {
+        var x = T(n);
+        if (!x.clasifI) f.push('TLM-' + n + ': elige una clasificación.');
+        else if (x.clasifI === 'C3' && (x.evidenciaI.length < 1 || x.evidenciaI.length > 2)) f.push('TLM-' + n + ': marca 1 o 2 evidencias que faltan.');
+      });
+    }
+    if (etapa === 'E2') {
+      NS.forEach(function (n) {
+        var x = T(n);
+        if (!x.clasifF) f.push('TLM-' + n + ': elige la clasificación final.');
+        else if (x.clasifF === 'C1' && !x.via) f.push('TLM-' + n + ': indica qué permite vincularlo.');
+        else if (x.clasifF === 'C3' && (x.evidenciaF.length < 1 || x.evidenciaF.length > 2)) f.push('TLM-' + n + ': marca 1 o 2 evidencias que faltan.');
+      });
+      var w = M.contarPalabras(est.j1);
+      if (w < 50 || w > 100) f.push('J1 debe tener entre 50 y 100 palabras (ahora: ' + w + ').');
+    }
+    if (etapa === 'E3') {
+      if (!est.av) f.push('Responde si la finalidad del Índice está informada en D07.');
+      if (!est.indice) f.push('Elige una opción sobre el Índice.');
+      NS.forEach(function (n) { if (!T(n).uso) f.push('TLM-' + n + ': elige la finalidad.'); });
+      var w2 = M.contarPalabras(est.j2);
+      if (w2 < 50 || w2 > 100) f.push('J2 debe tener entre 50 y 100 palabras (ahora: ' + w2 + ').');
+    }
+    if (etapa === 'E4') {
+      NS.forEach(function (n) {
+        var x = T(n);
+        if (!x.periodo) f.push('TLM-' + n + ': elige un periodo.');
+        else if (M.requiereMotivo(est, n) && !x.motivo) f.push('TLM-' + n + ': indica el motivo de la ampliación.');
+      });
+      if (est.controles.length < 3 || est.controles.length > 6) f.push('Elige de 3 a 6 controles.');
+      var w3 = M.contarPalabras(est.recomendacion);
+      if (w3 < 150 || w3 > 300) f.push('La recomendación debe tener entre 150 y 300 palabras (ahora: ' + w3 + ').');
+    }
+    return f;
+  }
+  function mostrarFaltantes(f) {
+    ui.mensajes = '<div class="msg falta"><strong>Antes de continuar:</strong><ul>' + f.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    var m = document.getElementById('mensajes'); if (m) m.innerHTML = ui.mensajes;
+    var b = document.getElementById('btn-avanzar'); if (b) b.focus();
+  }
+  function irA(etapa) {
+    est.etapa = etapa;
+    if (idx(etapa) > idx(est.etapaMax)) est.etapaMax = etapa;
+    ui.mensajes = ''; ui.ficha = null;
+    guardar();
+    render();
+  }
+  function avanzar() {
+    var e = est.etapa, f = faltantes(e);
+    if (f.length) { mostrarFaltantes(f); return; }
+    if (e === 'E0') { irA('E1'); return; }
+    if (e === 'E1') {
+      if (est.clasificacionInicial) { irA('E2'); return; }
+      confirmar('Tu clasificación preliminar quedará guardada y no podrá editarse. ¿Continuar?', 'Continuar a E2').then(function (ok) {
+        if (!ok) return;
+        var foto = {};
+        NS.forEach(function (n) {
+          var x = T(n);
+          foto[n] = { clasifI: x.clasifI, evidenciaI: x.evidenciaI.slice() };
+          if (!x.clasifF) { x.clasifF = x.clasifI; x.evidenciaF = x.clasifI === 'C3' ? x.evidenciaI.slice() : []; }
+        });
+        est.clasificacionInicial = foto;
+        irA('E2');
+      });
+      return;
+    }
+    if (e === 'E2') { irA('E3'); return; }
+    if (e === 'E3') { irA('E4'); return; }
+    if (e === 'E4') {
+      confirmar('Al cerrar el expediente se generará el reporte y ya no podrás modificar tus decisiones. ¿Continuar?', 'Cerrar y generar reporte').then(function (ok) {
+        if (!ok) return;
+        est.tFin = Date.now(); est.cerrado = true;
+        irA('REPORTE');
+      });
+    }
+  }
+  function avisoPalabrasRec() {
+    var w = M.contarPalabras(est.recomendacion);
+    if ((w >= 150 && w < 180) || (w > 250 && w <= 300)) return 'La guía es de 180–250 palabras; puedes continuar con ' + w + '.';
+    return '';
+  }
+
+  /* ---------- Eventos ---------- */
+  function alCambiar(ev) {
+    var el = ev.target, campo = el.getAttribute('data-campo');
+    if (!campo || est.cerrado) return;
+    var n = el.getAttribute('data-n') ? parseInt(el.getAttribute('data-n'), 10) : null;
+    var x = n ? T(n) : null;
+    ui.mensajes = '';
+    switch (campo) {
+      case 'hipotesis': if (!alcanzada('E1')) est.hipotesis = el.value; break;
+      case 'confianza': if (!alcanzada('E1')) est.confianza = el.value; break;
+      case 'clasifI':
+        if (est.clasificacionInicial) return;
+        x.clasifI = el.value || null; if (x.clasifI !== 'C3') x.evidenciaI = []; break;
+      case 'evidenciaI': case 'evidenciaF':
+        var lista = x[campo];
+        if (el.checked) {
+          if (lista.length >= 2) { el.checked = false; anunciar('Puedes marcar hasta dos evidencias; quita una para agregar otra.'); return; }
+          if (lista.indexOf(el.value) === -1) lista.push(el.value);
+        } else { x[campo] = lista.filter(function (v) { return v !== el.value; }); }
+        break;
+      case 'clasifF':
+        var nueva = el.value || null, previa = x.clasifF;
+        if (previa === 'C1' && nueva !== 'C1' && x.via) { x.via = null; anunciar('Se descartó la vía elegida para TLM-' + n + '.'); }
+        if (previa === 'C3' && nueva !== 'C3' && x.evidenciaF.length) { x.evidenciaF = []; anunciar('Se descartó la evidencia marcada para TLM-' + n + '.'); }
+        x.clasifF = nueva; break;
+      case 'via': x.via = el.value || null; break;
+      case 'av': est.av = el.value; break;
+      case 'indice': est.indice = el.value; M.prellenarUso(est, el.value); break;
+      case 'uso': x.uso = el.value || null; x.usoEditado = true; break;
+      case 'periodo':
+        x.periodo = el.value || null;
+        if (!M.requiereMotivo(est, n)) x.motivo = null;
+        break;
+      case 'motivo': x.motivo = el.value || null; break;
+      case 'control':
+        var c = est.controles;
+        if (el.checked) {
+          if (c.length >= 6) { el.checked = false; anunciar('Puedes elegir hasta seis controles; quita uno para agregar otro.'); var cc = document.getElementById('cont-controles'); if (cc) cc.textContent = 'Seleccionados: ' + c.length + ' de 6 · Puedes elegir hasta seis controles; quita uno para agregar otro.'; return; }
+          if (c.indexOf(el.value) === -1) c.push(el.value);
+        } else est.controles = c.filter(function (v) { return v !== el.value; });
+        break;
+      case 'calc':
+        ui.correoCalc = el.value || '';
+        if (el.value && est.hashesProbados.indexOf(el.value) === -1) est.hashesProbados.push(el.value);
+        break;
+      default: return;
+    }
+    guardar();
+    render();
+  }
+  function alEscribir(ev) {
+    var el = ev.target;
+    if (el.id === 'nombre') { ui.nombre = el.value; return; }
+    var campo = el.getAttribute('data-texto');
+    if (!campo || est.cerrado) return;
+    est[campo] = el.value;
+    var n = M.contarPalabras(el.value);
+    var c = document.getElementById('cont-' + campo);
+    if (c) {
+      var tmp = document.createElement('div'); tmp.innerHTML = contadorTxt(campo, n);
+      c.className = tmp.firstChild.className; c.textContent = tmp.firstChild.textContent;
+    }
+    guardarPronto();
+  }
+  function alPulsar(ev) {
+    var b = ev.target.closest('[data-accion]');
+    if (!b) return;
+    var a = b.getAttribute('data-accion');
+    if (a === 'continuar') {
+      est = guardadoPrevio; guardadoPrevio = null; avisoRecuperacion = false;
+      if (est.cerrado) est.etapa = 'REPORTE';
+      ui.mensajes = ''; render(); return;
+    }
+    if (a === 'nuevo') {
+      confirmar('Se borrará el expediente guardado en este navegador. ¿Continuar?', 'Borrar e iniciar').then(function (ok) {
+        if (!ok) return;
+        borrarGuardado(); guardadoPrevio = null; est = nuevoEstado(); ui.nombre = ''; ui.mensajes = ''; etapaPintada = null; render();
+        var nm = document.getElementById('nombre'); if (nm) nm.focus();
+      });
+      return;
+    }
+    if (a === 'portada') {
+      guardar(); guardadoPrevio = est; est = nuevoEstado(); ui.mensajes = '';
+      etapaPintada = null; render(); return;
+    }
+    if (a === 'imprimir') { window.print(); return; }
+    if (a === 'avanzar') { avanzar(); return; }
+    if (a === 'ir') { irA(b.getAttribute('data-destino')); return; }
+    if (a === 'doc') { abrirDocs(b.getAttribute('data-doc'), b); return; }
+    if (a === 'ver-doc') { ui.docAbierto = b.getAttribute('data-doc'); pintarDocs(); var t = document.getElementById('doc-t'); if (t) t.focus(); return; }
+    if (a === 'abrir-docs') { abrirDocs(null, b); return; }
+    if (a === 'cerrar-docs') { cerrarDocs(); return; }
+    if (a === 'ayuda') {
+      var k = b.getAttribute('data-clave'); ui.ayuda[k] = !ui.ayuda[k];
+      b.setAttribute('aria-expanded', String(ui.ayuda[k]));
+      var p = document.getElementById('ayuda-' + k); if (p) p.hidden = !ui.ayuda[k];
+      return;
+    }
+    if (a === 'ficha') {
+      var id = b.getAttribute('data-ficha');
+      ui.ficha = ui.ficha === id ? null : id;
+      if (ui.ficha && est.correlacionesExploradas.indexOf(id) === -1) est.correlacionesExploradas.push(id);
+      guardar(); render();
+      var nb = document.getElementById('ficha-' + id); if (nb) nb.focus({ preventScroll: true });
+      return;
+    }
+  }
+  function alEnviar(ev) {
+    var f = ev.target;
+    if (f.getAttribute('data-form') !== 'inicio') return;
+    ev.preventDefault();
+    var nombre = (document.getElementById('nombre').value || '').trim();
+    if (nombre.length < 1 || nombre.length > 60) {
+      ui.mensajes = '<div class="msg falta">Escribe tu nombre (entre 1 y 60 caracteres).</div>';
+      document.getElementById('mensajes').innerHTML = ui.mensajes;
+      document.getElementById('nombre').focus();
+      return;
+    }
+    est = nuevoEstado();
+    est.participante = nombre; est.tInicio = Date.now();
+    ui.mensajes = '';
+    irA('E0');
+  }
+  function alTecla(ev) {
+    if (ev.key === 'Escape') {
+      var panel = document.getElementById('panel-docs');
+      if (!panel.hidden) { ev.preventDefault(); cerrarDocs(); }
+      return;
+    }
+    if (ev.key === 'Tab') {
+      var p = document.getElementById('panel-docs');
+      if (p.hidden) return;
+      var foc = p.querySelectorAll('button,[href],select,input,textarea,[tabindex]:not([tabindex="-1"])');
+      if (!foc.length) return;
+      var primero = foc[0], ultimo = foc[foc.length - 1];
+      if (!p.contains(document.activeElement)) { ev.preventDefault(); primero.focus(); return; }
+      if (ev.shiftKey && document.activeElement === primero) { ev.preventDefault(); ultimo.focus(); }
+      else if (!ev.shiftKey && document.activeElement === ultimo) { ev.preventDefault(); primero.focus(); }
+    }
+  }
+
+  /* ---------- Arranque ---------- */
+  function iniciar() {
+    almacenamiento = probarAlmacenamiento();
+    guardadoPrevio = almacenamiento ? cargar() : null;
+    est = nuevoEstado();
+    document.addEventListener('change', alCambiar);
+    document.addEventListener('input', alEscribir);
+    document.addEventListener('click', alPulsar);
+    document.addEventListener('submit', alEnviar);
+    document.addEventListener('keydown', alTecla);
+    document.getElementById('velo').addEventListener('click', cerrarDocs);
+    window.addEventListener('resize', function () { if (est.etapa === 'E2') dibujarLineas(); ajustarDesplazables(document); });
+    window.addEventListener('pagehide', function () { if (temporizador) guardar(); });
+    window.addEventListener('beforeunload', function () { if (temporizador) guardar(); });
+    render({ sinFoco: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
+})();
+
+})();
+</script>
+</body>
+</html>
