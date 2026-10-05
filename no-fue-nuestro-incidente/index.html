@@ -1,0 +1,1711 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio 02 · No fue nuestro incidente</title>
+<meta name="description" content="Laboratorio interactivo de entrenamiento sobre responsables, encargados, remisiones, transferencias y subcontratación de datos personales en México. Caso ficticio.">
+<style>
+:root{
+  --papel:#FAF8F4;--fondo:#F1F3F5;--sup:#FFFFFF;--tinta:#1B2430;--tinta-2:#4F5A69;
+  --acento:#1F6F78;--acento-2:#E4F0F1;--acento-3:#17565D;
+  --tension:#B7791F;--tension-bg:#FBF3E4;--tension-tx:#6A430D;
+  --linea:#CBD2DA;--linea-2:#E3E7EC;--sello:#5E4590;
+  --radio:10px;--sombra:0 1px 2px rgba(27,36,48,.06),0 2px 8px rgba(27,36,48,.05);
+  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-doc:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fondo);color:var(--tinta);font-family:var(--f-ui);font-size:16px;line-height:1.5}
+h1,h2,h3,h4{line-height:1.25;margin:0 0 .5rem}
+h1{font-size:1.45rem}h2{font-size:1.15rem}h3{font-size:1rem}
+p{margin:0 0 .75rem}
+a{color:var(--acento-3)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--acento);outline-offset:2px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-999px;top:0;background:var(--sup);padding:.5rem 1rem;z-index:50}
+.skip:focus{left:.5rem;top:.5rem}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:44px;padding:.55rem 1.1rem;border-radius:8px;border:1px solid var(--acento);background:var(--acento);color:#fff;font-weight:600;cursor:pointer;text-align:center}
+.btn:hover{background:var(--acento-3)}
+.btn.sec{background:var(--sup);color:var(--acento-3)}
+.btn.sec:hover{background:var(--acento-2)}
+.btn.ghost{background:transparent;border-color:var(--linea);color:var(--tinta);font-weight:500}
+.btn.ghost:hover{background:var(--sup)}
+.btn.small{min-height:36px;padding:.3rem .7rem;font-size:.9rem}
+.linkbtn{background:none;border:none;padding:0;color:var(--acento-3);text-decoration:underline;cursor:pointer;min-height:32px}
+
+/* Barra superior */
+.topbar{position:sticky;top:0;z-index:20;background:var(--sup);border-bottom:1px solid var(--linea);display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;padding:.5rem 1rem}
+.brand{display:flex;align-items:baseline;gap:.5rem;font-weight:600;white-space:nowrap}
+.brand .lab{font-family:var(--f-mono);font-size:.8rem;color:var(--sup);background:var(--tinta);padding:.1rem .4rem;border-radius:4px}
+.stepper ol{list-style:none;display:flex;gap:.25rem;margin:0;padding:0;flex-wrap:wrap}
+.stepper button{min-height:40px;border:1px solid var(--linea);background:var(--sup);border-radius:999px;padding:.25rem .75rem;cursor:pointer;font-size:.9rem;color:var(--tinta)}
+.stepper button[aria-current="step"]{border-color:var(--acento);background:var(--acento-2);color:var(--acento-3);font-weight:600}
+.stepper button:disabled{color:#6B7684;background:var(--fondo);cursor:not-allowed}
+.stepper .stt{display:inline}
+.meta{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.85rem;color:var(--tinta-2)}
+.badge{display:inline-block;min-width:1.4rem;padding:0 .35rem;border-radius:999px;background:var(--acento);color:#fff;font-size:.75rem;font-weight:700;text-align:center}
+.notice{background:var(--tension-bg);color:var(--tension-tx);border-bottom:1px solid var(--tension);padding:.4rem 1rem;font-size:.9rem}
+
+/* Distribución */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;max-width:1500px;margin:0 auto;min-height:calc(100vh - 60px)}
+.layout.solo{grid-template-columns:minmax(0,1fr)}
+.sidebar{border-right:1px solid var(--linea);background:var(--sup);padding:1rem .75rem;position:sticky;top:60px;align-self:start;max-height:calc(100vh - 60px);overflow:auto}
+.rightpanel{border-left:1px solid var(--linea);background:var(--sup);padding:1rem .9rem;position:sticky;top:60px;align-self:start;max-height:calc(100vh - 60px);overflow:auto}
+main{padding:1.25rem 1.5rem 3rem;min-width:0}
+main:focus{outline:none}
+@media (max-width:1150px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .sidebar{display:none}
+  .rightpanel{position:static;max-height:none;border-left:none;border-top:1px solid var(--linea);padding:1rem 1.5rem}
+}
+@media (min-width:1151px){#btnExp{display:none}}
+
+/* Expediente (lista de documentos) */
+.doclist h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tinta-2);margin:.25rem 0 .5rem}
+.doclist ul{list-style:none;margin:0 0 1rem;padding:0}
+.doclist li{margin:0 0 .25rem}
+.doclist button{width:100%;text-align:left;border:1px solid transparent;background:none;border-radius:8px;padding:.45rem .5rem;cursor:pointer;display:flex;gap:.5rem;align-items:flex-start;min-height:44px;font-size:.9rem}
+.doclist button:hover{background:var(--fondo);border-color:var(--linea-2)}
+.doclist .k{font-family:var(--f-mono);font-size:.8rem;color:var(--sello);font-weight:600;padding-top:.1rem}
+.doclist .nuevo{margin-left:auto;font-size:.7rem;font-weight:700;color:var(--acento-3);border:1px solid var(--acento);border-radius:4px;padding:0 .3rem;white-space:nowrap}
+.doclist .stage{font-size:.75rem;color:var(--tinta-2);margin:.4rem .5rem .2rem}
+
+/* Encabezados de etapa y mensajes */
+.stagehead{margin-bottom:1rem}
+.eyebrow{font-family:var(--f-mono);font-size:.8rem;letter-spacing:.04em;color:var(--tinta-2);margin:0 0 .25rem}
+.lead{color:var(--tinta-2);max-width:62ch}
+.msg{background:var(--sup);border:1px solid var(--linea);border-left:4px solid var(--acento);border-radius:var(--radio);padding:.9rem 1rem;margin:0 0 1rem;max-width:760px;box-shadow:var(--sombra)}
+.msg .from{font-size:.85rem;color:var(--tinta-2);margin:0 0 .35rem}
+.msg blockquote{margin:0;font-size:1rem}
+.arrivals{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;background:var(--acento-2);border:1px solid #BFDADD;border-radius:var(--radio);padding:.6rem .8rem;margin:0 0 1rem;font-size:.9rem}
+.card{background:var(--sup);border:1px solid var(--linea);border-radius:var(--radio);padding:1rem;box-shadow:var(--sombra);margin:0 0 1rem}
+.card>h2,.card>h3{margin-bottom:.6rem}
+.hint{font-size:.88rem;color:var(--tinta-2)}
+.aviso{font-size:.92rem;color:var(--tension-tx);background:var(--tension-bg);border:1px solid var(--tension);border-radius:8px;padding:.5rem .7rem;margin:.5rem 0}
+.aviso:empty{display:none}
+.nota{font-size:.9rem;background:var(--fondo);border-radius:8px;padding:.5rem .7rem;margin:.5rem 0}
+.continuar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--linea)}
+
+/* Opciones (radios y casillas) */
+fieldset{border:none;margin:0 0 1rem;padding:0;min-width:0}
+legend{font-weight:600;margin-bottom:.4rem;padding:0;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.opts{display:flex;flex-wrap:wrap;gap:.45rem}
+.opts.col{flex-direction:column;align-items:stretch}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.opt label{display:flex;align-items:center;gap:.5rem;min-height:44px;padding:.45rem .75rem;border:1px solid var(--linea);border-radius:8px;background:var(--sup);cursor:pointer;font-size:.95rem;line-height:1.35}
+.opt label::before{content:"";flex:0 0 auto;width:14px;height:14px;border:2px solid #7A8593;border-radius:50%;background:#fff}
+.opt input[type=checkbox]+label::before{border-radius:3px}
+.opt input:checked+label{border-color:var(--acento);background:var(--acento-2)}
+.opt input:checked+label::before{border-color:var(--acento);background:var(--acento);box-shadow:inset 0 0 0 2px #fff}
+.opt input:focus-visible+label{outline:3px solid var(--acento);outline-offset:2px}
+.opt input:disabled+label{opacity:.6;cursor:not-allowed;background:var(--fondo)}
+.opt label:hover{border-color:var(--acento)}
+select,input[type=text],textarea{width:100%;min-height:44px;border:1px solid #8A95A3;border-radius:8px;background:#fff;padding:.5rem .65rem}
+textarea{min-height:8rem;resize:vertical;line-height:1.5}
+label.lbl{display:block;font-weight:600;margin:0 0 .35rem}
+.counter{font-size:.85rem;color:var(--tinta-2);margin-top:.3rem}
+.counter.fuera{color:var(--tension-tx);font-weight:600}
+details.help{display:inline-block;font-weight:400}
+details.help summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--linea);font-size:.8rem;font-weight:700;color:var(--acento-3);background:var(--sup)}
+details.help summary::-webkit-details-marker{display:none}
+details.help[open] summary{background:var(--acento-2)}
+details.help .helptx{display:block;font-size:.88rem;background:var(--papel);border:1px solid var(--linea);border-radius:8px;padding:.5rem .65rem;margin-top:.35rem;max-width:520px;color:var(--tinta)}
+.helpline{display:block;width:100%}
+details.helpline summary{width:auto;height:auto;min-height:36px;border:none;border-radius:0;background:none;justify-content:flex-start;padding:.15rem 0;font-weight:500;font-size:.88rem;text-decoration:underline;text-underline-offset:2px}
+details.helpline[open] summary{background:none}
+
+/* Mapa */
+.mapwrap{background:var(--sup);border:1px solid var(--linea);border-radius:var(--radio);padding:.5rem;margin:0 0 1rem;box-shadow:var(--sombra)}
+.mapwrap.small{max-width:720px}
+.map-svg{display:block;width:100%;height:auto;max-height:560px}
+.map-svg .box{fill:#fff;stroke:#9AA4B1;stroke-width:1.2}
+.map-svg .box.dash{stroke-dasharray:5 4;fill:#FBFCFD}
+.map-svg .inner{fill:var(--fondo);stroke:#C3CAD3;stroke-width:1}
+.map-svg .inner.dash{stroke-dasharray:4 3;fill:#fff}
+.map-svg .ttl{font:600 13px var(--f-ui);fill:var(--tinta)}
+.map-svg .tx{font:400 11px var(--f-ui);fill:var(--tinta-2)}
+.map-svg .rl{font:600 11px var(--f-ui);fill:var(--acento-3)}
+.map-svg .rl.vacio{fill:#6B7684;font-weight:400;font-style:italic}
+.map-svg .node{cursor:pointer}
+.map-svg .node:focus{outline:none}
+.map-svg .node:focus-visible .box{stroke:var(--acento);stroke-width:3.5}
+.map-svg .node:hover .box{stroke:var(--acento)}
+.map-svg .node.sel .box{stroke:var(--acento);stroke-width:3}
+.map-svg .node.static{cursor:default}
+.map-svg .fl path.ln{fill:none;stroke:#6B7684;stroke-width:1.8}
+.map-svg .fl path.hit{fill:none;stroke:transparent;stroke-width:18}
+.map-svg .fl circle{fill:#fff;stroke:#6B7684;stroke-width:1.5}
+.map-svg .fl text{font:700 10px var(--f-mono);fill:var(--tinta);text-anchor:middle;dominant-baseline:central}
+.map-svg .fl.set circle{fill:var(--acento-2);stroke:var(--acento)}
+.map-svg .fl:not(.int){pointer-events:none}
+.map-svg .fl.int{cursor:pointer}
+.map-svg .fl.int:hover path.ln{stroke:var(--acento)}
+.map-svg .fl.sel path.ln{stroke:var(--acento);stroke-width:3.2}
+.map-svg .fl.sel circle{fill:var(--acento);stroke:var(--acento)}
+.map-svg .fl.sel text{fill:#fff}
+.map-svg .fl:focus{outline:none}
+.map-svg .fl:focus-visible circle{stroke:var(--acento);stroke-width:3.5}
+.map-svg .fl:focus-visible path.ln{stroke:var(--acento);stroke-width:3}
+.map-tall{display:none}
+@media (max-width:600px){.map-wide{display:none}.map-tall{display:block}}
+
+/* E1–E2: actores */
+.actores{display:grid;grid-template-columns:240px minmax(0,1fr);gap:1rem;align-items:start}
+@media (max-width:820px){.actores{grid-template-columns:minmax(0,1fr)}}
+.resumen{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+.resumen button{width:100%;text-align:left;background:var(--sup);border:1px solid var(--linea);border-radius:8px;padding:.55rem .7rem;cursor:pointer;min-height:44px;display:block}
+.resumen button[aria-current="true"]{border-color:var(--acento);box-shadow:inset 3px 0 0 var(--acento)}
+.resumen .n{font-weight:600;display:block}
+.resumen .r{font-size:.85rem;color:var(--tinta-2);display:block}
+.resumen .st{font-size:.78rem;display:block;margin-top:.15rem;color:var(--tinta-2)}
+.resumen .st.ok{color:var(--acento-3);font-weight:600}
+.ficha{background:var(--sup);border:1px solid var(--linea);border-radius:var(--radio);padding:1rem 1.1rem;box-shadow:var(--sombra);min-width:0}
+.ficha .fhead{border-bottom:1px solid var(--linea-2);margin-bottom:.9rem;padding-bottom:.6rem}
+.ficha .razon{font-size:.85rem;color:var(--tinta-2);margin:0}
+.ficha .para{margin:.35rem 0 0}
+.ficha .etq{display:inline-block;margin-top:.5rem;font-size:.85rem;background:var(--papel);border:1px solid var(--linea);border-radius:6px;padding:.2rem .5rem}
+.ficha .sec{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tinta-2);margin:1rem 0 .5rem;font-weight:700}
+.ficha .derivado{background:var(--fondo);border-radius:8px;padding:.5rem .7rem;font-size:.93rem}
+.subroles{border-left:3px solid var(--acento);padding:.25rem 0 .25rem .8rem;margin:.25rem 0 1rem}
+.subroles fieldset{margin-bottom:.75rem}
+.fichanav{display:flex;justify-content:space-between;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+.placeholder{color:var(--tinta-2);border:1px dashed var(--linea);border-radius:var(--radio);padding:1.25rem;text-align:center;background:var(--sup)}
+
+/* E3: flujos */
+.flujos{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.flujo{background:var(--sup);border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra)}
+.flujo.sel{border-color:var(--acento);box-shadow:0 0 0 1px var(--acento),var(--sombra)}
+.flujo-head{width:100%;display:grid;grid-template-columns:2.6rem minmax(0,1fr);gap:.2rem .6rem;text-align:left;background:none;border:none;padding:.7rem .8rem;cursor:pointer;min-height:44px;border-radius:var(--radio)}
+.flujo-head .fid{grid-row:span 2;font-family:var(--f-mono);font-weight:700;color:var(--acento-3);font-size:1rem;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--acento);border-radius:50%;width:2.2rem;height:2.2rem}
+.flujo.sel .fid{background:var(--acento);color:#fff}
+.flujo-head .fdesc{font-weight:500}
+.flujo-head .fsum{font-size:.85rem;color:var(--tinta-2)}
+.fbody{padding:0 .9rem 1rem;border-top:1px solid var(--linea-2)}
+.fbody .od{font-size:.88rem;color:var(--tinta-2);margin:.7rem 0}
+.ctx{font-size:.9rem;background:var(--papel);border:1px solid var(--linea);border-radius:8px;padding:.45rem .65rem;margin:.5rem 0 .9rem}
+
+/* Panel derecho */
+.rightpanel h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tinta-2);margin:.25rem 0 .6rem}
+.hallazgos{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.25rem}
+.hallazgos .opt label{align-items:flex-start;font-size:.9rem}
+.hallazgos .opt label::before{margin-top:.2rem}
+.coh{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
+.coh li{background:var(--tension-bg);border:1px solid var(--tension);border-left-width:4px;border-radius:8px;padding:.55rem .65rem;font-size:.9rem;color:var(--tension-tx)}
+.coh .linkbtn{color:var(--tension-tx);font-size:.85rem}
+.vacio{font-size:.88rem;color:var(--tinta-2)}
+
+/* Portada */
+.portada{max-width:820px;margin:2rem auto}
+.portada h1{font-size:1.8rem;letter-spacing:.01em}
+.portada .sub{font-size:1.15rem;color:var(--tinta-2);margin-bottom:1.25rem}
+.portada ul{padding-left:1.2rem;margin:0 0 1rem}
+.portada li{margin:.3rem 0}
+.portada .pregunta{border-left:3px solid var(--sello);padding:.2rem 0 .2rem .8rem;color:var(--tinta);font-family:var(--f-doc)}
+.portada form{display:flex;flex-direction:column;gap:.5rem;max-width:420px}
+.small-print{font-size:.82rem;color:var(--tinta-2)}
+
+/* Documentos */
+dialog{border:none;border-radius:12px;padding:0;max-width:min(820px,96vw);width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25);color:var(--tinta)}
+dialog::backdrop{background:rgba(27,36,48,.45)}
+.dlg-head{display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem;border-bottom:1px solid var(--linea);background:var(--sup);position:sticky;top:0;z-index:2}
+.dlg-head h2{margin:0;font-size:1rem;flex:1}
+.dlg-body{padding:1rem 1.1rem;max-height:calc(90vh - 60px);overflow:auto}
+.doc{background:var(--papel);font-family:var(--f-doc);border:1px solid var(--linea);border-radius:8px}
+.franja{background:var(--sello);color:#fff;font-family:var(--f-ui);font-size:.82rem;font-weight:600;padding:.4rem .8rem;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.docmeta{font-family:var(--f-ui);font-size:.85rem;color:var(--tinta-2);padding:.6rem 1rem;border-bottom:1px solid var(--linea-2);display:grid;grid-template-columns:auto minmax(0,1fr);gap:.1rem .75rem}
+.docmeta dt{font-weight:600}
+.docmeta dd{margin:0}
+.doctext{padding:1rem 1.1rem}
+.doctext h3{font-family:var(--f-ui);font-size:.95rem;margin:1rem 0 .4rem}
+.doctext .mail{font-family:var(--f-ui);font-size:.9rem;background:#fff;border:1px solid var(--linea-2);border-radius:6px;padding:.5rem .7rem;margin-bottom:.8rem}
+.doctext .mail p{margin:0}
+.doctext .cid{font-weight:700}
+.doctext ul,.doctext ol{padding-left:1.3rem}
+.tw{overflow-x:auto;margin:.5rem 0 1rem}
+.tw table{border-collapse:collapse;font-family:var(--f-ui);font-size:.85rem;min-width:520px;width:100%;background:#fff}
+.tw th,.tw td{border:1px solid var(--linea);padding:.35rem .5rem;text-align:left;vertical-align:top}
+.tw th{background:var(--fondo)}
+@media (max-width:600px){
+  dialog{max-width:100vw;width:100vw;max-height:100vh;height:100%;border-radius:0;margin:0}
+  .dlg-body{max-height:calc(100vh - 56px)}
+}
+
+/* E4 */
+.guia{font-size:.9rem;color:var(--tinta-2);margin:.2rem 0 .6rem;padding-left:1.1rem}
+
+/* Reporte */
+.reporte{max-width:980px;margin:0 auto;background:var(--sup);border:1px solid var(--linea);border-radius:var(--radio);padding:1.5rem 1.75rem}
+.reporte h1{font-size:1.35rem;letter-spacing:.02em}
+.reporte .rsub{color:var(--tinta-2);margin-bottom:1rem}
+.reporte section{border-top:1px solid var(--linea);padding-top:.9rem;margin-top:1rem}
+.reporte h2{font-size:1.02rem;display:flex;gap:.5rem}
+.reporte h2 .num{font-family:var(--f-mono);color:var(--sello)}
+.reporte dl.kv{display:grid;grid-template-columns:minmax(150px,max-content) minmax(0,1fr);gap:.25rem 1rem;margin:0}
+.reporte dl.kv dt{font-weight:600}
+.reporte dl.kv dd{margin:0}
+.rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.75rem}
+.rcard{border:1px solid var(--linea);border-radius:8px;padding:.7rem .8rem;break-inside:avoid;page-break-inside:avoid}
+.rcard h3{font-size:.95rem;margin-bottom:.35rem}
+.rcard dl{margin:0;font-size:.88rem}
+.rcard dt{font-weight:600;color:var(--tinta-2);margin-top:.3rem}
+.rcard dd{margin:0}
+.mod{display:inline-block;font-size:.75rem;border:1px solid var(--sello);color:var(--sello);border-radius:4px;padding:0 .3rem;margin-left:.3rem;font-weight:600}
+.reporte ul{padding-left:1.2rem}
+.reporte .txt{white-space:pre-wrap;background:var(--papel);border:1px solid var(--linea-2);border-radius:8px;padding:.6rem .8rem;font-size:.95rem}
+.retro h3{margin-top:1rem}
+.retro ul{margin:.3rem 0 .5rem}
+.retro li{margin:.35rem 0}
+.acciones-rep{display:flex;gap:.75rem;flex-wrap:wrap;margin:0 0 1rem}
+@media (max-width:600px){
+  main{padding:1rem .9rem 2.5rem}
+  .reporte{padding:1rem .9rem}
+  .reporte dl.kv{grid-template-columns:minmax(0,1fr)}
+  .reporte dl.kv dd{margin-bottom:.4rem}
+  .topbar{padding:.45rem .6rem}
+  .btn.small{min-height:44px}
+  .topbar{position:static}
+  details.helpline summary{min-height:44px}
+  .stepper .stt{display:none}
+  .meta{margin-left:0;width:100%}
+  .portada{margin:1rem auto}
+  .portada h1{font-size:1.35rem}
+  h1{font-size:1.25rem}
+  .rcards{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  @page{margin:14mm}
+  body{background:#fff;font-size:11pt}
+  .topbar,.sidebar,.rightpanel,.notice,.noprint,.skip,dialog{display:none!important}
+  .layout{display:block}
+  main{padding:0}
+  .reporte{border:none;padding:0;max-width:none}
+  .map-wide{display:block!important}.map-tall{display:none!important}
+  .pb{break-before:page;page-break-before:always}
+  .rcard,.retro li,tr{break-inside:avoid;page-break-inside:avoid}
+  .reporte h2,.reporte h3{break-after:avoid;page-break-after:avoid}
+  .reporte section>p:first-of-type,.rcards{break-before:avoid}
+  .reporte::after{content:"Documento de entrenamiento · Caso ficticio";display:block;margin-top:1.5rem;font-size:9pt;color:#555;text-align:center}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<noscript><p style="padding:1rem">Este laboratorio requiere JavaScript activado.</p></noscript>
+<header class="topbar" id="topbar" hidden></header>
+<div class="notice" id="storageNotice" role="status" hidden></div>
+<div class="layout solo" id="layout">
+  <nav class="sidebar doclist" id="sidebar" aria-label="Expediente de documentos" hidden></nav>
+  <main id="main" tabindex="-1"></main>
+  <aside class="rightpanel" id="rightpanel" aria-label="Hallazgos y coherencia" hidden></aside>
+</div>
+
+<dialog id="docDialog" aria-labelledby="docDialogTitle">
+  <div class="dlg-head"><h2 id="docDialogTitle">Documento</h2><button class="btn small sec" id="docUse" hidden>Usar como evidencia principal</button><button class="btn small ghost" data-close="docDialog">Cerrar</button></div>
+  <div class="dlg-body" id="docDialogBody"></div>
+</dialog>
+<dialog id="expDialog" aria-labelledby="expDialogTitle">
+  <div class="dlg-head"><h2 id="expDialogTitle">Expediente</h2><button class="btn small ghost" data-close="expDialog">Cerrar</button></div>
+  <div class="dlg-body doclist" id="expDialogBody"></div>
+</dialog>
+<dialog id="fichaDialog" aria-labelledby="fichaDialogTitle">
+  <div class="dlg-head"><h2 id="fichaDialogTitle">Ficha de actor</h2><button class="btn small ghost" data-close="fichaDialog">Cerrar</button></div>
+  <div class="dlg-body" id="fichaDialogBody"></div>
+</dialog>
+<dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+  <div class="dlg-body">
+    <h2 id="confirmTitle">Confirmar</h2>
+    <p id="confirmText"></p>
+    <div class="continuar"><button class="btn" id="confirmOk">Continuar</button><button class="btn ghost" id="confirmCancel">Cancelar</button></div>
+  </div>
+</dialog>
+<div id="live" class="sr-only" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   Motor del laboratorio: datos del caso y reglas de retroalimentación.
+   Arquitectura v1.1 (fuente única de verdad).
+   ===================================================================== */
+var Lab02Motor = (function(){
+  'use strict';
+  var ACT_ORDEN = ['CV','CL','VA','BA','MP'];
+  var PROV = ['CL','VA','BA','MP'];
+  var FL_ORDEN = ['F1','F2','F3','F4','F5','F6'];
+  var NOMBRE = {CV:'CumbreViva',CL:'Orbiax',VA:'Voz Andante',BA:'CuarzoDelta Hosting',MP:'Metrivara'};
+  var ROL = {RESP:'Responsable',ENC:'Encargado',TER:'Tercero receptor',SUB:'Subcontratado del encargado',PEND:'Pendiente de determinar',DIST:'Rol distinto según el tratamiento'};
+  var SUBL = {ENC:'Encargado',TER:'Tercero receptor',RESPT:'Responsable de ese tratamiento',PEND:'Pendiente de determinar'};
+  var PORCUENTA = {SI:'Sí',SIOTRO:'Sí, a través de otro proveedor',PARTE:'En parte',NO:'No',NC:'No consta'};
+  var INSTR = {SUF:'Sí, suficientes',PARC:'Parciales',NOEX:'No existen',NC:'No consta'};
+  var USO = {NO:'No',SI:'Sí',POS:'Posible / por confirmar',NC:'No consta'};
+  var SUBC = {NOSUB:'No subcontrata',CONAUT:'Subcontrata con autorización acreditada',SINAUT:'Subcontrata sin autorización acreditada',NC:'No consta'};
+  var INCERT = {NINGUNA:'Ninguna relevante',INSTR:'Alcance de las instrucciones',USO:'Uso para finalidad propia',AUT:'Autorización de subcontratación',IDENT:'Identificabilidad de los datos',REL:'Relación contractual inexistente o incompleta'};
+  var TIPO = {INT:'Comunicación interna',RE:'Remisión responsable → encargado',SUBC:'Subcontratación: encargado → subcontratado',TRANS:'Transferencia a tercero',PEND:'Pendiente de determinar'};
+  var FALTA = {M1:'Instrumento de encargo inexistente o incompleto',M2:'Instrucciones documentadas que delimiten finalidad y usos',M3:'Autorización de la subcontratación y contrato con el subcontratado',M4:'Cobertura en el aviso de privacidad / consentimiento o excepción para la transferencia',M5:'Acreditación de que los datos están disociados',M6:'Cláusulas de notificación de incidentes y control de accesos de soporte',M7:'No se identifica faltante para este flujo'};
+  var TRAT = {CL:['F1','F3'],MP:['F4','F5']};
+  var TRAT_L = {F1:'F1 · Fichas, pedidos y casos en el CRM',F3:'F3 · Alojamiento de la base en CuarzoDelta',F4:'F4 · Tablero y segmentos para CumbreViva',F5:'F5 · Índice Metrivara Retail y MetrivaraScore'};
+  var DEST = {F1:'CL',F2:'VA',F3:'BA',F4:'MP',F5:'MP'};
+  var HIP = {
+    H1:'Es un incidente del proveedor: Orbiax lo gestiona y nosotros damos seguimiento.',
+    H2:'Es nuestro incidente: el proveedor sólo es un medio y todo recae en nosotros.',
+    H3:'Ocurrió en la plataforma de Orbiax, pero son datos que tratamos nosotros: hay que definir roles antes de repartir tareas.',
+    H4:'Como hay contrato firmado, la responsabilidad se trasladó al proveedor.',
+    H5:'No puedo saberlo sin revisar contratos y flujos.'
+  };
+  var HIP_BREVE = {H1:'era un incidente del proveedor',H2:'todo recaía en CumbreViva',H3:'había que definir roles antes de repartir tareas',H4:'el contrato trasladaba la responsabilidad',H5:'no podía saberse sin revisar el expediente'};
+  var CONF = {BAJA:'Baja',MEDIA:'Media',ALTA:'Alta'};
+  var HALL = {
+    H1:'El contrato de Voz Andante la llama ‘contratista independiente’, pero opera sólo con el CRM, el manual y los guiones de CumbreViva.',
+    H2:'Metrivara se presenta como encargado, pero sus términos le permiten usar los datos para índices y modelos propios.',
+    H3:'Orbiax aloja la base en CuarzoDelta Hosting, aunque su contrato exige consentimiento previo y por escrito para subcontratar, y no consta autorización.',
+    H4:'La minuta interna llama ‘transferencia’ a flujos hacia proveedores que trabajan por cuenta de CumbreViva y ‘remisión’ al uso propio de Metrivara.',
+    H5:'El aviso de privacidad es inválido porque no menciona por nombre a Orbiax ni a Voz Andante.',
+    H6:'CuarzoDelta Hosting fue el origen del acceso no autorizado.'
+  };
+  var HALL_CORTO = {H1:'la etiqueta de Voz Andante',H2:'el uso propio de Metrivara',H3:'la subcontratación de CuarzoDelta',H4:'la clasificación de la minuta interna'};
+  var COORD = {
+    C1:'Privacidad/Jurídico de CumbreViva coordina, con Tecnología; Orbiax aporta información técnica y actúa conforme a nuestras instrucciones.',
+    C2:'Orbiax coordina íntegramente, incluida la comunicación a los clientes, como propone en su correo.',
+    C3:'Coordinación conjunta: Orbiax redacta y envía la comunicación a los clientes con su propio criterio y marca; nosotros damos visto bueno posterior.',
+    C4:'Tecnología de CumbreViva coordina como asunto técnico, sin intervención de Privacidad.'
+  };
+  var ACC = {
+    A1:'Exigir a Orbiax preservación de evidencia, cronología, alcance y contención, por escrito y con plazo',
+    A2:'Suspender provisionalmente el uso de datos de CumbreViva por Metrivara para índice y modelos (F5), manteniendo el tablero (F4)',
+    A3:'Regularizar la subcontratación Orbiax → CuarzoDelta: solicitud de autorización, contrato con el subcontratado, evaluación',
+    A4:'Actualizar instrumentos de encargo: nuevo anexo con Orbiax (accesos de soporte, incidentes, subcontratación) y adenda de encargo con Voz Andante',
+    A5:'Reclasificar la relación con Metrivara respecto de F5 y revisar el aviso de privacidad si el uso propio se mantiene',
+    A6:'Terminar de inmediato todos los contratos con los proveedores',
+    A7:'Suspender todos los flujos hacia proveedores externos hasta concluir la revisión'
+  };
+  var ACC_ORDEN = ['A1','A6','A2','A3','A7','A4','A5'];
+  /* R4 permanece reservado como control jurídico interno (V5/V20) y no se ofrece al participante. */
+  var REV = {
+    R1:'Si los datos que usa Metrivara están efectivamente disociados',
+    R2:'Si la aceptación en línea de la cláusula 6.4 constituye una autorización válida de CumbreViva, lo que decide si F5 se analiza como transferencia (Ruta A) o con el art. 53 del Reglamento (Ruta B)',
+    R3:'Si la vulneración afecta de forma significativa derechos patrimoniales o morales de los clientes (decisión de notificar)',
+    R5:'Alcance real y justificación de los accesos permanentes de soporte de Orbiax',
+    R6:'Si Voz Andante debe notificar directamente a los clientes'
+  };
+  var REV_ORDEN = ['R1','R2','R3','R5','R6'];
+  var REV_CORTO = {R1:'la disociación de los datos que usa Metrivara',R2:'la validez de la autorización de la cláusula 6.4 (Ruta A o Ruta B)',R3:'la afectación significativa y la decisión de notificar',R5:'los accesos permanentes de soporte de Orbiax',R6:'la notificación directa por Voz Andante'};
+  var DIMS = ['Identificación de roles','Lectura de finalidades','Clasificación de flujos','Gobernanza de proveedores','Proporcionalidad de la respuesta'];
+  var GENERICA = [
+    'Tu clasificación de roles quedó registrada en la sección 5 del reporte.',
+    'Tus decisiones sobre finalidades quedaron registradas en las columnas de tratamiento por cuenta de CumbreViva y uso para finalidad propia.',
+    'Tu clasificación de los seis flujos quedó registrada en la sección 6 del reporte.',
+    'Tus hallazgos y faltantes quedaron registrados en las secciones 11 y 12 del reporte.',
+    'Tus acciones y tu recomendación quedaron registradas en las secciones 13 y 14 del reporte.'
+  ];
+  var APERTURA = {
+    ANALITICO:'Tu expediente traduce la arquitectura técnica en relaciones jurídicas diferenciadas por tratamiento y propone medidas ajustadas a cada problema. Abajo se detalla, decisión por decisión, qué sostiene tu lectura y qué queda abierto.',
+    TODOTRANS:'Tu expediente parte de una premisa consistente: lo que sale de la empresa es una transferencia. Esa premisa ordena casi todas tus decisiones; abajo se revisa dónde el expediente la tensiona.',
+    ETIQUETAS:'Tu expediente sigue de cerca lo que dicen los contratos y la minuta interna. Abajo se revisan los puntos en que la conducta descrita en otros documentos apunta en otra dirección.',
+    FINA_AMPLIA:'Tu lectura de roles y finalidades es detallada; la respuesta que propones es más amplia que los problemas que identificaste. Abajo se revisan ambas partes.',
+    MIXTO:'Tu expediente combina lecturas sólidas con algunos puntos en tensión. Abajo se revisan decisión por decisión.'
+  };
+  var NOTA_REGLAMENTO = 'Las referencias al Reglamento se hacen al Reglamento de 2011, en lo que resulte compatible con la LFPDPPP vigente.';
+
+  /* ---------- utilidades ---------- */
+  function lc(t){ return t ? t.charAt(0).toLowerCase() + t.slice(1) : t; }
+  function norm(t){ return (t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  function palabras(t){ var m=(t||'').trim().match(/\S+/g); return m ? m.length : 0; }
+  function unirY(a){ if(!a.length) return ''; if(a.length===1) return a[0]; return a.slice(0,-1).join(', ') + ' y ' + a[a.length-1]; }
+  function has(arr,v){ return (arr||[]).indexOf(v) !== -1; }
+  function enSet(v,arr){ return arr.indexOf(v) !== -1; }
+  function esResp(r){ return r==='RESP' || r==='RESPT'; }
+
+  /* ---------- funciones derivadas (§14) ---------- */
+  function rolF(s,x){ return s.actores[x].rol; }
+  function rolI(s,x){ return s.clasificacionInicial && s.clasificacionInicial[x] ? s.clasificacionInicial[x].rol : null; }
+  function rolEn(s,a,f){
+    var A = s.actores[a];
+    if(A.rol==='DIST' && A.rolPT && A.rolPT[f]) return A.rolPT[f];
+    return A.rol;
+  }
+  function etiquetaRolEn(s,a,f){
+    var A = s.actores[a];
+    if(A.rol==='DIST'){ var r = A.rolPT && A.rolPT[f]; return r ? SUBL[r] : 'sin definir'; }
+    return A.rol ? ROL[A.rol] : 'sin definir';
+  }
+  function etiquetaRol(s,x){
+    var A = s.actores[x];
+    if(!A.rol) return 'Sin definir';
+    if(A.rol==='DIST'){
+      return ROL.DIST + ' (' + TRAT[x].map(function(f){ return f + ': ' + lc(A.rolPT && A.rolPT[f] ? SUBL[A.rolPT[f]] : 'sin definir'); }).join('; ') + ')';
+    }
+    return ROL[A.rol];
+  }
+  function evaluarRol(s,x){
+    var A = s.actores[x], r = A.rol, pt = A.rolPT || {}, uso = A.usoPropio;
+    if(x==='CV') return r==='RESP' ? 'alineado' : 'tension';
+    if(x==='CL'){
+      if(r==='DIST'){
+        if(pt.F1==='ENC' && pt.F3==='ENC') return 'alineado';
+        if(enSet(pt.F1,['ENC','PEND']) && enSet(pt.F3,['ENC','PEND'])) return 'defendible';
+        return 'tension';
+      }
+      if(r==='ENC') return 'alineado';
+      if(r==='PEND') return 'defendible';
+      return 'tension';
+    }
+    if(x==='VA'){ if(r==='ENC') return 'alineado'; if(r==='PEND') return 'defendible'; return 'tension'; }
+    if(x==='BA'){ if(r==='SUB') return 'alineado'; if(r==='PEND') return 'defendible'; return 'tension'; }
+    if(x==='MP'){
+      if(r==='DIST'){
+        var f5ok = enSet(pt.F5,['PEND','TER','RESPT']);
+        if(pt.F4==='ENC' && f5ok) return 'alineado';
+        if(pt.F4==='PEND' && f5ok) return 'defendible';
+        return 'tension';
+      }
+      if(r==='PEND' && enSet(uso,['SI','POS'])) return 'defendible';
+      if(r==='ENC' && enSet(uso,['SI','POS'])) return 'defendible';
+      if((r==='TER' || r==='RESP') && uso==='SI') return 'defendible';
+      return 'tension';
+    }
+    return 'tension';
+  }
+  function rolesEnTension(s){ return ACT_ORDEN.filter(function(x){ return evaluarRol(s,x)==='tension'; }); }
+  function aceptacionEtiquetas(s){
+    var c = [];
+    if(rolF(s,'VA')==='TER') c.push('Voz Andante como independiente (D06)');
+    if(rolEn(s,'MP','F5')==='ENC' && enSet(s.actores.MP.usoPropio,['NO','NC'])) c.push('Metrivara como encargado (D07)');
+    if(s.flujos.F5.tipo==='RE') c.push('F5 como remisión (D11)');
+    return c;
+  }
+  function sobreTransferencia(s){ return ['F1','F2','F3','F4'].filter(function(f){ return s.flujos[f].tipo==='TRANS'; }); }
+  var FALT_ACEPT = {F1:['M6','M1'],F2:['M1','M2'],F3:['M3','M1'],F4:['M2','M1'],F5:['M4','M5','M2'],F6:['M7']};
+  function faltantesAlineados(s){
+    return FL_ORDEN.filter(function(f){ var fa = s.flujos[f].falta || []; return FALT_ACEPT[f].some(function(m){ return has(fa,m); }); }).length;
+  }
+  var SUFIJO_K = ' Revisa cuál lectura quieres sostener.';
+  function conflictos(s, incluirFlujos){
+    var out = [];
+    PROV.forEach(function(x){
+      var A = s.actores[x];
+      if(A.porCuenta==='SI' && A.rol==='TER') out.push({id:'K0a', base:'Indicaste que '+NOMBRE[x]+' actúa por cuenta de CumbreViva, pero lo clasificaste como tercero receptor.', suf:SUFIJO_K, ir:{t:'actor',id:x}});
+    });
+    PROV.forEach(function(x){
+      var A = s.actores[x];
+      if(A.porCuenta==='NO' && A.rol==='ENC') out.push({id:'K0b', base:'Indicaste que '+NOMBRE[x]+' no actúa por cuenta de CumbreViva, pero lo clasificaste como encargado.', suf:SUFIJO_K, ir:{t:'actor',id:x}});
+    });
+    if(!incluirFlujos) return out;
+    var F = s.flujos;
+    ['F1','F2','F4'].forEach(function(f){
+      var d = DEST[f], r = rolEn(s,d,f);
+      if(F[f].tipo==='RE' && r && !enSet(r,['ENC','PEND'])) out.push({id:'K1', base:'Tipificaste '+f+' como remisión a un encargado, pero tu rol para '+NOMBRE[d]+' en ese tratamiento es '+lc(SUBL[r]||ROL[r])+'.', suf:SUFIJO_K, ir:{t:'flujo',id:f}});
+    });
+    var rb = rolF(s,'BA');
+    if(F.F3.tipo==='SUBC' && rb && !enSet(rb,['SUB','PEND'])) out.push({id:'K2', base:'Tipificaste F3 como subcontratación, pero clasificaste a CuarzoDelta como '+lc(ROL[rb])+'.', suf:SUFIJO_K, ir:{t:'flujo',id:'F3'}});
+    if(rb==='SUB' && enSet(F.F3.tipo,['TRANS','RE'])) out.push({id:'K3', base:'Clasificaste a CuarzoDelta como subcontratado del encargado, pero tipificaste F3 como '+lc(TIPO[F.F3.tipo])+'.', suf:SUFIJO_K, ir:{t:'flujo',id:'F3'}});
+    ['F1','F2','F4','F5'].forEach(function(f){
+      var d = DEST[f];
+      if(F[f].tipo==='TRANS' && rolEn(s,d,f)==='ENC') out.push({id:'K4', base:'Tu rol para '+NOMBRE[d]+' en '+f+' es encargado, pero tipificaste ese flujo como transferencia; la Ley excluye a la persona encargada de la definición de transferencia.', suf:SUFIJO_K, ir:{t:'flujo',id:f}});
+    });
+    var r5 = rolEn(s,'MP','F5');
+    if(F.F5.tipo==='RE' && (s.actores.MP.usoPropio==='SI' || r5==='TER' || esResp(r5))) out.push({id:'K5', base:'Registraste una finalidad propia de Metrivara en F5, pero lo tipificaste como remisión por cuenta de CumbreViva.', suf:SUFIJO_K, ir:{t:'flujo',id:'F5'}});
+    if(F.F5.tipo==='TRANS' && esResp(r5)) out.push({id:'K6', base:'Tipificaste F5 como transferencia (Ruta A) y ubicaste a Metrivara como responsable de ese tratamiento (Ruta B). Son hipótesis distintas; revisa cuál sostienes o deja ambas pendientes.', suf:'', ir:{t:'flujo',id:'F5'}});
+    return out;
+  }
+  var GRUPOS = {
+    FINALIDAD:{raices:['finalidad','fines propios','propio','propia','benchmark','indice','modelo'], nombre:'la finalidad del uso'},
+    PORCUENTA:{raices:['instruc','por cuenta'], nombre:'el tratamiento por cuenta de CumbreViva'},
+    NORMA:{raices:['53','reglamento'], nombre:'el art. 53 del Reglamento'},
+    IDENT:{raices:['hash','seudonim','identific','disoci','agregad'], nombre:'la identificabilidad de los datos'}
+  };
+  function gruposJ1(t){
+    var n = norm(t), out = [];
+    ['FINALIDAD','PORCUENTA','NORMA','IDENT'].forEach(function(g){ if(GRUPOS[g].raices.some(function(r){ return n.indexOf(r)!==-1; })) out.push(g); });
+    return out;
+  }
+  var COB = [
+    {n:'quién coordina', r:['coordin','privacidad','juridico','lidera','titulares','comunicacion a clientes']},
+    {n:'qué se exige al proveedor', r:['evidencia','cronolog','bitacora','preserv','informe','alcance']},
+    {n:'qué contratos se corrigen', r:['anexo','adenda','contrat','clausula','autorizacion']},
+    {n:'qué flujos se limitan', r:['suspend','limit','indice','benchmark','metrivarascore','f5','flujo']},
+    {n:'qué queda en revisión', r:['revis','pendiente','verific','disoci','analizar','evaluar']}
+  ];
+  function cobertura(t){
+    var n = norm(t), si = [], no = [];
+    COB.forEach(function(e){ if(e.r.some(function(r){ return n.indexOf(r)!==-1; })) si.push(e.n); else no.push(e.n); });
+    return {k:si.length, faltan:no};
+  }
+  function perfilDominante(s){
+    if(sobreTransferencia(s).length >= 3) return 'TODOTRANS';
+    if(aceptacionEtiquetas(s).length >= 2) return 'ETIQUETAS';
+    var ac = s.acciones || [];
+    if(enSet(s.actores.MP.usoPropio,['SI','POS']) && evaluarRol(s,'MP')!=='tension' && (has(ac,'A6') || has(ac,'A7'))) return 'FINA_AMPLIA';
+    if(rolesEnTension(s).length <= 1 && !has(ac,'A6') && !has(ac,'A7') && has(ac,'A1') && s.coordinacion==='C1') return 'ANALITICO';
+    return 'MIXTO';
+  }
+  function derivados(s){
+    return {
+      rolesEnTension: rolesEnTension(s).length,
+      aceptacionEtiquetas: aceptacionEtiquetas(s).length,
+      sobreTransferencia: sobreTransferencia(s).length,
+      conflictosCoherencia: conflictos(s,true).length,
+      faltantesAlineados: faltantesAlineados(s),
+      hallazgosReales: (s.hallazgos||[]).filter(function(h){ return enSet(h,['H1','H2','H3','H4']); }).length,
+      cobertura: cobertura(s.recomendacion).k,
+      perfil: perfilDominante(s),
+      evaluarRol: ACT_ORDEN.reduce(function(o,x){ o[x]=evaluarRol(s,x); return o; },{})
+    };
+  }
+
+  /* ---------- reglas de retroalimentación (§11) ---------- */
+  function dim1(s){
+    var o = [], add = function(id,pr,t){ o.push({id:id,pr:pr,t:t}); };
+    var cv = rolF(s,'CV'), cl = rolF(s,'CL'), va = rolF(s,'VA'), ba = rolF(s,'BA');
+    if(cv==='RESP') add('R1.1a',4,'Mantuviste a CumbreViva como responsable: recaba los datos, publica el aviso de privacidad (D03) y contrata cada servicio para su propia operación.');
+    else add('R1.1b',1,'Clasificaste a CumbreViva como '+lc(ROL[cv]||'sin definir')+'. El aviso de privacidad (D03) la presenta como quien define para qué se usan los datos de clientes; conviene revisar qué cambiaría en el caso si no fuera responsable.');
+    if(cl==='DIST'){
+      var p = s.actores.CL.rolPT || {};
+      if(p.F1==='ENC' && p.F3==='ENC') add('R1.2e',3,'Desdoblaste el rol de Orbiax y en ambos tratamientos (F1 y F3) concluiste que actúa como encargado: en F3 es quien subcontrata, sin cambiar de posición. Un rol único habría bastado.');
+      else add('R1.2e',3,'Desdoblaste el rol de Orbiax (F1: '+lc(SUBL[p.F1]||'sin definir')+'; F3: '+lc(SUBL[p.F3]||'sin definir')+'). El expediente no muestra una finalidad propia de Orbiax en ninguno de los dos tratamientos (D04 cl. 7; D05).');
+    } else {
+      if(cl==='ENC') add('R1.2a',4,'Ubicaste a Orbiax como encargado: procesa los datos para prestar el CRM conforme a la configuración y al anexo (D04 cl. 7; D05), sin finalidad propia identificada.');
+      if(cl==='TER') add('R1.2b',2,'Clasificaste a Orbiax como tercero receptor pese a que el expediente indica que procesa los datos únicamente bajo instrucciones y para prestar el servicio contratado (D04 cl. 7; D05). Las debilidades del anexo son documentales; por sí solas no cambian su función.');
+      if(cl==='PEND') add('R1.2c',3,'Dejaste a Orbiax como pendiente de determinar. Es una postura prudente, aunque D04 y D05 permiten sostener una posición de trabajo; lo que queda abierto es la calidad del anexo, no el rol.');
+      if(cl==='SUB' || cl==='RESP') add('R1.2d',2,'Clasificaste a Orbiax como '+lc(ROL[cl])+'. Su contrato es directo con CumbreViva (D04) y trata los datos conforme a sus instrucciones (cl. 7); revisa qué elemento del expediente sostiene esa lectura.');
+    }
+    if(va==='ENC') add('R1.3a',3,'Leíste más allá de la etiqueta ‘contratista independiente’ (D06 cl. 2): Voz Andante usa el CRM designado por CumbreViva, sigue su manual y no conserva copias (cl. 4 y Anexo 1). Esa etiqueta describe autonomía comercial y laboral, no su posición frente a los datos.');
+    if(va==='TER') add('R1.3b',2,'Clasificaste a Voz Andante como tercero receptor. El contrato la llama ‘contratista independiente’ (D06 cl. 2), pero la cláusula 4 y el Anexo 1 muestran que atiende sólo con instrucciones, sistemas y guiones de CumbreViva. La etiqueta describe su relación comercial, no necesariamente su rol frente a los datos.');
+    if(va==='SUB') add('R1.3c',2,'Clasificaste a Voz Andante como subcontratada del encargado. Entra al CRM de Orbiax, pero su contrato es directo con CumbreViva (D06) y Orbiax no la subcontrató.');
+    if(va==='PEND') add('R1.3d',3,'Dejaste a Voz Andante como pendiente de determinar. La cláusula 4 de D06 y su Anexo 1 permiten sostener una posición de trabajo; lo que falta es el instrumento que documente el encargo (Reglamento, art. 51).');
+    if(ba==='SUB'){
+      var cola = (s.subcCL==='SINAUT' || s.actores.BA.incertidumbre==='AUT') ? ' y dejaste abierta la autorización, que es justamente lo que el expediente no acredita (D04 cl. 11; D09; D11)' : '';
+      add('R1.4a',3,'Identificaste a CuarzoDelta Hosting como proveedor subcontratado por Orbiax'+cola+'.');
+    }
+    if(ba==='ENC') add('R1.4b',2,'Clasificaste a CuarzoDelta Hosting como encargado. No tiene relación con CumbreViva (D11): trabaja para Orbiax. Tratarlo como encargado directo oculta la pregunta relevante: si Orbiax obtuvo la autorización que exigen los arts. 54–55 del Reglamento.');
+    if(ba==='TER') add('R1.4c',2,'Clasificaste a CuarzoDelta Hosting como tercero receptor. No hay indicio de que use los datos para fines propios (D09); el problema que muestra el expediente es de autorización y formalización de la subcontratación.');
+    if(ba==='PEND') add('R1.4d',3,'Dejaste a CuarzoDelta Hosting como pendiente de determinar. D09 permite ubicarlo como proveedor de infraestructura de Orbiax; lo que el expediente deja abierto es si esa subcontratación fue autorizada (D04 cl. 11; D11).');
+    var cambios = ACT_ORDEN.filter(function(x){ return rolI(s,x)!==rolF(s,x); });
+    if(cambios.length){
+      var lista = cambios.map(function(x){
+        var desde = lc(ROL[rolI(s,x)] || 'sin definir');
+        var hasta = rolF(s,x)==='DIST' ? 'rol distinto según el tratamiento (' + TRAT[x].map(function(f){ return f+': '+lc(SUBL[(s.actores[x].rolPT||{})[f]]||'sin definir'); }).join('; ') + ')' : lc(ROL[rolF(s,x)]||'sin definir');
+        return NOMBRE[x] + ', de ' + desde + ' a ' + hasta;
+      });
+      var t = 'Entre tu clasificación inicial y la final modificaste estos roles: ' + lista.join('; ') + '.';
+      if(rolI(s,'MP')==='ENC' && rolF(s,'MP')!=='ENC') t += ' El ajuste sobre Metrivara, después de leer D07 y D08, es el movimiento que el caso propone: de la etiqueta a la conducta.';
+      if(enSet(rolI(s,'VA'),['TER','PEND']) && rolF(s,'VA')==='ENC') t += ' En Voz Andante, la cláusula 4 de D06 pesó más que la etiqueta de la cláusula 2.';
+      add('R1.5',2,t);
+    }
+    var ae = aceptacionEtiquetas(s);
+    if(ae.length >= 2) add('R1.6',1,'En '+ae.length+' puntos tu lectura final coincide con la etiqueta de un documento ('+unirY(ae)+') aunque otros documentos describen una conducta distinta. El laboratorio propone contrastar siempre la etiqueta con lo que el actor hace con los datos.');
+    var ten = rolesEnTension(s);
+    if(!cambios.length && ten.length >= 1) add('R1.7',3,'No modificaste ninguna clasificación después de leer contratos y correos. Los documentos de E2 contienen elementos que tensionan al menos '+ten.length+' de tus roles iniciales ('+unirY(ten.map(function(x){ return NOMBRE[x]; }))+').');
+    return o;
+  }
+  function textoR27(s){
+    var mp = s.actores.MP, uso = mp.usoPropio;
+    if(mp.rol==='DIST'){
+      var p = mp.rolPT || {}, f4 = p.F4, f5 = p.F5;
+      var t = 'Separaste los tratamientos de Metrivara: para el tablero y los segmentos (F4) concluiste ‘'+(SUBL[f4]||'sin definir')+'’ y para el índice y MetrivaraScore (F5), ‘'+(SUBL[f5]||'sin definir')+'’.';
+      if(!enSet(f4,['ENC','PEND'])) t += ' Para F4, D07 §3 describe un servicio prestado por cuenta de CumbreViva.';
+      if(f5==='TER') t += ' Esa conclusión corresponde a la Ruta A: si CumbreViva autorizó válidamente el uso propio, F5 se analiza como transferencia a un tercero distinto del encargado, lo que exige revisar la cobertura del aviso de privacidad y el consentimiento o una excepción aplicable (Ley, arts. 35 y 36).';
+      else if(f5==='RESPT') t += ' Esa conclusión corresponde a la Ruta B: si Metrivara recibió los datos como encargado y los usa con una finalidad distinta a la autorizada, el Reglamento dispone que será considerada responsable, con las obligaciones propias de éste (art. 53); en este laboratorio esa consecuencia se analiza respecto de F5.';
+      else if(f5==='PEND') t += ' Dejar F5 pendiente refleja que la ruta depende de un hecho que el expediente no resuelve: si la aceptación en línea de §6.4 por Marketing es una autorización válida de CumbreViva (Ruta A, transferencia) o si Metrivara actúa fuera de la finalidad autorizada (Ruta B, art. 53 del Reglamento). Las dos rutas no son intercambiables.';
+      else if(f5==='ENC') t += ' Para F5 mantuviste ‘encargado’, aunque Metrivara se declara titular del índice y del modelo (D07 §6.4): ese uso no se presta por cuenta de CumbreViva.';
+      return t;
+    }
+    if(mp.rol==='PEND') return 'Dejaste a Metrivara como pendiente con una sola etiqueta. El expediente permite separar dos tratamientos: el tablero (F4), que se presta por cuenta de CumbreViva, y el índice y MetrivaraScore (F5), con finalidad propia.';
+    if(mp.rol==='ENC') return 'Mantuviste para Metrivara una sola etiqueta de encargado. Explica el tablero (F4), pero no el índice ni MetrivaraScore (F5)' + (enSet(uso,['SI','POS']) ? ', cuyo uso propio tú mismo registraste' : '') + '.';
+    if(mp.rol==='TER' || mp.rol==='RESP') return 'Tu etiqueta única para Metrivara describe el índice y MetrivaraScore (F5), pero no el tablero (F4), que sigue prestándose por cuenta de CumbreViva.';
+    if(mp.rol==='SUB') return 'Clasificaste a Metrivara como subcontratada del encargado; su relación es directa con CumbreViva (D07) y ningún proveedor la subcontrató. Además, el expediente permite separar F4 y F5.';
+    return null;
+  }
+  function dim2(s){
+    var o = [], add = function(id,pr,t){ o.push({id:id,pr:pr,t:t}); };
+    var mp = s.actores.MP, uso = mp.usoPropio, F = s.flujos;
+    if(enSet(uso,['SI','POS'])) add('R2.1',1,'Detectaste que D07 llama encargado a Metrivara (§3), pero también registraste un uso de los datos para finalidades propias (§6.4 y D08: índice sectorial y MetrivaraScore).');
+    else add('R2.2',1,'Registraste que Metrivara no usa los datos para finalidades propias, o que no consta. D07 §6.4 y el correo D08 describen un índice que vende a terceros y un modelo que ofrece a otros comercios, y Metrivara se declara titular de ambos: son finalidades que no definió CumbreViva.');
+    var g = gruposJ1(s.j1);
+    var identA = mp.incertidumbre==='IDENT' || has(g,'IDENT') || has(F.F5.falta,'M5') || has(s.revisiones,'R1');
+    if(identA) add('R2.3a',2,'Advertiste que ‘agregado’ o ‘seudonimizado’ no equivale a disociado: según D08, el identificador derivado del correo permite reconocer a la misma persona en distintos comercios, y la Ley define la disociación como la imposibilidad de asociar el dato a su titular (art. 2, fr. IX).');
+    else if(enSet(uso,['SI','POS'])) add('R2.3b',2,'Tu análisis no registró la pregunta de identificabilidad: D08 explica que el mismo identificador se usa en más de 40 comercios para reconocer a una persona. Antes de aceptar que el uso es ‘sólo agregado’, convendría verificar si hay disociación (art. 2, fr. IX).');
+    if(g.length >= 2) add('R2.4a',3,'Tu justificación sobre Metrivara se apoya en '+unirY(g.map(function(k){ return GRUPOS[k].nombre; }))+'.');
+    else add('R2.4b',3,'Tu justificación sobre Metrivara no explicita qué finalidad persigue cada uso; es el punto que separa el servicio contratado del uso propio.');
+    if(has(F.F5.falta,'M4') || has(s.acciones,'A5')) add('R2.5',3,'Relacionaste el uso propio con el aviso de privacidad: D03 prevé el análisis de preferencias de CumbreViva, no estudios sectoriales ni modelos de un tercero (Ley, art. 11).');
+    if(F.F6.tipo==='INT' && has(F.F6.falta,'M7')) add('R2.6',4,'En el flujo interno hacia Marketing (F6) no buscaste un documento de comunicación; ahí la pregunta pertinente es si la finalidad está en el aviso, y D03 la prevé (finalidades e y f).');
+    var r27 = textoR27(s);
+    if(r27) add('R2.7',2,r27);
+    return o;
+  }
+  function dim3(s){
+    var o = [], add = function(id,pr,t){ o.push({id:id,pr:pr,t:t}); };
+    var F = s.flujos, st = sobreTransferencia(s), mp = s.actores.MP;
+    if(st.length >= 3) add('R3.1',1,'Tipificaste como transferencia '+st.length+' de los cuatro flujos hacia proveedores que prestan un servicio por cuenta de CumbreViva ('+unirY(st)+'). La Ley excluye de la transferencia la comunicación a la persona encargada (art. 2, fr. XX) y el Reglamento llama remisión a la comunicación entre responsable y encargado (arts. 2, fr. IX, y 53). Que el destinatario sea una empresa externa no basta para hablar de transferencia.');
+    else if(st.length >= 1) add('R3.2',2,'En '+unirY(st)+' optaste por transferencia, aunque el expediente describe un servicio prestado por cuenta de CumbreViva. Revisa qué distingue '+(st.length>1?'esos flujos':'ese flujo')+' de los que tipificaste como remisión.');
+    if(F.F2.tipo==='RE') add('R3.3a',3,'En F2 separaste la ruta técnica (Voz Andante entra al CRM de Orbiax) de la relación jurídica (Voz Andante fue contratada por CumbreViva): por eso es una remisión del responsable a su encargado y no una subcontratación.');
+    if(F.F2.tipo==='SUBC') add('R3.3b',2,'En F2 seguiste la ruta técnica: los datos parecen ir de Orbiax a Voz Andante. Sin embargo, Voz Andante fue contratada directamente por CumbreViva (D06) y Orbiax no la subcontrató.');
+    if(F.F3.tipo==='SUBC') add('R3.4a',3,'Tipificaste F3 como subcontratación: CuarzoDelta aloja la base por cuenta de Orbiax. Conforme al Reglamento (arts. 54–55), esa subcontratación se realiza en nombre y por cuenta de CumbreViva, requiere su autorización y la persona subcontratada asume las obligaciones establecidas para el encargado.');
+    if(F.F3.tipo==='TRANS') add('R3.4b',2,'Tipificaste F3 como transferencia. CuarzoDelta aloja la base para que Orbiax preste su servicio (D09), sin finalidad propia; lo que el expediente cuestiona es la autorización de esa subcontratación, no la naturaleza del flujo.');
+    var pt5 = mp.rol==='DIST' ? (mp.rolPT||{}).F5 : null;
+    if(F.F5.tipo==='TRANS'){
+      if(pt5==='TER') add('R3.5a',1,'En F5 no aceptaste la etiqueta de ‘remisión’ de la minuta (D11); tipificarlo como transferencia es consistente con la Ruta A que sostuviste para Metrivara.');
+      else add('R3.5a',1,'En F5 no aceptaste la etiqueta de ‘remisión’ de la minuta (D11). Tipificarlo como transferencia presupone la Ruta A: que CumbreViva haya autorizado válidamente el uso propio; entonces deben revisarse la cobertura del aviso y el consentimiento o una excepción aplicable (Ley, arts. 35 y 36). Si esa autorización no existiera, la Ruta B (art. 53 del Reglamento) llevaría a otro análisis.');
+    }
+    if(F.F5.tipo==='PEND'){
+      if(pt5==='PEND') add('R3.5a',1,'En F5 no aceptaste la etiqueta de ‘remisión’ de la minuta (D11) y dejaste el tipo pendiente, de forma consistente con la ruta que aún está abierta.');
+      else add('R3.5a',1,'En F5 no aceptaste la etiqueta de ‘remisión’ de la minuta (D11) y dejaste el tipo pendiente. La caracterización depende de si existió una autorización válida de CumbreViva (Ruta A, transferencia) o si Metrivara actúa fuera de la finalidad autorizada (Ruta B, art. 53 del Reglamento).');
+    }
+    if(F.F5.tipo==='RE') add('R3.5b',1,'Tipificaste F5 como remisión del responsable al encargado, igual que la minuta interna (D11). La remisión supone tratamiento por cuenta del responsable; el Índice Metrivara Retail y MetrivaraScore son productos de Metrivara, que se declara su titular (D07 §6.4).');
+    if(F.F6.tipo && F.F6.tipo!=='INT') add('R3.6',2,'Tipificaste F6 como '+lc(TIPO[F.F6.tipo])+', aunque los datos no salen de CumbreViva: van de la tienda a su propio equipo de Marketing. Ahí no hay remisión ni transferencia; la pregunta es de finalidad.');
+    var k = conflictos(s,true);
+    if(k.length >= 1) add('R3.7a',2,'Tu expediente conservó '+k.length+' '+(k.length===1?'tensión':'tensiones')+' entre los roles y los tipos de flujo (por ejemplo: '+k[0].base+') Una arquitectura jurídica defendible requiere que ambas partes cuenten la misma historia.');
+    else if(st.length >= 3) add('R3.7b',2,'Tu matriz es coherente consigo misma: al tratar a los proveedores como terceros, sus flujos resultan transferencias. Lo que conviene revisar es la premisa, no la consistencia.');
+    var fa = faltantesAlineados(s);
+    if(fa >= 4) add('R3.8',4,'Para '+fa+' de los seis flujos identificaste la condición que hoy falta para defenderlos'+(has(F.F3.falta,'M3')?', incluida la autorización de la subcontratación de CuarzoDelta':'')+'.');
+    var m4 = ['F1','F2','F3','F4','F6'].filter(function(f){ return has(F[f].falta,'M4'); });
+    var m4p = ['F1','F2','F3','F4'].filter(function(f){ return has(F[f].falta,'M4'); });
+    if(has(F.F6.falta,'M4') || m4p.length >= 2) add('R3.9',3,'Marcaste como faltante la cobertura de transferencia en flujos donde el destinatario trabaja por cuenta de CumbreViva o donde los datos no salen de la empresa ('+unirY(m4)+'). El Reglamento señala que las remisiones no requieren informarse al titular ni su consentimiento (art. 53).');
+    return o;
+  }
+  function dim4(s){
+    var o = [], add = function(id,pr,t){ o.push({id:id,pr:pr,t:t}); };
+    var h = s.hallazgos || [], ac = s.acciones || [], F = s.flujos;
+    var reales = ['H1','H2','H3','H4'].filter(function(x){ return has(h,x); });
+    if(reales.length) add('R4.1',1,'Registraste '+reales.length+' de las cuatro contradicciones documentales del expediente ('+unirY(reales.map(function(x){ return HALL_CORTO[x]; }))+').');
+    else add('R4.1',1,'No registraste ninguna de las cuatro contradicciones documentales del expediente entre etiqueta, contrato y operación.');
+    if(!has(h,'H3') && s.subcCL!=='SINAUT') add('R4.2',2,'No registraste la contradicción sobre CuarzoDelta Hosting: D04 cl. 11 exige consentimiento previo y por escrito, D05 afirma infraestructura propia y D09 muestra a CuarzoDelta desde 2023. Según el Reglamento, acreditar la autorización corresponde al encargado (art. 54).');
+    if(has(h,'H5')) add('R4.3',2,'Registraste que el aviso es inválido por no nombrar a Orbiax ni a Voz Andante. El Reglamento señala que las remisiones entre responsable y encargado no requieren informarse al titular (art. 53); la tensión del aviso está en otro punto: el uso propio de Metrivara.');
+    if(has(h,'H6')) add('R4.4',2,'Atribuiste el acceso no autorizado a CuarzoDelta Hosting. D10 describe el uso de una cuenta de soporte de Orbiax en la aplicación; ningún documento vincula a CuarzoDelta con el acceso. La subcontratación no autorizada es un problema de gobernanza en sí mismo, no la causa documentada del incidente.');
+    if(has(F.F1.falta,'M6') || has(s.revisiones,'R5')) add('R4.5',3,'Relacionaste el incidente con una condición contractual concreta: D02 muestra que el soporte de Orbiax tenía acceso administrativo permanente con exportación, sin aprobación por caso, y D05 no regula ese acceso ni fija plazo de notificación (Reglamento, arts. 50, fr. III, y 52).');
+    if(has(ac,'A3') || has(ac,'A4')){
+      var t = 'Trataste ';
+      if(has(ac,'A4')) t += 'la falta de cláusulas de encargo con Voz Andante y el anexo desactualizado de Orbiax';
+      if(has(ac,'A3') && has(ac,'A4')) t += ', así como ';
+      if(has(ac,'A3')) t += 'la subcontratación de CuarzoDelta';
+      add('R4.6',4,t+' como asuntos que se corrigen con instrumentos, sin convertirlos automáticamente en infracciones.');
+    }
+    if(s.coordinacion==='C1' && has(ac,'A1')) add('R4.7',2,'Exigiste a Orbiax evidencia y cronología sin aceptar que la limitación de responsabilidad (D04 cl. 18) o la declaración de ‘único responsable’ (cl. 20) resuelvan quién hace qué: esas cláusulas reparten consecuencias económicas entre las partes, pero no trasladan las obligaciones frente a las personas titulares (Reglamento, art. 47). Las personas titulares, por su parte, pueden reclamar indemnización también a la persona encargada (Ley, art. 53).');
+    var j2 = {
+      F3:'En tu segunda justificación elegiste F3: su defensa depende de un documento que hoy no existe (la autorización de CumbreViva).',
+      F5:'En tu segunda justificación elegiste F5: su defensa no depende sólo de un documento, sino de cuál de las dos rutas resulte aplicable.',
+      F2:'En tu segunda justificación elegiste F2: la función de encargo es clara, pero falta el instrumento que la acredite (Reglamento, art. 51).',
+      F1:'En tu segunda justificación elegiste F1: el anexo existe, pero no regula accesos de soporte ni plazos de notificación, justo lo que el incidente puso a prueba.',
+      F4:'En tu segunda justificación elegiste F4: las únicas instrucciones son los términos redactados por el propio proveedor.',
+      F6:'En tu segunda justificación elegiste F6, un flujo interno; las mayores dificultades de defensa del expediente están en los flujos hacia proveedores.'
+    };
+    if(j2[s.j2Flujo]) add('R4.8',3,j2[s.j2Flujo]);
+    return o;
+  }
+  function dim5(s){
+    var o = [], add = function(id,pr,t){ o.push({id:id,pr:pr,t:t}); };
+    var ac = s.acciones || [], c = s.coordinacion, h = s.hipotesis, rv = s.revisiones || [];
+    if(c==='C1') add('R5.1a',1,'Asignaste la coordinación a Privacidad/Jurídico de CumbreViva, con Orbiax como fuente técnica obligada a seguir instrucciones. Es consistente con que la Ley asigna al responsable informar las vulneraciones a los titulares (art. 19) y con el contenido mínimo que prevé el Reglamento (arts. 64–65).');
+    if(c==='C2') add('R5.1b',1,'Dejaste que Orbiax coordinara todo, incluida la comunicación con los clientes, como propone D10. La comunicación con las personas titulares es una decisión que la Ley asigna al responsable (art. 19); que el incidente ocurriera en la plataforma de Orbiax no desplaza esa obligación, aunque Orbiax sí debe aportar la información técnica.');
+    if(c==='C3') add('R5.1c',1,'Elegiste una coordinación conjunta en la que Orbiax decide contenido y momento de la comunicación. Orbiax puede ejecutar el envío si CumbreViva lo instruye; lo que tu elección deja sin resolver es quién decide, y la Ley lo asigna al responsable (art. 19).');
+    if(c==='C4') add('R5.1d',1,'Dejaste la coordinación a Tecnología como asunto técnico. La contención es técnica, pero la decisión de informar a los clientes, su contenido mínimo (Reglamento, art. 65) y la relación con los proveedores son de gobernanza.');
+    if(has(ac,'A6')) add('R5.2',1,'Seleccionaste terminar de inmediato todos los contratos. Los hallazgos no exigen una medida uniforme: Voz Andante y CuarzoDelta presentan defectos documentales corregibles, y terminar con Orbiax en plena respuesta dificulta obtener la evidencia y la cooperación que el incidente requiere.' + (enSet(s.actores.MP.usoPropio,['SI','POS']) ? ' Tu lectura de Metrivara fue fina; la respuesta puede serlo también: el problema identificado es un tratamiento concreto (F5), que admite limitarse.' : ''));
+    if(has(ac,'A7')) add('R5.3',1,'Seleccionaste suspender todos los flujos hacia proveedores. Esa medida detiene el CRM y la atención a clientes sin distinguir entre flujos que funcionan por cuenta de CumbreViva y el único tratamiento que el expediente cuestiona en su finalidad (F5).');
+    if(!has(ac,'A1')) add('R5.4',2,'No incluiste exigir a Orbiax preservación de evidencia, cronología y alcance. Sin esa información, CumbreViva no puede valorar si la vulneración afecta de forma significativa a los clientes ni cumplir el contenido mínimo de una comunicación (Reglamento, arts. 64–65).');
+    if(has(ac,'A6') && has(ac,'A1')) add('R5.5',2,'Exigir evidencia a Orbiax y terminar de inmediato el contrato tiran en direcciones opuestas: la cooperación del encargado es más difícil de obtener si la relación termina en ese momento.');
+    if(has(ac,'A2') && !has(ac,'A6') && !has(ac,'A7')) add('R5.6',3,'Limitaste un tratamiento concreto (F5) en lugar de cortar la relación completa con Metrivara: el tablero contratado (F4) puede continuar mientras se resuelve el uso propio.');
+    var t57 = null, hb = HIP_BREVE[h];
+    if(h==='H1' || h==='H4'){
+      if(c==='C1') t57 = 'Empezaste con la hipótesis de que '+hb+' y terminaste asignando la coordinación a CumbreViva. Ese desplazamiento es el recorrido que el caso propone.';
+      else if(c==='C2' || c==='C3') t57 = 'Tu hipótesis inicial ('+hb+') se mantuvo hasta la decisión final. El expediente aportó elementos (D10; D04 cl. 20) que permitían contrastarla.';
+      else if(c==='C4') t57 = 'Tu hipótesis inicial ('+hb+') cambió de forma: la respuesta quedó en CumbreViva, pero como asunto sólo técnico.';
+    } else if(h==='H2'){
+      t57 = c==='C1' ? 'Empezaste con la hipótesis de que todo recaía en CumbreViva y terminaste en una posición más precisa: CumbreViva coordina, pero Orbiax conserva obligaciones propias de seguridad e información.' : 'Empezaste con la hipótesis de que todo recaía en CumbreViva. Conviene distinguir lo que corresponde a CumbreViva de lo que corresponde a cada proveedor según su conducta.';
+    } else if(h==='H3' || h==='H5'){
+      t57 = c==='C1' ? 'Desde el inicio evitaste una etiqueta única para el incidente; tu decisión final mantiene esa lógica: coordinación del responsable y obligaciones diferenciadas para el proveedor.' : 'Tu hipótesis inicial evitaba una etiqueta única; la coordinación que elegiste concentra la decisión en '+(c==='C4'?'Tecnología':'Orbiax')+', lo que se aleja de ese punto de partida.';
+    }
+    if(t57) add('R5.7',3,t57);
+    var cb = cobertura(s.recomendacion);
+    add('R5.8',4,'Tu recomendación ejecutiva aborda de forma identificable '+cb.k+' de los cinco elementos solicitados'+(cb.k<5 ? '; no se identifican: '+unirY(cb.faltan) : '')+'.');
+    if(rv.length >= 1){
+      var t = 'Dejaste abiertas para revisión: '+unirY(rv.map(function(r){ return REV_CORTO[r] || r; }))+'.';
+      if(has(rv,'R6')) t += ' Respecto de Voz Andante, el expediente no la vincula con el acceso y no es quien decide sobre los datos; la comunicación con los clientes corresponde a CumbreViva.';
+      if(!has(rv,'R3')) t += ' No incluiste la valoración de si la vulneración afecta de forma significativa a los clientes, que es la que define si procede informarles (Ley, art. 19).';
+      add('R5.9',4,t);
+    }
+    return o;
+  }
+  function seleccionar(lista, gen){
+    var act = lista.slice().sort(function(a,b){ return a.pr-b.pr || (a.id<b.id?-1:a.id>b.id?1:0); });
+    var mostradas = act.slice(0,4);
+    if(mostradas.length < 2) mostradas.push({id:'GEN',pr:9,t:gen});
+    return {activadas:act.map(function(r){ return r.id; }), mostradas:mostradas};
+  }
+  function retro(s){
+    var fns = [dim1,dim2,dim3,dim4,dim5];
+    var perfil = perfilDominante(s);
+    return {
+      perfil: perfil,
+      apertura: APERTURA[perfil],
+      nota: NOTA_REGLAMENTO,
+      dims: fns.map(function(fn,i){ var r = seleccionar(fn(s), GENERICA[i]); return {titulo:DIMS[i], activadas:r.activadas, obs:r.mostradas.map(function(x){ return {id:x.id, texto:x.t}; })}; })
+    };
+  }
+
+  return {
+    ACT_ORDEN:ACT_ORDEN, PROV:PROV, FL_ORDEN:FL_ORDEN, NOMBRE:NOMBRE, ROL:ROL, SUBL:SUBL, PORCUENTA:PORCUENTA, INSTR:INSTR, USO:USO, SUBC:SUBC, INCERT:INCERT,
+    TIPO:TIPO, FALTA:FALTA, TRAT:TRAT, TRAT_L:TRAT_L, DEST:DEST, HIP:HIP, CONF:CONF, HALL:HALL, COORD:COORD, ACC:ACC, ACC_ORDEN:ACC_ORDEN, REV:REV, REV_ORDEN:REV_ORDEN,
+    lc:lc, palabras:palabras, unirY:unirY, rolEn:rolEn, etiquetaRol:etiquetaRol, etiquetaRolEn:etiquetaRolEn,
+    conflictos:conflictos, derivados:derivados, retro:retro, cobertura:cobertura
+  };
+})();
+</script>
+
+<script>
+/* =====================================================================
+   Aplicación: interfaz, persistencia y reporte.
+   ===================================================================== */
+(function(){
+'use strict';
+var M = Lab02Motor;
+var KEY = 'lab02_no_fue_nuestro_incidente_v1';
+var ESQUEMA = 'lab02-v1.1';
+var ETAPAS = ['E0','E1','E2','E3','E4','REPORTE'];
+var TITULO = {E0:'¿De quién es el incidente?',E1:'Quién decide y quién ejecuta',E2:'Lo que dice el contrato vs. lo que ocurre',E3:'Remisión, transferencia o subcontratación',E4:'¿Qué hacemos ahora?',REPORTE:'Reporte'};
+var S = null;
+var storageOK = true;
+var ui = {vista:null, actorSel:null, flujoSel:null, opener:null, docAbierto:null, fichaDialogActor:null};
+var $ = function(id){ return document.getElementById(id); };
+var main = $('main');
+
+/* ---------- datos del caso ---------- */
+var ACTOR = {
+  CV:{titulo:'CumbreViva', razon:'CumbreViva Comercio, S.A. de C.V.', para:'Recaba los datos de clientes y opera tienda, app, BI y Marketing'},
+  CL:{titulo:'Orbiax Nube', razon:'Orbiax Nube, S.A.P.I. de C.V.', para:'Opera el CRM donde se guardan fichas, pedidos y casos de clientes', etiqueta:'Encargado (D05)', relacion:'Condiciones Generales (adhesión en línea) + Orden de Servicio (2023) + Anexo de Tratamiento (versión 2021)'},
+  VA:{titulo:'Voz Andante', razon:'Voz Andante Contact Services, S.A. de C.V.', para:'Atiende aclaraciones y pedidos de clientes dentro del CRM', etiqueta:'Contratista independiente (D06 cl. 2)', relacion:'Contrato de prestación de servicios (2024)'},
+  BA:{titulo:'CuarzoDelta Hosting', razon:'CuarzoDelta Hosting, S.A. de C.V.', para:'Aloja la infraestructura del CRM de Orbiax', etiqueta:'Sin contrato con CumbreViva (D11)', relacion:'Ninguna con CumbreViva'},
+  MP:{titulo:'Metrivara', razon:'Metrivara Analytics, S.A. de C.V.', para:'Recibe eventos de navegación y compra para tableros y segmentos', etiqueta:'Encargado (D07 §3)', relacion:'Términos y Adenda del proveedor, aceptados en línea por Marketing (2025)'}
+};
+var FLUJO = {
+  F1:{desc:'Tienda en línea de CumbreViva → CRM de Orbiax (fichas, pedidos, casos)', od:'Origen: CumbreViva · Destino: Orbiax', aria:'Flujo F1: CumbreViva hacia el CRM de Orbiax'},
+  F2:{desc:'Agentes de Voz Andante consultan y editan fichas en el CRM de Orbiax', od:'Origen: CRM de Orbiax · Destino: Voz Andante', aria:'Flujo F2: CRM de Orbiax hacia Voz Andante'},
+  F3:{desc:'Orbiax aloja la base del CRM en infraestructura de CuarzoDelta Hosting', od:'Origen: Orbiax · Destino: CuarzoDelta Hosting', aria:'Flujo F3: Orbiax hacia CuarzoDelta Hosting'},
+  F4:{desc:'Tienda y app → Metrivara: eventos con identificador derivado del correo, para tablero y segmentos de CumbreViva', od:'Origen: CumbreViva · Destino: Metrivara', aria:'Flujo F4: CumbreViva hacia Metrivara'},
+  F5:{desc:'Metrivara incorpora los eventos de clientes de CumbreViva a su índice sectorial y al entrenamiento de MetrivaraScore', od:'Origen: Metrivara (eventos recibidos) · Destino: base comparativa y modelos de Metrivara', aria:'Flujo F5: recepción de eventos de Metrivara hacia su base comparativa y modelos'},
+  F6:{desc:'Tienda de CumbreViva → equipo interno de Marketing (segmentos para campañas propias)', od:'Origen: tienda de CumbreViva · Destino: Marketing de CumbreViva', aria:'Flujo F6: tienda de CumbreViva hacia su equipo de Marketing'}
+};
+var AYUDA = {
+  porCuenta:'La Ley define a la persona encargada como quien trata datos personales por cuenta del responsable (art. 2, fr. XII).',
+  tercero:'En este laboratorio, ‘tercero receptor’ significa un tercero distinto de la persona encargada que recibe datos mediante una transferencia. La definición general de tercero de la Ley es más amplia.',
+  subcontratado:'Persona o proveedor subcontratado por el encargado. Conforme al Reglamento, la subcontratación se realiza en nombre y por cuenta del responsable, y la persona subcontratada asume las obligaciones establecidas para el encargado.',
+  respTrat:'Úsalo cuando, en un tratamiento concreto, el proveedor decide una finalidad propia.',
+  porTrat:'El rol se analiza respecto de cada tratamiento. Un proveedor puede tratar datos por cuenta de CumbreViva en un tratamiento y con una finalidad propia en otro.'
+};
+var PERSONA = {
+  andrea:'Andrea Villaseñor Ruiz · Responsable del Departamento de Datos Personales',
+  ines:'Mtra. Inés Carvajal Pliego · Directora General'
+};
+var NARRATIVA = {
+  E0:{de:'andrea', t:'Te reenvío lo que mandó Rodrigo. Antes de contestarle, quiero que revisemos qué relación tenemos realmente con cada proveedor. Dame primero tu hipótesis, sin pensarlo demasiado; la vamos a contrastar con el expediente.'},
+  E2:{de:'andrea', t:'Ya llegaron los contratos y algunos correos. Revisa si tu clasificación aguanta. Ojo: no todos los documentos dicen lo mismo que la operación, y un mismo proveedor puede hacer más de una cosa con los datos.'},
+  E3:{de:'andrea', t:'Compras y Tecnología ya hicieron su propia clasificación de los flujos (te paso la minuta). Antes de que Dirección la tome como posición de la empresa, necesito la nuestra, flujo por flujo, y qué nos falta para defender cada uno.'},
+  E4:{de:'ines', t:'Tecnología quiere cerrar esto como incidente del proveedor y Compras propone cambiar de CRM. Necesito una recomendación hoy: quién lleva la respuesta, qué le exigimos a Orbiax, qué arreglamos en contratos, qué flujos frenamos y qué queda por revisar.'}
+};
+
+/* ---------- documentos D01–D12 ---------- */
+function mail(rows){ return '<div class="mail">' + rows.map(function(r){ return '<p><strong>'+r[0]+':</strong> '+r[1]+'</p>'; }).join('') + '</div>'; }
+function cl(id,t){ return '<p><span class="cid">'+id+'</span> '+t+'</p>'; }
+var DOCS = {
+  D01:{etapa:'E0', titulo:'Correo de Tecnología', tipo:'Correo electrónico', emisor:'Rodrigo Lázaro Ibarra, Director de Tecnología', fecha:'Lunes 28 de septiembre de 2026, 09:12',
+    html: mail([['De','Rodrigo Lázaro Ibarra, Director de Tecnología'],['Para','Andrea Villaseñor Ruiz, Privacidad'],['CC','Mariana Ochoa Treviño, Compras'],['Fecha','lunes 28 de septiembre de 2026, 09:12'],['Asunto','Aviso de Orbiax – ¿cerramos?']]) +
+    '<p>Andrea:</p><p>El proveedor nos informó que hubo acceso no autorizado a una cuenta de soporte. Dice que el incidente ocurrió en su plataforma y que ellos se harán cargo. ¿Podemos cerrar el tema como incidente del proveedor?</p><p>Contexto rápido: Orbiax nos llamó el viernes 25. Según ellos, alguien usó una cuenta de su propio personal de soporte entre el 22 y el 24 de septiembre y consultó fichas de clientes nuestros. Ya deshabilitaron la cuenta. De nuestro lado no vemos nada raro en la tienda ni en la app.</p><p>Dirección quiere saber hoy si hay algo que hacer de nuestro lado. Yo propondría dejarlo en manos de Orbiax y pedirles un informe cuando terminen.</p><p>Saludos,<br>Rodrigo</p>'},
+  D02:{etapa:'E1', titulo:'Diagrama de flujos y listado de accesos', tipo:'Diagrama de flujo de datos y listado de accesos (uso interno)', emisor:'Tecnología de CumbreViva', fecha:'Versión 3.2, 29 de septiembre de 2026',
+    html:'<h3>Panel A · Diagrama</h3><p><strong>Nodos.</strong></p><ul><li><strong>CumbreViva:</strong> “Tienda web y app” · “Almacén de datos interno (BI)” · “Marketing”.</li><li><strong>Orbiax Nube:</strong> “CRM · tenant CumbreViva”; dentro, en línea punteada: “Infraestructura: CuarzoDelta Hosting (según lista de Orbiax, D09)”.</li><li><strong>Voz Andante:</strong> “Agentes y supervisores”.</li><li><strong>Metrivara:</strong> “Recepción de eventos” → “Tableros y segmentos de CumbreViva”; en línea punteada: “Base comparativa sectorial / modelos” (etiqueta de Tecnología: “uso del proveedor, por confirmar”).</li></ul>' +
+    '<div class="tw"><table><caption class="sr-only">Conexiones del diagrama</caption><thead><tr><th scope="col">Conexión</th><th scope="col">Etiqueta técnica</th><th scope="col">Datos</th></tr></thead><tbody>' +
+    '<tr><td>Tienda → CRM</td><td>Sincronización nocturna + API en tiempo real</td><td>Perfil, contacto, dirección de entrega, pedidos, casos</td></tr>' +
+    '<tr><td>Agentes Voz Andante → CRM</td><td>Acceso web con usuario nominal</td><td>Lectura/edición de fichas y casos</td></tr>' +
+    '<tr><td>CRM → Infraestructura CuarzoDelta</td><td>Alojamiento de base de datos y respaldos</td><td>Toda la base del CRM (cifrada en reposo, según Orbiax)</td></tr>' +
+    '<tr><td>Tienda/app → Metrivara</td><td>Etiqueta de eventos (SDK)</td><td>Eventos de navegación y compra; identificador derivado del correo (hash)</td></tr>' +
+    '<tr><td>Metrivara → Base comparativa / modelos</td><td>(sin información de Tecnología)</td><td>Por confirmar</td></tr>' +
+    '<tr><td>Tienda → BI interno → Marketing</td><td>Exportación de segmentos</td><td>Correo, historial de compra, categoría preferida</td></tr></tbody></table></div>' +
+    '<h3>Panel B · Listado de accesos (corte 29-sep-2026)</h3><div class="tw"><table><caption class="sr-only">Listado de accesos</caption><thead><tr><th scope="col">Cuenta / integración</th><th scope="col">De quién es</th><th scope="col">Sistema</th><th scope="col">Permisos</th><th scope="col">Cómo se otorgó</th></tr></thead><tbody>' +
+    '<tr><td><code>cv-admin-01</code> a <code>cv-admin-03</code></td><td>TI de CumbreViva</td><td>CRM (tenant CV)</td><td>Administración del tenant</td><td>Alta interna</td></tr>' +
+    '<tr><td><code>va-agente-01</code> a <code>va-agente-42</code></td><td>Voz Andante</td><td>CRM (tenant CV)</td><td>Lectura y edición de fichas y casos; exportación deshabilitada</td><td>Alta solicitada por CV a petición de Voz Andante</td></tr>' +
+    '<tr><td><code>va-supervisor-01</code> a <code>va-supervisor-04</code></td><td>Voz Andante</td><td>CRM (tenant CV)</td><td>Lo anterior + reportes de casos (sin datos de contacto)</td><td>Igual</td></tr>' +
+    '<tr><td><code>soporte-n2-01</code> a <code>soporte-n2-09</code></td><td>Personal de soporte de Orbiax</td><td>CRM (tenant CV)</td><td>Acceso administrativo delegado permanente, con exportación</td><td>Configuración predeterminada del proveedor; no consta aprobación por caso</td></tr>' +
+    '<tr><td><code>api-metrivara-01</code></td><td>Metrivara</td><td>SDK de eventos en tienda y app</td><td>Recepción de eventos</td><td>Alta por Marketing (feb-2025)</td></tr>' +
+    '<tr><td><code>cuarzodelta-infra</code></td><td>CuarzoDelta Hosting</td><td>Infraestructura de Orbiax</td><td>Administración de infraestructura; sin acceso a la aplicación (según Orbiax)</td><td>Gestionado por Orbiax; no visible para CV</td></tr></tbody></table></div>' +
+    '<p>Nota de Tecnología: “La cuenta <code>soporte-n2-07</code> fue la usada en el acceso no autorizado (información de Orbiax).”</p>'},
+  D03:{etapa:'E1', titulo:'Aviso de privacidad (extracto)', tipo:'Extracto del aviso de privacidad integral', emisor:'CumbreViva Comercio, S.A. de C.V.', fecha:'Versión vigente, publicada el 2 de marzo de 2025',
+    html: cl('Identidad y domicilio del responsable.','CumbreViva Comercio, S.A. de C.V. [domicilio ficticio], Zapopan, Jalisco, es responsable del tratamiento de sus datos personales.') +
+    cl('Datos que tratamos.','Identificación y contacto; dirección de entrega; historial de compras y de navegación en nuestra tienda y app; comunicaciones de atención a clientes. No tratamos datos personales sensibles.') +
+    cl('Finalidades necesarias.','(a) Procesar compras, pagos y envíos; (b) atender aclaraciones, devoluciones y garantías; (c) facturación; (d) seguridad de la cuenta y prevención de fraude.') +
+    cl('Finalidades no necesarias','(usted puede negarse en [mecanismo ficticio]): (e) enviarle promociones y comunicaciones de mercadotecnia de CumbreViva; (f) analizar sus preferencias para mejorar nuestra oferta y personalizar su experiencia en CumbreViva; (g) encuestas de satisfacción.') +
+    cl('Proveedores.','Para cumplir estas finalidades, CumbreViva se apoya en proveedores que tratan los datos por nuestra cuenta, siguiendo nuestras instrucciones y bajo obligaciones de confidencialidad y seguridad.') +
+    cl('Transferencias.','CumbreViva no transfiere sus datos a terceros que los usen para finalidades propias, salvo en los supuestos en que la ley no exige su consentimiento.') +
+    cl('Derechos ARCO y revocación.','[Medios ficticios.]') +
+    cl('Cambios al aviso.','Se comunicarán en el sitio y por correo.')},
+  D04:{etapa:'E2', titulo:'Condiciones Generales de Orbiax', tipo:'Condiciones Generales de Servicio (extractos) + Orden de Servicio', emisor:'Orbiax Nube, S.A.P.I. de C.V.', fecha:'Versión 2022.3, aceptadas en línea el 1 de marzo de 2023 (OS-2023-0412)',
+    html:'<p>“Condiciones Generales de Servicio Orbiax Cloud CRM, versión 2022.3”, aceptadas en línea por CumbreViva el 1-mar-2023 mediante la Orden de Servicio OS-2023-0412 (plan Empresarial, 60 usuarios).</p>' +
+    cl('Cl. 1 · Objeto.','Orbiax pone a disposición del Cliente una plataforma de gestión de relación con clientes en modalidad de software como servicio.') +
+    cl('Cl. 7 · Datos del Cliente.','Los datos que el Cliente cargue o genere en la plataforma son del Cliente. Orbiax los tratará únicamente para prestar el servicio y conforme a las instrucciones del Cliente expresadas en la configuración de la plataforma y en el Anexo de Tratamiento.') +
+    cl('Cl. 9 · Soporte.','El personal de soporte de Orbiax podrá acceder al entorno del Cliente cuando sea necesario para prestar el servicio, resolver incidencias o realizar mantenimiento.') +
+    cl('Cl. 11 · Subcontratación.','Orbiax no subcontratará el tratamiento de Datos del Cliente sin el consentimiento previo y por escrito del Cliente.') +
+    cl('Cl. 14 · Incidentes.','Orbiax notificará al Cliente los incidentes de seguridad que afecten Datos del Cliente sin demora indebida y le proporcionará la información razonablemente disponible.') +
+    cl('Cl. 18 · Limitación de responsabilidad.','La responsabilidad total de Orbiax derivada de estas Condiciones no excederá el monto de las cuotas pagadas por el Cliente en los doce meses anteriores al hecho que la origine.') +
+    cl('Cl. 20 · Declaración de roles.','Orbiax actúa como proveedor de servicios. El Cliente es el único responsable frente a los titulares de los datos que trate a través de la plataforma.')},
+  D05:{etapa:'E2', titulo:'Anexo de Tratamiento de Orbiax', tipo:'Anexo de Tratamiento de Datos', emisor:'Orbiax Nube, S.A.P.I. de C.V.', fecha:'Versión 2021.1',
+    html: cl('1. Roles.','El Cliente actúa como responsable y Orbiax como encargado respecto de los Datos del Cliente.') +
+    cl('2. Instrucciones.','Orbiax tratará los Datos del Cliente sólo para prestar el servicio contratado y conforme a las instrucciones documentadas del Cliente.') +
+    cl('3. Confidencialidad.','El personal de Orbiax con acceso a los datos está sujeto a obligaciones de confidencialidad.') +
+    cl('4. Infraestructura.','Orbiax presta el servicio en infraestructura propia ubicada en México.') +
+    cl('5. Seguridad.','Orbiax mantiene medidas de seguridad administrativas, técnicas y físicas razonables.') +
+    cl('6. Incidentes.','Orbiax informará al Cliente sobre incidentes que afecten los Datos del Cliente en un plazo razonable.') +
+    cl('7. Supresión.','Al terminar el servicio, Orbiax suprimirá los Datos del Cliente después de permitir su exportación.') +
+    cl('8. Auditoría.','El Cliente podrá solicitar una auditoría al año, a su costa.')},
+  D06:{etapa:'E2', titulo:'Contrato con Voz Andante', tipo:'Contrato de prestación de servicios de atención a clientes (extractos) y Anexo 1', emisor:'CumbreViva Comercio, S.A. de C.V. y Voz Andante Contact Services, S.A. de C.V.', fecha:'Firmado el 15 de enero de 2024',
+    html: cl('Cl. 2 · Naturaleza.','EL PRESTADOR actúa como contratista independiente, con plena autonomía técnica y administrativa. No existe relación laboral entre CUMBREVIVA y el personal de EL PRESTADOR.') +
+    cl('Cl. 4 · Forma de prestación.','EL PRESTADOR atenderá a los clientes de CUMBREVIVA conforme al Manual de Atención y a los guiones que CUMBREVIVA le proporcione y actualice. Utilizará exclusivamente el CRM designado por CUMBREVIVA y no conservará copias de la información de clientes fuera de dicho sistema.') +
+    cl('Cl. 9 · Confidencialidad.','Las partes mantendrán confidencial la información que reciban con motivo de este contrato.') +
+    cl('Cl. 12 · Vigencia.','Un año, con renovación automática.') +
+    '<h3>Anexo 1 · Manual de Atención (extracto)</h3><p>Verificar identidad con tres datos antes de dar información. Registrar todo caso en el CRM. No enviar información de clientes por correo personal ni mensajería. Escalar a CumbreViva cualquier solicitud de derechos ARCO. Seguir el guion vigente para devoluciones y garantías.</p>'},
+  D07:{etapa:'E2', titulo:'Términos y Adenda de Metrivara', tipo:'Términos del Servicio y Adenda de Protección de Datos (extractos)', emisor:'Metrivara Analytics, S.A. de C.V.', fecha:'Aceptados en línea el 10 de febrero de 2025 · “Aceptado por: Gerencia de Marketing – CumbreViva”',
+    html: cl('§3 · Tratamiento por cuenta del Cliente.','Metrivara actuará como encargado y tratará los Datos del Cliente por cuenta del Cliente para prestar el Servicio: tableros de conversión, análisis de embudo y segmentaciones para las campañas del Cliente.') +
+    cl('§4 · Identificadores.','Para vincular eventos de un mismo usuario, el SDK genera un identificador a partir del correo electrónico mediante una función de resumen (hash).') +
+    cl('§6.4 · Mejora del Servicio y Conocimiento Sectorial.','El Cliente autoriza a Metrivara a utilizar Datos del Servicio, en forma agregada, seudonimizada o derivada, para (a) desarrollar y mejorar sus modelos y productos, y (b) elaborar índices y estudios comparativos sectoriales. Metrivara será titular de dichos índices, modelos y estudios.') +
+    cl('§6.5 · No venta.','Metrivara no venderá Datos del Cliente que identifiquen directamente a una persona.') +
+    cl('§9 · Subencargados.','Metrivara publica su lista de subencargados en su sitio web.')},
+  D08:{etapa:'E2', titulo:'Correo de Metrivara', tipo:'Correo electrónico', emisor:'Sofía Quintal Ramos, Alianzas, Metrivara', fecha:'Martes 29 de septiembre de 2026, 11:47',
+    html: mail([['De','Sofía Quintal Ramos, Alianzas, Metrivara'],['Para','Andrea Villaseñor Ruiz, Privacidad, CumbreViva'],['Fecha','martes 29 de septiembre de 2026, 11:47'],['Asunto','RE: Consulta sobre uso de datos de CumbreViva']]) +
+    '<p>Hola, Andrea:</p><p>Con gusto aclaro. Además de sus tableros, usamos los eventos de todos nuestros clientes de comercio electrónico (más de 40 comercios) para dos cosas:</p><ol><li><strong>Índice Metrivara Retail.</strong> Un estudio trimestral de recurrencia y ticket promedio por categoría y región, que vendemos a marcas y a fondos. Para medir recurrencia real necesitamos saber cuándo la misma persona compra en distintos comercios; por eso usamos el identificador hash del correo, que es el mismo en todos nuestros clientes. Los resultados publicados son agregados, con mínimo 50 personas por celda.</li><li><strong>MetrivaraScore.</strong> Un modelo de propensión de compra que entrenamos con eventos de todos los comercios y que ofrecemos a otros clientes como producto adicional.</li></ol><p>Nunca vendemos datos identificables y todo está autorizado en la sección 6.4 de nuestros términos. Si lo prefieren, podemos platicar opciones, pero excluir a un cliente del índice afecta la calidad del producto.</p><p>Saludos,<br>Sofía</p>'},
+  D09:{etapa:'E2', titulo:'Lista de subproveedores de Orbiax', tipo:'Lista de subproveedores', emisor:'Orbiax Nube, S.A.P.I. de C.V.', fecha:'Entregada el 29 de septiembre de 2026, a solicitud de Privacidad de CumbreViva',
+    html:'<div class="tw"><table><caption class="sr-only">Subproveedores de Orbiax</caption><thead><tr><th scope="col">Subproveedor</th><th scope="col">Servicio</th><th scope="col">Desde</th><th scope="col">Ubicación</th><th scope="col">Acceso a datos</th></tr></thead><tbody><tr><td>CuarzoDelta Hosting, S.A. de C.V.</td><td>Cómputo, almacenamiento y respaldos de la plataforma</td><td>Enero de 2023</td><td>Querétaro, México</td><td>Datos cifrados en reposo; personal de CuarzoDelta con acceso administrativo a infraestructura</td></tr></tbody></table></div><p>Nota de Orbiax: “Nuestros subproveedores se informan a los clientes que lo solicitan.”</p>'},
+  D10:{etapa:'E4', titulo:'Respuesta de Orbiax tras el incidente', tipo:'Correo electrónico', emisor:'Daniel Ferrer Almada, Customer Success, Orbiax', fecha:'Lunes 28 de septiembre de 2026, 13:30',
+    html: mail([['De','Daniel Ferrer Almada, Customer Success, Orbiax'],['Para','Rodrigo Lázaro Ibarra'],['CC','Andrea Villaseñor Ruiz'],['Fecha','lunes 28 de septiembre de 2026, 13:30'],['Asunto','Incidente de seguridad – resumen y siguientes pasos']]) +
+    '<p>Estimados:</p><p>Confirmamos lo comentado por teléfono:</p><ul><li>Entre el 22-sep 23:40 y el 24-sep 17:55, un tercero usó credenciales de la cuenta <code>soporte-n2-07</code> de nuestro equipo de soporte, obtenidas mediante un correo de suplantación.</li><li>Con esa cuenta se consultaron fichas de su tenant. Nuestra estimación preliminar es de hasta 3 800 fichas (nombre, correo, teléfono, dirección de entrega, historial de pedidos y notas de casos). No hay datos de tarjeta en la plataforma.</li><li>La cuenta fue deshabilitada el 24-sep a las 18:10. Estamos revisando si hubo exportaciones.</li></ul><p>Como el incidente ocurrió en nuestra plataforma, lo gestionaremos íntegramente. Ya preparamos un comunicado que enviaremos desde <code>notificaciones@orbiax</code> a los usuarios cuyas fichas fueron consultadas; no es necesario que ustedes intervengan.</p><p>Por políticas internas no compartimos bitácoras completas; podemos entregar un resumen ejecutivo en 10 días hábiles.</p><p>Les recordamos que, conforme a la cláusula 18, nuestra responsabilidad se limita a las cuotas de los últimos doce meses y que, conforme a la cláusula 20, ustedes son responsables frente a sus titulares.</p><p>Atentamente,<br>Daniel Ferrer</p>'},
+  D11:{etapa:'E3', titulo:'Minuta interna de Compras y Tecnología', tipo:'Minuta de reunión', emisor:'Compras de CumbreViva (asistentes: M. Ochoa, Compras; R. Lázaro, Tecnología; T. Rentería, Marketing)', fecha:'Martes 29 de septiembre de 2026, 17:00',
+    html: cl('1. Orbiax.','Como mandamos datos de clientes a una empresa externa, es una transferencia a un tercero. Proponer agregar en el checkout una casilla de consentimiento: “Acepto la transferencia de mis datos al CRM de CumbreViva”.') +
+    cl('2. Voz Andante.','Es proveedor independiente, su contrato lo dice expresamente. No requiere revisión de privacidad.') +
+    cl('3. Metrivara.','Sus términos dicen que es encargado, así que lo que hace con los eventos es una remisión. No requiere nada adicional. Marketing aceptó los términos en línea; Compras no los revisó.') +
+    cl('4. CuarzoDelta Hosting.','No tenemos contrato con ellos; es asunto de Orbiax. Compras confirma que nunca recibimos solicitud de autorización para subcontratar.') +
+    cl('5. Acuerdo.','Proponer a Dirección terminar con Orbiax y migrar el CRM a otro proveedor en 30 días.')},
+  D12:{etapa:'E4', titulo:'Nota de marco normativo (opcional)', tipo:'Nota de marco normativo. No contiene opinión sobre el caso concreto.', emisor:'Ledesma & Orozco Abogados (despacho externo ficticio), para Privacidad de CumbreViva', fecha:'30 de septiembre de 2026',
+    html:'<p><em>Se cita la LFPDPPP vigente y el Reglamento de 2011, en lo que resulte compatible con la LFPDPPP vigente.</em></p><ol>' +
+    '<li><strong>Persona encargada.</strong> La LFPDPPP la define como quien trata datos personales por cuenta del responsable (art. 2, fr. XII). El Reglamento agrega que es ajena a la organización del responsable y que una relación jurídica delimita su actuación para prestar un servicio (art. 49).</li>' +
+    '<li><strong>Transferencia y remisión.</strong> La Ley define transferencia como la comunicación a persona distinta de la titular, del responsable o de la persona encargada (art. 2, fr. XX). El Reglamento llama remisión a la comunicación entre responsable y encargado (art. 2, fr. IX) y señala que no requiere informarse al titular ni contar con su consentimiento (art. 53).</li>' +
+    '<li><strong>Obligaciones del encargado.</strong> Tratar conforme a instrucciones; no usar los datos para finalidades distintas; medidas de seguridad; confidencialidad; supresión; abstenerse de transferir salvo supuestos (Reglamento, art. 50). La relación debe constar en cláusulas u otro instrumento que acredite su existencia, alcance y contenido (art. 51).</li>' +
+    '<li><strong>Finalidad distinta.</strong> El Reglamento dispone que el encargado será considerado responsable, con las obligaciones propias de éste, cuando destine o utilice los datos con una finalidad distinta a la autorizada por el responsable, o efectúe una transferencia incumpliendo sus instrucciones (art. 53).</li>' +
+    '<li><strong>Subcontratación.</strong> Toda subcontratación del encargado que implique tratamiento debe ser autorizada por el responsable y se realiza en nombre y por cuenta de éste; la persona subcontratada asume las mismas obligaciones establecidas para el encargado; acreditar la autorización corresponde al encargado (arts. 54–55).</li>' +
+    '<li><strong>Nube por adhesión.</strong> Si el servicio se contrata mediante condiciones generales, el proveedor debe, entre otros, transparentar subcontrataciones e impedir accesos de personas sin privilegios (art. 52).</li>' +
+    '<li><strong>Transferencias.</strong> Comunicar aviso y finalidades al receptor, quien asume las obligaciones del responsable (Ley, art. 35); supuestos sin consentimiento (art. 36).</li>' +
+    '<li><strong>Vulneraciones.</strong> Las que afecten de forma significativa derechos patrimoniales o morales deben ser informadas de forma inmediata por el responsable (Ley, art. 19); contenido mínimo y medidas (Reglamento, arts. 64–66).</li>' +
+    '<li><strong>Responsabilidad.</strong> El responsable vela y responde también por los datos comunicados a un encargado (Reglamento, art. 47). Las personas titulares pueden reclamar indemnización por incumplimientos del responsable o de la persona encargada (Ley, art. 53).</li>' +
+    '<li><strong>Tercero.</strong> La Ley define “tercero” de forma amplia (art. 2, fr. XVII). La definición de transferencia excluye expresamente a la persona encargada (art. 2, fr. XX).</li></ol>'}
+};
+var DOC_ORDEN = ['D01','D02','D03','D04','D05','D06','D07','D08','D09','D11','D10','D12'];
+
+/* ---------- utilidades ---------- */
+function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function idx(e){ return ETAPAS.indexOf(e); }
+function anunciar(t){ var l = $('live'); l.textContent = ''; setTimeout(function(){ l.textContent = t; }, 30); }
+var reducirMov = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
+function irA(el){ if(el && el.scrollIntoView) el.scrollIntoView({block:'start', behavior: reducirMov.matches ? 'auto' : 'smooth'}); }
+function hora(ts){ try{ return new Date(ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+function fechaHora(ts){ try{ return new Date(ts).toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'}); }catch(e){ return new Date(ts).toString(); } }
+function has(a,v){ return (a||[]).indexOf(v)!==-1; }
+
+/* ---------- estado y persistencia ---------- */
+function estadoNuevo(nombre){
+  var act = {};
+  M.ACT_ORDEN.forEach(function(x){
+    act[x] = x==='CV' ? {rol:null} : {porCuenta:null, rol:null, rolPT:{}, instrucciones:null, usoPropio:null, evidencia:null, incertidumbre:null};
+  });
+  var fl = {}; M.FL_ORDEN.forEach(function(f){ fl[f] = {tipo:null, falta:[]}; });
+  return {esquema:ESQUEMA, participante:nombre, etapa:'E0', tInicio:Date.now(), tFin:null, guardadoEn:null,
+    docsLeidos:[], memoConsultado:false, hipotesis:null, confianza:null, actores:act, subcCL:null,
+    clasificacionInicial:null, flujos:fl, hallazgos:[], j1:'', j2Flujo:null, j2:'', coordinacion:null,
+    acciones:[], revisiones:[], recomendacion:'', cerrado:false};
+}
+function probarStorage(){ try{ var k='__lab02_prueba'; window.localStorage.setItem(k,'1'); window.localStorage.removeItem(k); return true; }catch(e){ return false; } }
+function leerGuardado(){
+  if(!storageOK) return {estado:null};
+  try{
+    var raw = window.localStorage.getItem(KEY);
+    if(!raw) return {estado:null};
+    var o = JSON.parse(raw);
+    if(!o || o.esquema!==ESQUEMA || !o.actores || !o.flujos) return {estado:null, ilegible:true};
+    return {estado:o};
+  }catch(e){ return {estado:null, ilegible:true}; }
+}
+var tGuardar = null;
+function escribir(){
+  if(!S) return;
+  S.guardadoEn = Date.now();
+  if(storageOK){
+    try{ window.localStorage.setItem(KEY, JSON.stringify(S)); }
+    catch(e){ storageOK = false; avisoStorage(); }
+  }
+  pintarGuardado();
+}
+function guardar(inmediato){ clearTimeout(tGuardar); if(inmediato) escribir(); else tGuardar = setTimeout(escribir, 300); }
+function borrarGuardado(){ try{ window.localStorage.removeItem(KEY); }catch(e){} }
+function avisoStorage(){
+  var n = $('storageNotice');
+  n.textContent = 'El guardado automático no está disponible en este navegador. Tu avance se conserva mientras esta pestaña siga abierta.';
+  n.hidden = false;
+}
+function pintarGuardado(){
+  var g = $('guardado'); if(!g || !S) return;
+  g.textContent = storageOK ? (S.guardadoEn ? 'Guardado · ' + hora(S.guardadoEn) : '') : 'Sin guardado automático';
+}
+window.addEventListener('pagehide', function(){ if(S && tGuardar){ clearTimeout(tGuardar); escribir(); } });
+
+/* ---------- disponibilidad de documentos ---------- */
+function docsDisponibles(){
+  if(!S) return [];
+  var e = S.cerrado ? idx('E4') : idx(S.etapa);
+  return DOC_ORDEN.filter(function(d){ return idx(DOCS[d].etapa) <= e; });
+}
+function docNuevo(d){ return !has(S.docsLeidos, d); }
+
+/* ---------- validaciones por etapa ---------- */
+function faltantesEtapa(e){
+  var f = [];
+  if(e==='E0'){
+    if(!S.hipotesis) f.push('hipótesis inicial');
+    if(!S.confianza) f.push('nivel de confianza');
+  }
+  if(e==='E1'){
+    M.ACT_ORDEN.forEach(function(x){
+      var a = S.actores[x], p = [];
+      if(x!=='CV' && !a.porCuenta) p.push('¿actúa por cuenta de CumbreViva?');
+      if(!a.rol) p.push('rol propuesto');
+      if(p.length) f.push(M.NOMBRE[x] + ' (' + p.join(', ') + ')');
+    });
+  }
+  if(e==='E2'){
+    M.ACT_ORDEN.forEach(function(x){
+      var a = S.actores[x], p = [];
+      if(x!=='CV' && !a.porCuenta) p.push('¿actúa por cuenta de CumbreViva?');
+      if(!a.rol) p.push('rol propuesto');
+      if(a.rol==='DIST') M.TRAT[x].forEach(function(t){ if(!a.rolPT || !a.rolPT[t]) p.push('rol en '+t); });
+      if(x!=='CV'){
+        if(!a.instrucciones) p.push('instrucciones documentadas');
+        if(!a.usoPropio) p.push('uso para finalidad propia');
+        if(!a.evidencia) p.push('evidencia principal');
+        if(!a.incertidumbre) p.push('incertidumbre pendiente');
+      }
+      if(x==='CL' && !S.subcCL) p.push('subcontratación');
+      if(p.length) f.push(M.NOMBRE[x] + ' (' + p.join(', ') + ')');
+    });
+    var w = M.palabras(S.j1);
+    if(w<40 || w>100) f.push('justificación sobre Metrivara entre 40 y 100 palabras (llevas ' + w + ')');
+  }
+  if(e==='E3'){
+    M.FL_ORDEN.forEach(function(fl){
+      var p = [];
+      if(!S.flujos[fl].tipo) p.push('tipo');
+      if(!S.flujos[fl].falta.length) p.push('faltante');
+      if(p.length) f.push(fl + ' (' + p.join(', ') + ')');
+    });
+    if(!S.j2Flujo) f.push('flujo elegido en la segunda justificación');
+    var w2 = M.palabras(S.j2);
+    if(w2<40 || w2>100) f.push('segunda justificación entre 40 y 100 palabras (llevas ' + w2 + ')');
+  }
+  if(e==='E4'){
+    if(!S.coordinacion) f.push('coordinación de la respuesta');
+    if(!S.acciones.length) f.push('al menos una acción');
+    var w3 = M.palabras(S.recomendacion);
+    if(w3<150 || w3>300) f.push('recomendación ejecutiva entre 150 y 300 palabras (llevas ' + w3 + ')');
+  }
+  return f;
+}
+function completoActor(x, etapa){
+  var a = S.actores[x];
+  if(!a.rol) return false;
+  if(x==='CV') return true;
+  if(!a.porCuenta) return false;
+  if(etapa==='E1') return true;
+  if(a.rol==='DIST' && M.TRAT[x].some(function(t){ return !a.rolPT || !a.rolPT[t]; })) return false;
+  if(!a.instrucciones || !a.usoPropio || !a.evidencia || !a.incertidumbre) return false;
+  if(x==='CL' && !S.subcCL) return false;
+  return true;
+}
+
+/* ---------- mapa de actores ---------- */
+var LAYOUT = {
+  wide:{vb:'0 0 840 480', nodes:{
+    CV:{box:[16,120,236,240], title:[32,144], role:[32,162], wrap:36, inner:[{r:[32,192,204,40], t:['Tienda web y app']},{r:[32,300,204,40], t:['BI interno → Marketing']}]},
+    CL:{box:[372,10,268,226], title:[388,34], role:[388,52], wrap:42, inner:[{r:[390,80,232,40], t:['CRM · tenant CumbreViva']}]},
+    BA:{box:[408,160,196,66], dash:true, title:[420,180], role:[420,198], wrap:30},
+    VA:{box:[668,30,160,110], title:[680,54], sub:[[680,70,'Agentes y supervisores']], role:[680,92], wrap:24, max:3},
+    MP:{box:[372,262,268,208], title:[388,286], role:[388,304], wrap:42, inner:[{r:[390,330,232,44], t:['Recepción de eventos','Tableros y segmentos']},{r:[408,410,196,50], t:['Base comparativa / modelos','uso del proveedor, por confirmar'], dash:true}]}
+  }, flows:{
+    F1:{d:'M236,206 C300,206 320,100 384,100', lab:[311,153]},
+    F2:{d:'M622,96 L662,88', lab:[642,66]},
+    F3:{d:'M506,120 L506,154', lab:[532,138]},
+    F4:{d:'M236,222 C310,222 320,352 384,352', lab:[311,287]},
+    F5:{d:'M506,374 L506,404', lab:[532,390]},
+    F6:{d:'M134,232 L134,294', lab:[160,264]}
+  }},
+  tall:{vb:'0 0 360 690', nodes:{
+    CV:{box:[10,10,340,140], title:[24,32], role:[24,50], wrap:46, inner:[{r:[24,80,140,40], t:['Tienda web y app']},{r:[206,80,130,40], t:['BI → Marketing']}]},
+    CL:{box:[10,196,212,214], title:[24,218], role:[24,236], wrap:32, inner:[{r:[22,262,188,40], t:['CRM · tenant CumbreViva']}]},
+    BA:{box:[32,340,168,62], dash:true, title:[42,360], role:[42,378], wrap:26},
+    VA:{box:[250,210,100,120], title:[258,232], sub:[[258,248,'Agentes']], role:[258,270], wrap:15, max:3},
+    MP:{box:[10,440,340,230], title:[24,462], role:[24,480], wrap:46, inner:[{r:[24,508,312,44], t:['Recepción de eventos','Tableros y segmentos']},{r:[54,594,252,62], t:['Base comparativa / modelos','uso del proveedor, por confirmar'], dash:true}]}
+  }, flows:{
+    F1:{d:'M94,120 L94,190', lab:[118,170]},
+    F2:{d:'M210,282 L244,282', lab:[228,262]},
+    F3:{d:'M116,302 L116,334', lab:[142,319]},
+    F4:{d:'M236,150 L236,434', lab:[236,388]},
+    F5:{d:'M180,552 L180,588', lab:[206,571]},
+    F6:{d:'M164,100 L200,100', lab:[183,76]}
+  }}
+};
+function envolver(t, n){
+  var w = t.split(' '), lines = [], cur = '';
+  w.forEach(function(p){ if((cur + ' ' + p).trim().length > n && cur){ lines.push(cur); cur = p; } else cur = (cur + ' ' + p).trim(); });
+  if(cur) lines.push(cur);
+  return lines;
+}
+function lineasRol(x){
+  var a = S.actores[x];
+  if(!a.rol) return {l:['Rol sin definir'], vacio:true};
+  if(a.rol==='DIST') return {l: M.TRAT[x].map(function(t){ return t + ' · ' + (a.rolPT && a.rolPT[t] ? M.SUBL[a.rolPT[t]] : 'sin definir'); })};
+  return {l:['Rol · ' + M.ROL[a.rol]]};
+}
+function mapaSVG(lay, o){
+  var L = LAYOUT[lay], p = o.pfx + '-' + lay, h = [];
+  var descId = p + '-desc';
+  h.push('<svg class="map-svg map-'+lay+'" viewBox="'+L.vb+'" role="group" aria-label="Mapa de actores y flujos de datos" aria-describedby="'+descId+'" xmlns="http://www.w3.org/2000/svg">');
+  h.push('<desc id="'+descId+'">CumbreViva comunica datos al CRM de Orbiax (F1) y a Metrivara (F4), y de su tienda a su propio equipo de Marketing (F6). Voz Andante accede al CRM de Orbiax (F2). Orbiax aloja el CRM en CuarzoDelta Hosting (F3). Metrivara incorpora eventos a su base comparativa y modelos (F5). La lista de actores y la lista de flujos de esta página contienen la misma información en texto.</desc>');
+  h.push('<defs><marker id="'+p+'-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7684"/></marker><marker id="'+p+'-ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1F6F78"/></marker></defs>');
+  ['CV','CL','BA','MP','VA'].forEach(function(x){
+    var n = L.nodes[x], b = n.box, sel = o.selActor===x, inter = o.nodos;
+    var attrs = inter ? ' role="button" tabindex="0" data-act="abrir-actor" data-id="'+x+'" aria-label="Abrir ficha de '+esc(ACTOR[x].titulo)+'"' + (sel ? ' aria-pressed="true"' : ' aria-pressed="false"') : ' aria-hidden="true"';
+    h.push('<g class="node'+(sel?' sel':'')+(inter?'':' static')+'"'+attrs+'>');
+    h.push('<rect class="box'+(n.dash?' dash':'')+'" x="'+b[0]+'" y="'+b[1]+'" width="'+b[2]+'" height="'+b[3]+'" rx="10"/>');
+    h.push('<text class="ttl" x="'+n.title[0]+'" y="'+n.title[1]+'">'+esc(ACTOR[x].titulo)+'</text>');
+    (n.sub||[]).forEach(function(s){ h.push('<text class="tx" x="'+s[0]+'" y="'+s[1]+'">'+esc(s[2])+'</text>'); });
+    var rl = lineasRol(x), lines = [];
+    rl.l.forEach(function(t){ lines = lines.concat(envolver(t, n.wrap)); });
+    lines = lines.slice(0, n.max || 2);
+    lines.forEach(function(t,i){ h.push('<text class="rl'+(rl.vacio?' vacio':'')+'" x="'+n.role[0]+'" y="'+(n.role[1]+i*14)+'">'+esc(t)+'</text>'); });
+    (n.inner||[]).forEach(function(ib){
+      var r = ib.r;
+      h.push('<rect class="inner'+(ib.dash?' dash':'')+'" x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" rx="6"/>');
+      var y0 = r[1] + r[3]/2 - (ib.t.length-1)*7 + 4;
+      ib.t.forEach(function(t,i){ h.push('<text class="tx" x="'+(r[0]+10)+'" y="'+(y0+i*14)+'">'+esc(t)+'</text>'); });
+    });
+    h.push('</g>');
+  });
+  M.FL_ORDEN.forEach(function(f){
+    var fl = L.flows[f], sel = o.selFlujo===f, set = !!(S.flujos[f] && S.flujos[f].tipo), inter = o.flujos;
+    var etq = FLUJO[f].aria + (set ? '. Tipo elegido: ' + M.TIPO[S.flujos[f].tipo] : '');
+    var attrs = inter ? ' role="button" tabindex="0" data-act="sel-flujo" data-id="'+f+'" aria-label="'+esc(etq)+'" aria-pressed="'+(sel?'true':'false')+'"' : ' aria-hidden="true"';
+    h.push('<g class="fl'+(inter?' int':'')+(sel?' sel':'')+(set&&o.marcarTipos?' set':'')+'"'+attrs+'>');
+    if(inter) h.push('<path class="hit" d="'+fl.d+'"/>');
+    h.push('<path class="ln" d="'+fl.d+'" marker-end="url(#'+p+(sel?'-ahs':'-ah')+')"/>');
+    h.push('<circle cx="'+fl.lab[0]+'" cy="'+fl.lab[1]+'" r="12"/><text x="'+fl.lab[0]+'" y="'+fl.lab[1]+'">'+f+'</text>');
+    h.push('</g>');
+  });
+  h.push('</svg>');
+  return h.join('');
+}
+function mapa(o){ return mapaSVG('wide', o) + mapaSVG('tall', o); }
+
+/* ---------- componentes de formulario ---------- */
+function opcion(tipo, name, val, label, checked, extra){
+  var id = 'in-' + name.replace(/[^A-Za-z0-9]/g,'-') + '-' + val;
+  return '<div class="opt"><input type="'+tipo+'" id="'+id+'" name="'+name+'" value="'+val+'"'+(checked?' checked':'')+(extra||'')+'><label for="'+id+'">'+label+'</label></div>';
+}
+function grupo(legend, name, mapaOpc, valor, opts){
+  opts = opts || {};
+  var tipo = opts.multi ? 'checkbox' : 'radio';
+  var h = '<fieldset><legend>'+legend+(opts.ayuda?' '+ayudaHTML(opts.ayuda, name):'')+'</legend><div class="opts'+(opts.col?' col':'')+'">';
+  (opts.orden || Object.keys(mapaOpc)).forEach(function(k){
+    var chk = opts.multi ? has(valor,k) : valor===k;
+    var dis = opts.deshabilitar && opts.deshabilitar[k];
+    h += opcion(tipo, name, k, esc(mapaOpc[k]) + (dis ? ' <span class="hint">('+esc(dis)+')</span>' : ''), chk, dis ? ' disabled' : '');
+  });
+  return h + '</div>' + (opts.post||'') + '</fieldset>';
+}
+var ayudaN = 0;
+function ayudaHTML(t, key){ ayudaN++; return '<details class="help"><summary aria-label="Ayuda">i</summary><span class="helptx">'+esc(t)+'</span></details>'; }
+function ayudaBloque(titulo, t){ return '<details class="help helpline"><summary>¿Qué significa “'+esc(titulo)+'”?</summary><span class="helptx">'+esc(t)+'</span></details>'; }
+
+/* ---------- ficha de actor ---------- */
+function rolOpciones(x, etapa){
+  var o = {RESP:M.ROL.RESP, ENC:M.ROL.ENC, TER:M.ROL.TER, SUB:M.ROL.SUB, PEND:M.ROL.PEND};
+  var dis = null;
+  if(etapa!=='E1' && x!=='CV'){
+    o.DIST = M.ROL.DIST;
+    if(x==='VA' || x==='BA') dis = {DIST:'Interviene en un solo tratamiento del caso'};
+  }
+  return {o:o, dis:dis};
+}
+function fichaHTML(x, etapa){
+  var A = ACTOR[x], a = S.actores[x], e2 = etapa!=='E1', h = [];
+  h.push('<div class="fhead"><h2 id="ficha-tit-'+x+'">'+esc(A.titulo)+'</h2><p class="razon">'+esc(A.razon)+'</p><p class="para"><strong>Para qué interviene:</strong> '+esc(A.para)+'</p>');
+  if(e2 && A.etiqueta) h.push('<span class="etq">Etiqueta contractual: '+esc(A.etiqueta)+'</span>');
+  h.push('</div>');
+  if(x==='CV'){
+    h.push('<p class="hint">¿Actúa por cuenta de CumbreViva? Es CumbreViva.</p>');
+  } else {
+    h.push(grupo('¿Actúa por cuenta de CumbreViva?', 'a.'+x+'.porCuenta', M.PORCUENTA, a.porCuenta, {ayuda:AYUDA.porCuenta}));
+  }
+  var ro = rolOpciones(x, etapa);
+  var ay = ayudaBloque('Tercero receptor', AYUDA.tercero) + ayudaBloque('Subcontratado del encargado', AYUDA.subcontratado);
+  h.push(grupo('Rol propuesto', 'a.'+x+'.rol', ro.o, a.rol, {deshabilitar:ro.dis, post:'<div style="margin-top:.4rem;display:flex;flex-direction:column;gap:.1rem">'+ay+'</div>'}));
+  if(e2 && a.rol==='DIST'){
+    h.push('<div class="subroles"><p class="hint">'+esc(AYUDA.porTrat)+'</p>');
+    M.TRAT[x].forEach(function(t){
+      h.push(grupo(esc(M.TRAT_L[t]), 'a.'+x+'.rolPT.'+t, M.SUBL, a.rolPT && a.rolPT[t], {}));
+    });
+    h.push(ayudaBloque('Responsable de ese tratamiento', AYUDA.respTrat) + '</div>');
+  }
+  if(e2 && x!=='CV'){
+    h.push('<p class="sec">Contratos y conducta</p>');
+    h.push(grupo('Instrucciones documentadas', 'a.'+x+'.instrucciones', M.INSTR, a.instrucciones));
+    h.push(grupo('Uso para finalidad propia', 'a.'+x+'.usoPropio', M.USO, a.usoPropio));
+    if(x==='CL') h.push(grupo('Subcontratación', 'subcCL', M.SUBC, S.subcCL));
+    else if(x==='BA') h.push('<div class="field"><p class="lbl">Subcontratación</p><p class="derivado">Subcontratado por Orbiax · Autorización: '+esc(S.subcCL ? M.SUBC[S.subcCL] : 'sin definir (se responde en la ficha de Orbiax)')+'</p></div>');
+    else h.push('<div class="field"><p class="lbl">Subcontratación</p><p class="derivado">No se analiza en este caso</p></div>');
+    var docs = docsDisponibles();
+    var sid = 'sel-ev-'+x;
+    h.push('<div class="field" style="margin-bottom:1rem"><label class="lbl" for="'+sid+'">Evidencia principal</label><select id="'+sid+'" name="a.'+x+'.evidencia"><option value="">Elige un documento</option>' + docs.map(function(d){ return '<option value="'+d+'"'+(a.evidencia===d?' selected':'')+'>'+d+' · '+esc(DOCS[d].titulo)+'</option>'; }).join('') + '</select></div>');
+    var iid = 'sel-in-'+x;
+    h.push('<div class="field"><label class="lbl" for="'+iid+'">Incertidumbre pendiente</label><select id="'+iid+'" name="a.'+x+'.incertidumbre"><option value="">Elige una opción</option>' + Object.keys(M.INCERT).map(function(k){ return '<option value="'+k+'"'+(a.incertidumbre===k?' selected':'')+'>'+esc(M.INCERT[k])+'</option>'; }).join('') + '</select></div>');
+  }
+  return h.join('');
+}
+function resumenHTML(etapa){
+  return '<h2 class="sr-only">Actores</h2><ul class="resumen">' + M.ACT_ORDEN.map(function(x){
+    var ok = completoActor(x, etapa);
+    return '<li><button type="button" data-act="abrir-actor" data-id="'+x+'" id="res-'+x+'" aria-current="'+(ui.actorSel===x?'true':'false')+'"><span class="n">'+esc(ACTOR[x].titulo)+'</span><span class="r">'+esc(M.etiquetaRol(S,x))+'</span><span class="st'+(ok?' ok':'')+'">'+(ok?'Ficha completa':'Ficha por completar')+'</span></button></li>';
+  }).join('') + '</ul>';
+}
+
+/* ---------- flujos (E3) ---------- */
+function resumenFlujo(f){
+  var st = S.flujos[f];
+  return 'Tipo: ' + (st.tipo ? M.TIPO[st.tipo] : 'sin definir') + ' · Faltantes: ' + (st.falta.length ? st.falta.join(', ') : 'sin definir');
+}
+function flujosHTML(){
+  return M.FL_ORDEN.map(function(f){
+    var sel = ui.flujoSel===f, st = S.flujos[f], ctx = '';
+    if(f==='F4' || f==='F5') ctx = '<p class="ctx">Rol de Metrivara en este tratamiento: <strong>'+esc(M.etiquetaRolEn(S,'MP',f))+'</strong></p>';
+    return '<section class="flujo'+(sel?' sel':'')+'" id="flujo-'+f+'" aria-labelledby="fh-'+f+'">' +
+      '<button type="button" class="flujo-head" id="fh-'+f+'" data-act="sel-flujo" data-id="'+f+'" aria-expanded="'+(sel?'true':'false')+'" aria-controls="fx-'+f+'"><span class="fid" aria-hidden="true">'+f+'</span><span class="fdesc"><span class="sr-only">'+f+': </span>'+esc(FLUJO[f].desc)+'</span><span class="fsum">'+esc(resumenFlujo(f))+'</span></button>' +
+      '<div class="fbody" id="fx-'+f+'"'+(sel?'':' hidden')+'><p class="od">'+esc(FLUJO[f].od)+'</p>'+ctx +
+      grupo('Tipo de comunicación', 'f.'+f+'.tipo', M.TIPO, st.tipo, {col:true}) +
+      grupo('Documento o condición faltante <span class="hint">(elige una o dos)</span>', 'f.'+f+'.falta', M.FALTA, st.falta, {multi:true, col:true, post:'<p class="aviso" id="msg-falta-'+f+'" role="status"></p>'}) +
+      '</div></section>';
+  }).join('');
+}
+
+/* ---------- panel derecho ---------- */
+function panelHTML(){
+  var e = ui.vista, h = '';
+  if(idx(e) >= idx('E2')){
+    var dispH4 = idx(S.etapa) >= idx('E3');
+    var orden = ['H1','H2','H3'].concat(dispH4 ? ['H4'] : []).concat(['H5','H6']);
+    h += '<section aria-labelledby="hall-tit"><h2 id="hall-tit">Hallazgos</h2><p class="hint">Marca los enunciados que registrarías como hallazgo. <span id="hall-cont">'+S.hallazgos.length+' registrados</span>.</p><div class="hallazgos">' +
+      orden.map(function(k){ return opcion('checkbox','hall',k,esc(M.HALL[k]),has(S.hallazgos,k), S.cerrado?' disabled':''); }).join('') + '</div></section>';
+  }
+  var k = M.conflictos(S, idx(S.etapa) >= idx('E3'));
+  h += '<section aria-labelledby="coh-tit"><h2 id="coh-tit">Coherencia entre tus decisiones</h2>';
+  if(!k.length) h += '<p class="vacio">Sin observaciones de coherencia por ahora.</p>';
+  else h += '<ul class="coh">' + k.map(function(c,i){ return '<li>'+esc(c.base + c.suf)+' <button type="button" class="linkbtn" data-act="ir-'+c.ir.t+'" data-id="'+c.ir.id+'">'+(c.ir.t==='actor'?'Ir a la ficha':'Ir al flujo')+'</button></li>'; }).join('') + '</ul>';
+  h += '</section>';
+  return h;
+}
+
+/* ---------- vistas ---------- */
+function cabecera(e){
+  return '<header class="stagehead"><p class="eyebrow">'+e+' de E4</p><h1>'+e+' · '+esc(TITULO[e])+'</h1></header>';
+}
+function narrativa(e){
+  var n = NARRATIVA[e]; if(!n) return '';
+  return '<article class="msg"><p class="from">Mensaje de '+esc(PERSONA[n.de])+'</p><blockquote><p>'+esc(n.t)+'</p></blockquote></article>';
+}
+function llegadas(lista){
+  return '<div class="arrivals" role="note"><strong>Documentos recibidos:</strong> ' + lista.map(function(d){ return '<button type="button" class="btn small sec" data-act="abrir-doc" data-id="'+d+'">'+d+' · '+esc(DOCS[d].titulo)+'</button>'; }).join(' ') + '</div>';
+}
+function docFrame(d){
+  var D = DOCS[d];
+  return '<div class="doc"><div class="franja"><span>Documento simulado para fines de entrenamiento.</span><span>'+d+'</span></div>' +
+    '<dl class="docmeta"><dt>Clave</dt><dd>'+d+'</dd><dt>Tipo</dt><dd>'+esc(D.tipo)+'</dd><dt>Emisor</dt><dd>'+esc(D.emisor)+'</dd><dt>Fecha</dt><dd>'+esc(D.fecha)+'</dd></dl>' +
+    '<div class="doctext">'+D.html+'</div></div>';
+}
+function botonContinuar(e, etiqueta){
+  var futuro = idx(S.etapa) > idx(e);
+  var sig = ETAPAS[idx(e)+1];
+  var t = futuro ? 'Ir a '+sig : etiqueta;
+  return '<div class="continuar noprint"><button type="button" class="btn" data-act="continuar" data-id="'+e+'" id="btn-cont-'+e+'">'+esc(t)+'</button><div class="aviso" id="msg-cont" role="status" aria-live="polite"></div></div>';
+}
+
+function vistaE0(){
+  var ro = idx(S.etapa) > idx('E0');
+  marcarLeido('D01');
+  var h = cabecera('E0') + narrativa('E0') + '<section class="card" aria-labelledby="d01t"><h2 id="d01t">D01 · '+esc(DOCS.D01.titulo)+'</h2>' + docFrame('D01') + '</section>';
+  if(ro){
+    h += '<section class="card"><h2>Tu hipótesis inicial (registrada)</h2><p>'+esc(M.HIP[S.hipotesis])+'</p><p class="hint">Confianza: '+esc(M.CONF[S.confianza])+'</p></section>';
+  } else {
+    h += '<section class="card" aria-labelledby="hip-t"><h2 id="hip-t">Tu primera hipótesis</h2><p class="hint">Responde sin revisar todavía el resto del expediente. No hay reacción a esta respuesta.</p>' +
+      grupo('¿De quién es el incidente?', 'hip', M.HIP, S.hipotesis, {col:true}) +
+      grupo('¿Qué tanta confianza tienes en esta hipótesis?', 'conf', M.CONF, S.confianza) + '</section>';
+  }
+  return h + botonContinuar('E0','Continuar a E1');
+}
+function vistaActores(e){
+  var h = cabecera(e);
+  if(e==='E1'){
+    h += '<p class="lead">Abre cada actor desde el mapa y registra si actúa por cuenta de CumbreViva y qué rol propones. Para CumbreViva sólo se registra el rol.</p>';
+    h += llegadas(['D02','D03']);
+  } else {
+    h += narrativa('E2') + llegadas(['D04','D05','D06','D07','D08','D09']);
+  }
+  h += '<div class="mapwrap" id="mapa"></div>';
+  h += '<p class="sr-only">La lista de actores debajo del mapa contiene la misma información en texto y permite abrir cada ficha.</p>';
+  h += '<div class="actores"><div id="resumen"></div><div id="ficha" class="ficha" tabindex="-1" aria-live="off"></div></div>';
+  if(e==='E2'){
+    var w = M.palabras(S.j1);
+    h += '<section class="card" style="margin-top:1rem" aria-labelledby="j1t"><h2 id="j1t">Justificación breve (J1)</h2><label class="lbl" for="j1">Metrivara: ¿sigue actuando sólo por cuenta de CumbreViva? Explica tu posición; si distingues tratamientos, di cuáles.</label><textarea id="j1" data-text="j1" aria-describedby="j1c">'+esc(S.j1)+'</textarea><p class="counter" id="j1c">'+contador(w,40,100)+'</p></section>';
+  }
+  return h + botonContinuar(e, e==='E1' ? 'Continuar a E2' : 'Continuar a E3');
+}
+function vistaE1Instantanea(){
+  var h = cabecera('E1') + '<p class="lead">Ésta es tu clasificación inicial, registrada al cerrar E1. No se modifica; puedes ajustar los roles actuales en E2 y E3.</p>';
+  h += '<div class="mapwrap small">'+mapaInstantanea()+'</div>';
+  h += '<section class="card"><h2>Clasificación inicial (registrada)</h2><ul>' + M.ACT_ORDEN.map(function(x){ var c = S.clasificacionInicial[x]; return '<li><strong>'+esc(ACTOR[x].titulo)+'</strong>: '+(x==='CV'?'':'¿por cuenta de CumbreViva? '+esc(M.PORCUENTA[c.porCuenta]||'—')+' · ')+'rol '+esc(M.lc(M.ROL[c.rol]||'—'))+'</li>'; }).join('') + '</ul></section>';
+  return h + botonContinuar('E1','Continuar a E2');
+}
+function mapaInstantanea(){
+  var actual = S.actores, copia = JSON.parse(JSON.stringify(S.actores));
+  M.ACT_ORDEN.forEach(function(x){ copia[x].rol = S.clasificacionInicial[x].rol; copia[x].rolPT = {}; });
+  S.actores = copia; var m = mapa({pfx:'snap', nodos:false, flujos:false}); S.actores = actual; return m;
+}
+function vistaE3(){
+  var h = cabecera('E3') + narrativa('E3') + llegadas(['D11']);
+  h += '<p class="lead">Selecciona un flujo en el mapa o en la lista. Para cada flujo indica el tipo de comunicación y qué documento o condición falta para defenderlo.</p>';
+  h += '<div class="mapwrap" id="mapa"></div>';
+  h += '<p class="hint">Puedes revisar la ficha de cualquier actor seleccionándolo en el mapa.</p>';
+  h += '<h2 id="flujos-t">Flujos de datos</h2><div class="flujos" id="flujos" aria-labelledby="flujos-t"></div>';
+  var w = M.palabras(S.j2);
+  h += '<section class="card" aria-labelledby="j2t"><h2 id="j2t">Justificación breve (J2)</h2><p>Elige el flujo que hoy te costaría más defender ante una autoridad y explica qué falta.</p>' +
+    '<label class="lbl" for="j2Flujo">Flujo elegido</label><select id="j2Flujo" name="j2Flujo"><option value="">Elige un flujo</option>' + M.FL_ORDEN.map(function(f){ return '<option value="'+f+'"'+(S.j2Flujo===f?' selected':'')+'>'+f+' · '+esc(FLUJO[f].desc)+'</option>'; }).join('') + '</select>' +
+    '<label class="lbl" for="j2" style="margin-top:.75rem">Explicación (40–100 palabras)</label><textarea id="j2" data-text="j2" aria-describedby="j2c">'+esc(S.j2)+'</textarea><p class="counter" id="j2c">'+contador(w,40,100)+'</p></section>';
+  return h + botonContinuar('E3','Continuar a E4');
+}
+function vistaE4(){
+  var h = cabecera('E4') + narrativa('E4') + llegadas(['D10']);
+  h += '<div class="arrivals" role="note"><span>Referencia normativa opcional:</span> <button type="button" class="btn small sec" data-act="abrir-doc" data-id="D12">Consultar nota de marco normativo (D12)</button></div>';
+  h += '<section class="card">' + grupo('1. ¿Quién coordina la respuesta?', 'coord', M.COORD, S.coordinacion, {col:true}) + '</section>';
+  h += '<section class="card">' + grupo('2. Acciones <span class="hint">(elige hasta cuatro)</span>', 'acc', M.ACC, S.acciones, {multi:true, col:true, orden:M.ACC_ORDEN, post:'<p class="aviso" id="msg-acc" role="status"></p>'}) + '</section>';
+  h += '<section class="card">' + grupo('3. Puntos para revisión adicional <span class="hint">(opcional, hasta tres)</span>', 'rev', M.REV, S.revisiones, {multi:true, col:true, orden:M.REV_ORDEN, post:'<p class="aviso" id="msg-rev" role="status"></p>'}) + '</section>';
+  var w = M.palabras(S.recomendacion);
+  h += '<section class="card" aria-labelledby="rect"><h2 id="rect">4. Recomendación ejecutiva</h2><p class="hint" id="recg">Orientación: 180–250 palabras. Puedes cubrir:</p><ul class="guia"><li>quién coordina;</li><li>qué se exige al proveedor;</li><li>qué contratos se corrigen;</li><li>qué flujos se limitan;</li><li>qué queda en revisión.</li></ul>' +
+    '<label class="lbl" for="recom">Recomendación para Dirección</label><textarea id="recom" data-text="recomendacion" style="min-height:14rem" aria-describedby="recg recc">'+esc(S.recomendacion)+'</textarea><p class="counter" id="recc">'+contadorRec(w)+'</p></section>';
+  h += '<div class="continuar noprint"><button type="button" class="btn" data-act="cerrar">5. Cerrar expediente y generar reporte</button><div class="aviso" id="msg-cont" role="status" aria-live="polite"></div></div>';
+  return h;
+}
+function contador(w, min, max){ return w + ' palabras · requerido: ' + min + '–' + max; }
+function contadorRec(w){
+  var t = w + ' palabras · orientación 180–250';
+  if(w>0 && (w<180 || w>250)) t += (w<150 || w>300) ? ' · para cerrar se requieren entre 150 y 300' : ' · se sugiere 180–250 palabras';
+  return t;
+}
+
+/* ---------- reporte ---------- */
+function reporteHTML(){
+  var r = M.retro(S), h = [];
+  var dur = S.tFin && S.tInicio ? Math.max(1, Math.round((S.tFin - S.tInicio)/60000)) : null;
+  h.push('<div class="acciones-rep noprint"><button type="button" class="btn" data-act="imprimir">Imprimir / Guardar como PDF</button><button type="button" class="btn ghost" data-act="nuevo">Iniciar un nuevo expediente</button></div>');
+  h.push('<article class="reporte" id="reporte" aria-labelledby="rep-t"><h1 id="rep-t">REPORTE DE GOBERNANZA DE PROVEEDORES Y FLUJOS DE DATOS</h1><p class="rsub">LABORATORIO 02 · NO FUE NUESTRO INCIDENTE — Caso ficticio con fines de entrenamiento.</p>');
+  function sec(n, t, body, pb){ h.push('<section class="'+(pb?'pb':'')+'" aria-labelledby="rs'+n+'"><h2 id="rs'+n+'"><span class="num">'+n+'.</span> '+t+'</h2>'+body+'</section>'); }
+  sec(1,'Datos generales','<dl class="kv"><dt>Participante</dt><dd>'+esc(S.participante)+'</dd><dt>Organización ficticia</dt><dd>CumbreViva Comercio, S.A. de C.V.</dd><dt>Cierre</dt><dd>'+esc(S.tFin?fechaHora(S.tFin):'—')+'</dd><dt>Duración</dt><dd>'+(dur?dur+(dur===1?' minuto':' minutos'):'—')+'</dd><dt>Consulta de D12</dt><dd>'+(S.memoConsultado?'Sí':'No')+'</dd></dl>');
+  sec(2,'Mapa de actores', '<div class="mapwrap">'+mapa({pfx:'rep', nodos:false, flujos:false, marcarTipos:true})+'</div><ul>'+M.FL_ORDEN.map(function(f){ return '<li><strong>'+f+'</strong> · '+esc(FLUJO[f].desc)+' — <em>'+esc(S.flujos[f].tipo?M.TIPO[S.flujos[f].tipo]:'sin definir')+'</em></li>'; }).join('')+'</ul>', true);
+  sec(3,'Hipótesis inicial','<p>'+esc(M.HIP[S.hipotesis]||'—')+'</p><p class="hint">Confianza: '+esc(M.CONF[S.confianza]||'—')+'</p>');
+  var ci = S.clasificacionInicial || {};
+  sec(4,'Clasificación inicial','<div class="rcards">'+M.ACT_ORDEN.map(function(x){ var c = ci[x]||{}; return '<div class="rcard"><h3>'+esc(ACTOR[x].titulo)+'</h3><dl>'+(x==='CV'?'':'<dt>¿Actúa por cuenta de CumbreViva?</dt><dd>'+esc(M.PORCUENTA[c.porCuenta]||'—')+'</dd>')+'<dt>Rol</dt><dd>'+esc(M.ROL[c.rol]||'—')+'</dd></dl></div>'; }).join('')+'</div>');
+  sec(5,'Clasificación final','<div class="rcards">'+M.ACT_ORDEN.map(function(x){
+    var a = S.actores[x], mod = ci[x] && ci[x].rol!==a.rol;
+    var rol = a.rol==='DIST' ? M.ROL.DIST + '<ul>'+M.TRAT[x].map(function(t){ return '<li>'+esc(M.TRAT_L[t])+': '+esc(M.SUBL[a.rolPT[t]]||'—')+'</li>'; }).join('')+'</ul>' : esc(M.ROL[a.rol]||'—');
+    var b = '<div class="rcard"><h3>'+esc(ACTOR[x].titulo)+(mod?'<span class="mod">modificado en revisión</span>':'')+'</h3><dl>';
+    if(x!=='CV') b += '<dt>¿Actúa por cuenta de CumbreViva?</dt><dd>'+esc(M.PORCUENTA[a.porCuenta]||'—')+'</dd>';
+    b += '<dt>Rol</dt><dd>'+rol+'</dd>';
+    if(x!=='CV'){
+      b += '<dt>Etiqueta contractual</dt><dd>'+esc(ACTOR[x].etiqueta)+'</dd><dt>Instrucciones documentadas</dt><dd>'+esc(M.INSTR[a.instrucciones]||'—')+'</dd><dt>Uso para finalidad propia</dt><dd>'+esc(M.USO[a.usoPropio]||'—')+'</dd>';
+      b += '<dt>Subcontratación</dt><dd>'+esc(x==='CL' ? (M.SUBC[S.subcCL]||'—') : x==='BA' ? 'Subcontratado por Orbiax · Autorización: '+(M.SUBC[S.subcCL]||'—') : 'No se analiza en este caso')+'</dd>';
+      b += '<dt>Evidencia principal</dt><dd>'+esc(a.evidencia ? a.evidencia+' · '+DOCS[a.evidencia].titulo : '—')+'</dd><dt>Incertidumbre pendiente</dt><dd>'+esc(M.INCERT[a.incertidumbre]||'—')+'</dd>';
+    }
+    return b + '</dl></div>';
+  }).join('')+'</div>', true);
+  sec(6,'Matriz de flujos','<div class="rcards">'+M.FL_ORDEN.map(function(f){ var st = S.flujos[f]; return '<div class="rcard"><h3>'+f+'</h3><p>'+esc(FLUJO[f].desc)+'</p><dl><dt>Tipo de comunicación</dt><dd>'+esc(M.TIPO[st.tipo]||'—')+'</dd><dt>Documento o condición faltante</dt><dd>'+(st.falta.length?'<ul>'+st.falta.map(function(m){ return '<li>'+m+' · '+esc(M.FALTA[m])+'</li>'; }).join('')+'</ul>':'—')+'</dd></dl></div>'; }).join('')+'</div>');
+  function listaFl(tipo){ var l = M.FL_ORDEN.filter(function(f){ return S.flujos[f].tipo===tipo; }); return l.length ? '<ul>'+l.map(function(f){ return '<li><strong>'+f+'</strong> · '+esc(FLUJO[f].desc)+'</li>'; }).join('')+'</ul>' : '<p>Ninguna identificada.</p>'; }
+  sec(7,'Remisiones identificadas', listaFl('RE'));
+  sec(8,'Transferencias identificadas', listaFl('TRANS'));
+  sec(9,'Subcontrataciones','<dl class="kv"><dt>Subcontratación de Orbiax</dt><dd>'+esc(M.SUBC[S.subcCL]||'—')+'</dd><dt>Rol de CuarzoDelta Hosting</dt><dd>'+esc(M.etiquetaRol(S,'BA'))+'</dd></dl><p class="hint" style="margin-top:.5rem">Flujos tipificados como subcontratación:</p>'+listaFl('SUBC'));
+  var usos = [];
+  M.PROV.forEach(function(x){ var a = S.actores[x]; if(a.usoPropio==='SI' || a.usoPropio==='POS') usos.push(ACTOR[x].titulo+': uso para finalidad propia — '+M.USO[a.usoPropio]); if(a.rol==='DIST') M.TRAT[x].forEach(function(t){ var v = a.rolPT[t]; if(v==='TER' || v==='RESPT') usos.push(ACTOR[x].titulo+' en '+t+': '+M.SUBL[v]); }); });
+  sec(10,'Usos para finalidad propia detectados', usos.length ? '<ul>'+usos.map(function(u){ return '<li>'+esc(u)+'</li>'; }).join('')+'</ul>' : '<p>Ninguno identificado.</p>');
+  var hs = ['H1','H2','H3','H4','H5','H6'].filter(function(k){ return has(S.hallazgos,k); });
+  sec(11,'Contradicciones contractuales (hallazgos registrados)', hs.length ? '<ul>'+hs.map(function(k){ return '<li>'+esc(M.HALL[k])+'</li>'; }).join('')+'</ul>' : '<p>Ningún hallazgo registrado.</p>');
+  var falt = ['M1','M2','M3','M4','M5','M6'].map(function(m){ var fl = M.FL_ORDEN.filter(function(f){ return has(S.flujos[f].falta,m); }); return fl.length ? '<li><strong>'+m+'</strong> · '+esc(M.FALTA[m])+': '+fl.join(', ')+'</li>' : ''; }).join('');
+  sec(12,'Documentación faltante', falt ? '<ul>'+falt+'</ul>' : '<p>No se marcó documentación faltante.</p>');
+  sec(13,'Coordinación y acciones seleccionadas','<p><strong>Coordinación:</strong> '+esc(M.COORD[S.coordinacion]||'—')+'</p><p><strong>Acciones:</strong></p><ul>'+S.acciones.map(function(a){ return '<li>'+esc(M.ACC[a])+'</li>'; }).join('')+'</ul>');
+  sec(14,'Recomendación ejecutiva','<div class="txt">'+esc(S.recomendacion)+'</div><p class="hint" style="margin-top:.4rem">'+M.palabras(S.recomendacion)+' palabras</p>');
+  var inc = M.PROV.filter(function(x){ return S.actores[x].incertidumbre && S.actores[x].incertidumbre!=='NINGUNA'; }).map(function(x){ return '<li>'+esc(ACTOR[x].titulo)+': '+esc(M.INCERT[S.actores[x].incertidumbre])+'</li>'; }).join('');
+  var rv = S.revisiones.map(function(k){ return '<li>'+esc(M.REV[k]||k)+'</li>'; }).join('');
+  sec(15,'Incertidumbres pendientes','<p><strong>Por actor:</strong></p>'+(inc?'<ul>'+inc+'</ul>':'<p>Ninguna registrada.</p>')+'<p><strong>Puntos para revisión adicional:</strong></p>'+(rv?'<ul>'+rv+'</ul>':'<p>Ninguno seleccionado.</p>'));
+  sec(16,'Justificaciones','<p><strong>J1 · Metrivara</strong></p><div class="txt">'+esc(S.j1)+'</div><p style="margin-top:.75rem"><strong>J2 · Flujo elegido: '+esc(S.j2Flujo||'—')+'</strong></p><div class="txt">'+esc(S.j2)+'</div>');
+  var rb = '<div class="retro"><p class="hint">'+esc(r.nota)+'</p><p>'+esc(r.apertura)+'</p>' + r.dims.map(function(d){ return '<h3>'+esc(d.titulo)+'</h3><ul>'+d.obs.map(function(o){ return '<li data-r="'+o.id+'">'+esc(o.texto)+'</li>'; }).join('')+'</ul>'; }).join('') + '</div>';
+  sec(17,'Retroalimentación narrativa', rb, true);
+  sec(18,'Nota metodológica','<p>No hay puntuación. La retroalimentación compara tus decisiones con el expediente y reconoce lecturas alternativas. La detección en textos libres es una lectura automática aproximada.</p>');
+  sec(19,'Nota normativa','<p>Marco de referencia: LFPDPPP vigente (DOF 20-03-2025, última reforma 14-11-2025) y Reglamento de 2011, en lo que resulte compatible con la LFPDPPP vigente. Las conclusiones marcadas como pendientes requieren revisión jurídica.</p>');
+  h.push('</article>');
+  h.push('<div class="acciones-rep noprint" style="margin-top:1rem"><button type="button" class="btn" data-act="imprimir">Imprimir / Guardar como PDF</button><button type="button" class="btn ghost" data-act="nuevo">Iniciar un nuevo expediente</button></div>');
+  return h.join('');
+}
+
+/* ---------- portada ---------- */
+function vistaPortada(previo, ilegible){
+  var h = '<section class="portada" aria-labelledby="p-t"><p class="eyebrow">Serie · Protección de datos personales y ciberseguridad en México</p><h1 id="p-t">LABORATORIO 02 · NO FUE NUESTRO INCIDENTE</h1><p class="sub">Responsable, encargado o tercero: ¿quién responde por qué?</p>';
+  h += '<div class="card"><ul><li>Participas como analista de Privacidad y Gobierno de Proveedores de CumbreViva, una tienda en línea mexicana.</li><li>Duración estimada: 35–40 minutos, en cinco etapas.</li><li>El caso, las organizaciones, las personas y los documentos son ficticios.</li><li>Tus decisiones se guardan automáticamente en este navegador.</li><li>No existe una puntuación visible: al cierre recibirás un reporte con retroalimentación narrativa.</li><li>La finalidad es analizar roles, tratamientos y flujos de datos entre la empresa y sus proveedores.</li></ul>' +
+    '<p class="pregunta">Cuando los datos están en manos de varios proveedores, ¿cómo se determina quién trata por cuenta de quién, qué comunicaciones son remisiones o transferencias y qué obligaciones no pueden simplemente desplazarse por contrato?</p></div>';
+  if(ilegible) h += '<p class="aviso" role="status">No se pudo recuperar un expediente anterior.</p>';
+  if(previo){
+    var et = previo.cerrado ? 'Expediente cerrado (reporte disponible)' : previo.etapa + ' · ' + TITULO[previo.etapa];
+    h += '<div class="card" aria-labelledby="cont-t"><h2 id="cont-t">Expediente en curso</h2><p><strong>'+esc(previo.participante)+'</strong> · '+esc(et)+(previo.guardadoEn?' · último guardado: '+esc(fechaHora(previo.guardadoEn)):'')+'</p><div class="continuar" style="border:none;padding-top:0;margin-top:.5rem"><button type="button" class="btn" data-act="continuar-exp">Continuar expediente</button><button type="button" class="btn ghost" data-act="nuevo">Iniciar un nuevo expediente</button></div></div>';
+  } else {
+    h += '<form class="card" id="formInicio" novalidate><label class="lbl" for="nombre">Nombre del participante</label><input type="text" id="nombre" maxlength="60" autocomplete="name" required aria-describedby="nombre-msg"><p class="aviso" id="nombre-msg" role="status"></p><button type="submit" class="btn">Abrir expediente</button><p class="small-print">Tu avance y tu nombre se guardan sólo en este navegador.</p></form>';
+  }
+  h += '</section>';
+  return h;
+}
+
+/* ---------- estructura y renderizado ---------- */
+function pintarTopbar(){
+  var tb = $('topbar');
+  if(!S){ tb.hidden = true; return; }
+  tb.hidden = false;
+  var st = '';
+  if(!S.cerrado){
+    st = '<nav class="stepper" aria-label="Etapas"><ol>' + ['E0','E1','E2','E3','E4'].map(function(e){
+      var dis = idx(e) > idx(S.etapa);
+      return '<li><button type="button" data-act="ir-etapa" data-id="'+e+'"'+(ui.vista===e?' aria-current="step"':'')+(dis?' disabled':'')+' aria-label="'+e+' · '+esc(TITULO[e])+(dis?' (aún no disponible)':'')+'">'+e+(ui.vista===e?'<span class="stt"> · '+esc(TITULO[e])+'</span>':'')+'</button></li>';
+    }).join('') + '</ol></nav>';
+  } else st = '<span class="hint">Expediente cerrado</span>';
+  var nuevos = docsDisponibles().filter(docNuevo).length;
+  tb.innerHTML = '<div class="brand"><span class="lab">LAB 02</span><span>No fue nuestro incidente</span></div>' + st +
+    '<div class="meta"><span id="tiempo"></span><span id="guardado"></span><button type="button" class="btn small ghost" id="btnExp" data-act="expediente">Expediente'+(nuevos?' <span class="badge" aria-label="'+nuevos+' documentos nuevos">'+nuevos+'</span>':'')+'</button><button type="button" class="btn small ghost" data-act="nuevo">Iniciar un nuevo expediente</button></div>';
+  pintarTiempo(); pintarGuardado();
+}
+function pintarTiempo(){
+  var t = $('tiempo'); if(!t || !S) return;
+  var fin = S.cerrado && S.tFin ? S.tFin : Date.now();
+  t.textContent = 'Tiempo: ' + Math.max(0, Math.round((fin - S.tInicio)/60000)) + ' min';
+}
+setInterval(pintarTiempo, 30000);
+function listaDocsHTML(){
+  var disp = docsDisponibles(), h = '<h2>Expediente</h2>';
+  var grupos = [['E0','Recibido en E0'],['E1','Recibidos en E1'],['E2','Recibidos en E2'],['E3','Recibido en E3'],['E4','Recibidos en E4']];
+  grupos.forEach(function(g){
+    var ds = disp.filter(function(d){ return DOCS[d].etapa===g[0]; });
+    if(!ds.length) return;
+    h += '<p class="stage">'+g[1]+'</p><ul>' + ds.map(function(d){ return '<li><button type="button" data-act="abrir-doc" data-id="'+d+'"><span class="k">'+d+'</span><span>'+esc(DOCS[d].titulo)+'</span>'+(docNuevo(d)?'<span class="nuevo">Nuevo</span>':'')+'</button></li>'; }).join('') + '</ul>';
+  });
+  return h;
+}
+function pintarSidebar(){
+  var sb = $('sidebar'), lay = $('layout'), rp = $('rightpanel');
+  if(!S || ui.vista==='REPORTE'){ sb.hidden = true; rp.hidden = true; lay.classList.add('solo'); return; }
+  sb.hidden = false; lay.classList.remove('solo');
+  sb.innerHTML = listaDocsHTML();
+  if(document.getElementById('expDialog').open) $('expDialogBody').innerHTML = listaDocsHTML();
+  var mostrarPanel = idx(ui.vista) >= idx('E1');
+  rp.hidden = !mostrarPanel;
+  if(mostrarPanel) rp.innerHTML = panelHTML();
+}
+function renderVista(foco){
+  ayudaN = 0;
+  if(!S){ return; }
+  if(S.cerrado) ui.vista = 'REPORTE';
+  if(!ui.vista) ui.vista = S.etapa;
+  var v = ui.vista, h = '';
+  if(v==='E0') h = vistaE0();
+  else if(v==='E1') h = S.clasificacionInicial ? vistaE1Instantanea() : vistaActores('E1');
+  else if(v==='E2') h = vistaActores('E2');
+  else if(v==='E3') h = vistaE3();
+  else if(v==='E4') h = vistaE4();
+  else if(v==='REPORTE') h = reporteHTML();
+  main.innerHTML = h;
+
+  pintarTopbar(); pintarSidebar(); refrescarPartes();
+  document.title = (v==='REPORTE' ? 'Reporte' : v + ' · ' + TITULO[v]) + ' · Laboratorio 02';
+  if(foco!==false){ main.focus({preventScroll:true}); window.scrollTo(0,0); }
+}
+function refrescarPartes(){
+  var v = ui.vista;
+  var m = $('mapa');
+  if(m){
+    var e3 = v==='E3' || v==='E4';
+    m.innerHTML = mapa({pfx:'m', nodos:true, flujos:v==='E3', selActor:(v==='E1'||v==='E2')?ui.actorSel:null, selFlujo:v==='E3'?ui.flujoSel:null, marcarTipos:v==='E3'});
+  }
+  var r = $('resumen'); if(r) r.innerHTML = resumenHTML(v);
+  var f = $('ficha');
+  if(f){
+    if(ui.actorSel){ f.innerHTML = fichaHTML(ui.actorSel, v) + navFicha(); f.setAttribute('aria-labelledby','ficha-tit-'+ui.actorSel); }
+    else { f.innerHTML = '<p class="placeholder">Selecciona un actor en el mapa o en la lista para abrir su ficha.</p>'; f.removeAttribute('aria-labelledby'); }
+  }
+  var fd = $('fichaDialog');
+  if(fd.open && ui.fichaDialogActor) $('fichaDialogBody').innerHTML = fichaHTML(ui.fichaDialogActor, 'E2');
+  var fl = $('flujos'); if(fl) fl.innerHTML = flujosHTML();
+  var rp = $('rightpanel'); if(rp && !rp.hidden) rp.innerHTML = panelHTML();
+}
+function navFicha(){
+  var i = M.ACT_ORDEN.indexOf(ui.actorSel), prev = M.ACT_ORDEN[i-1], next = M.ACT_ORDEN[i+1];
+  return '<div class="fichanav">' + (prev ? '<button type="button" class="btn small ghost" data-act="abrir-actor" data-id="'+prev+'" id="fnav-prev">← '+esc(ACTOR[prev].titulo)+'</button>' : '<span></span>') + (next ? '<button type="button" class="btn small sec" data-act="abrir-actor" data-id="'+next+'" id="fnav-next">'+esc(ACTOR[next].titulo)+' →</button>' : '') + '</div>';
+}
+function refrescar(){
+  var ae = document.activeElement, id = ae && ae.id;
+  refrescarPartes(); pintarTopbar();
+  if(id){ var el = document.getElementById(id); if(el && el !== document.activeElement){ try{ el.focus({preventScroll:true}); }catch(e){} } }
+}
+function marcarLeido(d){ if(S && !has(S.docsLeidos,d)){ S.docsLeidos.push(d); guardar(); } }
+
+
+/* ---------- documentos (diálogo) ---------- */
+function abrirDoc(d, opener){
+  if(docsDisponibles().indexOf(d)===-1) return;
+  ui.docAbierto = d; ui.opener = opener || document.activeElement;
+  $('docDialogTitle').textContent = d + ' · ' + DOCS[d].titulo;
+  $('docDialogBody').innerHTML = docFrame(d);
+  marcarLeido(d);
+  if(d==='D12' && !S.memoConsultado){ S.memoConsultado = true; guardar(); }
+  var actor = ui.fichaDialogActor && $('fichaDialog').open ? ui.fichaDialogActor : ((ui.vista==='E2') ? ui.actorSel : null);
+  var puede = !S.cerrado && actor && actor!=='CV' && idx(S.etapa) >= idx('E2');
+  var b = $('docUse'); b.hidden = !puede;
+  if(puede){ b.textContent = 'Usar como evidencia principal de ' + ACTOR[actor].titulo; b.dataset.actor = actor; }
+  var dlg = $('docDialog');
+  if(!dlg.open) dlg.showModal();
+  $('docDialogBody').scrollTop = 0;
+  pintarSidebar(); pintarTopbar();
+}
+function cerrarDialogo(id){
+  var dlg = $(id); if(dlg.open) dlg.close();
+}
+['docDialog','expDialog','fichaDialog'].forEach(function(id){
+  $(id).addEventListener('close', function(){
+    if(id==='fichaDialog'){ ui.fichaDialogActor = null; refrescar(); }
+    var o = id==='docDialog' ? ui.opener : null;
+    if(o && document.body.contains(o)){ try{ o.focus(); }catch(e){} }
+  });
+});
+function confirmar(texto, ok){
+  return new Promise(function(res){
+    var d = $('confirmDialog');
+    $('confirmText').textContent = texto;
+    $('confirmOk').textContent = ok || 'Continuar';
+    var fin = function(v){ $('confirmOk').onclick = null; $('confirmCancel').onclick = null; d.onclose = null; if(d.open) d.close(); res(v); };
+    $('confirmOk').onclick = function(){ fin(true); };
+    $('confirmCancel').onclick = function(){ fin(false); };
+    d.onclose = function(){ res(false); };
+    d.showModal();
+    $('confirmCancel').focus();
+  });
+}
+
+/* ---------- acciones ---------- */
+function iniciar(nombre){
+  S = estadoNuevo(nombre);
+  ui = {vista:'E0', actorSel:null, flujoSel:null, opener:null, docAbierto:null, fichaDialogActor:null};
+  guardar(true);
+  renderVista();
+}
+function nuevoExpediente(){
+  confirmar('Se borrará el expediente guardado en este navegador. ¿Continuar?', 'Iniciar un nuevo expediente').then(function(ok){
+    if(!ok) return;
+    borrarGuardado(); S = null;
+    ui = {vista:null, actorSel:null, flujoSel:null, opener:null, docAbierto:null, fichaDialogActor:null};
+    ['docDialog','expDialog','fichaDialog'].forEach(cerrarDialogo);
+    $('topbar').hidden = true; pintarSidebar();
+    main.innerHTML = vistaPortada(null);
+    document.title = 'Laboratorio 02 · No fue nuestro incidente';
+    var n = $('nombre'); if(n) n.focus();
+  });
+}
+function continuar(e){
+  if(idx(S.etapa) > idx(e)){ ui.vista = ETAPAS[idx(e)+1]; renderVista(); return; }
+  var f = faltantesEtapa(e), msg = $('msg-cont');
+  if(f.length){
+    msg.textContent = 'Para continuar falta: ' + f.join('; ') + '.';
+    return;
+  }
+  if(e==='E1' && !S.clasificacionInicial){
+    S.clasificacionInicial = {};
+    M.ACT_ORDEN.forEach(function(x){ S.clasificacionInicial[x] = {porCuenta: x==='CV' ? null : S.actores[x].porCuenta, rol: S.actores[x].rol}; });
+  }
+  S.etapa = ETAPAS[idx(e)+1];
+  ui.vista = S.etapa;
+  if(S.etapa==='E3' && !ui.flujoSel) ui.flujoSel = null;
+  guardar(true);
+  renderVista();
+  anunciar('Avanzaste a ' + S.etapa + ' · ' + TITULO[S.etapa] + '.');
+}
+function cerrarExpediente(){
+  var f = faltantesEtapa('E4'), msg = $('msg-cont');
+  if(f.length){ msg.textContent = 'Para cerrar falta: ' + f.join('; ') + '.'; return; }
+  confirmar('Después de cerrar no podrás modificar tus respuestas.', 'Cerrar expediente y generar reporte').then(function(ok){
+    if(!ok) return;
+    S.cerrado = true; S.tFin = Date.now(); S.etapa = 'REPORTE'; ui.vista = 'REPORTE';
+    guardar(true); renderVista();
+    anunciar('Expediente cerrado. Reporte generado.');
+  });
+}
+function abrirActor(x){
+  var v = ui.vista;
+  if(v==='E1' || v==='E2'){
+    ui.actorSel = x; refrescarPartes();
+    var f = $('ficha');
+    if(f){ if(window.matchMedia && window.matchMedia('(max-width:820px)').matches) irA(f); try{ f.focus({preventScroll:true}); }catch(e){} }
+  } else if(v==='E3' || v==='E4'){
+    if(S.cerrado) return;
+    ui.fichaDialogActor = x;
+    $('fichaDialogTitle').textContent = 'Ficha de ' + ACTOR[x].titulo;
+    $('fichaDialogBody').innerHTML = fichaHTML(x,'E2');
+    var d = $('fichaDialog'); if(!d.open) d.showModal();
+  }
+}
+function selFlujo(f, desdeMapa){
+  ui.flujoSel = ui.flujoSel===f && !desdeMapa ? null : f;
+  refrescarPartes();
+  var head = $('fh-'+f);
+  if(desdeMapa && head){ irA($('flujo-'+f)); head.focus({preventScroll:true}); }
+  else if(head) head.focus({preventScroll:true});
+}
+
+/* ---------- cambios de valores ---------- */
+function aplicarCambio(t){
+  var name = t.name, val = t.value;
+  if(!S || S.cerrado || !name) return false;
+  var p = name.split('.');
+  if(name==='hip'){ S.hipotesis = val; }
+  else if(name==='conf'){ S.confianza = val; }
+  else if(p[0]==='a'){
+    var a = S.actores[p[1]];
+    if(p[2]==='rolPT'){ a.rolPT = a.rolPT || {}; a.rolPT[p[3]] = val; }
+    else if(p[2]==='rol'){
+      if(a.rol==='DIST' && val!=='DIST' && a.rolPT && Object.keys(a.rolPT).length){ a.rolPT = {}; anunciar('Se descartaron los roles por tratamiento de ' + M.NOMBRE[p[1]] + '.'); }
+      a.rol = val;
+    }
+    else a[p[2]] = val || null;
+  }
+  else if(name==='subcCL'){ S.subcCL = val; }
+  else if(p[0]==='f' && p[2]==='tipo'){ S.flujos[p[1]].tipo = val; }
+  else if(p[0]==='f' && p[2]==='falta'){
+    var fa = S.flujos[p[1]].falta, msg = $('msg-falta-'+p[1]);
+    if(msg) msg.textContent = '';
+    if(t.checked){
+      if(val==='M7'){ S.flujos[p[1]].falta = ['M7']; }
+      else {
+        fa = fa.filter(function(m){ return m!=='M7'; });
+        if(fa.length >= 2){ t.checked = false; if(msg) msg.textContent = 'Elige como máximo dos faltantes; quita uno para agregar otro.'; return false; }
+        fa.push(val); S.flujos[p[1]].falta = fa;
+      }
+    } else S.flujos[p[1]].falta = fa.filter(function(m){ return m!==val; });
+  }
+  else if(name==='hall'){
+    if(t.checked){ if(!has(S.hallazgos,val)) S.hallazgos.push(val); } else S.hallazgos = S.hallazgos.filter(function(h){ return h!==val; });
+  }
+  else if(name==='j2Flujo'){ S.j2Flujo = val || null; }
+  else if(name==='coord'){ S.coordinacion = val; }
+  else if(name==='acc'){
+    var m = $('msg-acc'); if(m) m.textContent = '';
+    if(t.checked){
+      if(S.acciones.length >= 4){ t.checked = false; if(m) m.textContent = 'Puedes elegir hasta cuatro acciones; quita una para agregar otra.'; return false; }
+      S.acciones.push(val);
+    } else S.acciones = S.acciones.filter(function(a){ return a!==val; });
+  }
+  else if(name==='rev'){
+    var mr = $('msg-rev'); if(mr) mr.textContent = '';
+    if(t.checked){
+      if(S.revisiones.length >= 3){ t.checked = false; if(mr) mr.textContent = 'Puedes elegir hasta tres puntos; quita uno para agregar otro.'; return false; }
+      S.revisiones.push(val);
+    } else S.revisiones = S.revisiones.filter(function(a){ return a!==val; });
+  }
+  else return false;
+  return true;
+}
+document.addEventListener('change', function(ev){
+  var t = ev.target;
+  if(!t.name) return;
+  if(aplicarCambio(t)){
+    guardar();
+    var simples = ['coord','acc','rev','hip','conf','j2Flujo'];
+    if(simples.indexOf(t.name)===-1) refrescar();
+    else { var rp = $('rightpanel'); if(rp && !rp.hidden) rp.innerHTML = panelHTML(); }
+  }
+});
+document.addEventListener('input', function(ev){
+  var t = ev.target, k = t.getAttribute && t.getAttribute('data-text');
+  if(!k || !S || S.cerrado) return;
+  S[k] = t.value;
+  var w = M.palabras(t.value);
+  if(k==='j1'){ var c = $('j1c'); c.textContent = contador(w,40,100); c.classList.toggle('fuera', w>0 && (w<40||w>100)); }
+  if(k==='j2'){ var c2 = $('j2c'); c2.textContent = contador(w,40,100); c2.classList.toggle('fuera', w>0 && (w<40||w>100)); }
+  if(k==='recomendacion'){ var c3 = $('recc'); c3.textContent = contadorRec(w); c3.classList.toggle('fuera', w>0 && (w<180||w>250)); }
+  guardar();
+});
+document.addEventListener('click', function(ev){
+  var cerrar = ev.target.closest && ev.target.closest('[data-close]');
+  if(cerrar){ cerrarDialogo(cerrar.getAttribute('data-close')); return; }
+  var el = ev.target.closest && ev.target.closest('[data-act]');
+  if(!el) return;
+  var act = el.getAttribute('data-act'), id = el.getAttribute('data-id');
+  if(act==='abrir-actor') abrirActor(id);
+  else if(act==='sel-flujo') selFlujo(id, el.tagName.toLowerCase()==='g');
+  else if(act==='abrir-doc') abrirDoc(id, el);
+  else if(act==='continuar') continuar(id);
+  else if(act==='cerrar') cerrarExpediente();
+  else if(act==='ir-etapa'){ if(idx(id) <= idx(S.etapa)){ ui.vista = id; renderVista(); } }
+  else if(act==='expediente'){ $('expDialogBody').innerHTML = listaDocsHTML(); $('expDialog').showModal(); }
+  else if(act==='nuevo') nuevoExpediente();
+  else if(act==='continuar-exp'){ ui = {vista:null, actorSel:null, flujoSel:null, opener:null, docAbierto:null, fichaDialogActor:null}; renderVista(); }
+  else if(act==='imprimir') window.print();
+  else if(act==='ir-actor'){ if(ui.vista==='E1' || ui.vista==='E2') abrirActor(id); else abrirActor(id); }
+  else if(act==='ir-flujo'){ if(ui.vista!=='E3'){ ui.vista = 'E3'; renderVista(false); } ui.flujoSel = id; refrescarPartes(); var h = $('fh-'+id); if(h){ irA($('flujo-'+id)); h.focus({preventScroll:true}); } }
+});
+document.addEventListener('keydown', function(ev){
+  var t = ev.target;
+  if((ev.key==='Enter' || ev.key===' ') && t.getAttribute && t.getAttribute('role')==='button' && t.tagName.toLowerCase()==='g'){
+    ev.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  }
+});
+$('docUse').addEventListener('click', function(){
+  var x = this.dataset.actor; if(!x || !ui.docAbierto || S.cerrado) return;
+  S.actores[x].evidencia = ui.docAbierto; guardar();
+  anunciar(ui.docAbierto + ' quedó como evidencia principal de ' + ACTOR[x].titulo + '.');
+  this.textContent = 'Asignado como evidencia principal de ' + ACTOR[x].titulo;
+  refrescarPartes();
+});
+document.addEventListener('submit', function(ev){
+  if(ev.target.id!=='formInicio') return;
+  ev.preventDefault();
+  var n = $('nombre').value.trim(), m = $('nombre-msg');
+  if(!n){ m.textContent = 'Escribe tu nombre para abrir el expediente.'; $('nombre').focus(); return; }
+  iniciar(n.slice(0,60));
+});
+
+/* ---------- arranque ---------- */
+storageOK = probarStorage();
+if(!storageOK) avisoStorage();
+var guardado = leerGuardado();
+main.innerHTML = vistaPortada(guardado.estado, guardado.ilegible);
+if(guardado.estado){ S = guardado.estado; S.hallazgos = S.hallazgos || []; S.acciones = S.acciones || []; S.revisiones = S.revisiones || []; S.docsLeidos = S.docsLeidos || []; }
+var _S = S; S = null; pintarTopbar(); pintarSidebar(); S = _S;
+})();
+</script>
+</body>
+</html>
